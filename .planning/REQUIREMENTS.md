@@ -31,12 +31,12 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 
 ### Escrow
 
-- [ ] **ESCR-01**: Agent can lock USDT into escrow for a given event (deposit)
-- [ ] **ESCR-02**: Agent can release escrowed USDT to seller when listing is classified as legitimate
-- [ ] **ESCR-03**: Agent can refund escrowed USDT to buyer when fraud is detected
-- [ ] **ESCR-04**: Agent can slash escrowed USDT to bounty pool on confirmed fraud above confidence threshold
-- [ ] **ESCR-05**: Organizer can stake USDT as legitimacy bond; agent slashes bond on confirmed fraud activity
-- [ ] **ESCR-06**: All escrow actions are logged on-chain with transaction hashes
+- [x] **ESCR-01**: Agent can lock USDT into escrow for a given event (deposit)
+- [x] **ESCR-02**: Agent can release escrowed USDT to seller when listing is classified as legitimate
+- [x] **ESCR-03**: Agent can refund escrowed USDT to buyer when fraud is detected
+- [x] **ESCR-04**: Agent can slash escrowed USDT to bounty pool on confirmed fraud above confidence threshold
+- [x] **ESCR-05**: Organizer can stake USDT as legitimacy bond; agent slashes bond on confirmed fraud activity
+- [x] **ESCR-06**: All escrow actions are logged on-chain with transaction hashes
 
 ### Evidence
 
@@ -46,10 +46,10 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 
 ### Dashboard
 
-- [ ] **DASH-01**: React dashboard displays live table of scanned listings with classification badges
-- [ ] **DASH-02**: Dashboard shows USDT escrow status and wallet balance per event
-- [ ] **DASH-03**: Dashboard includes wallet inspector showing key storage location (non-custodial proof)
-- [ ] **DASH-04**: Dashboard is styled consistently with Ducket brand (borrowing from ducket-web)
+- [x] **DASH-01**: React dashboard displays live table of scanned listings with classification badges
+- [x] **DASH-02**: Dashboard shows USDT escrow status and wallet balance per event
+- [x] **DASH-03**: Dashboard includes wallet inspector showing key storage location (non-custodial proof)
+- [x] **DASH-04**: Dashboard is styled consistently with Ducket brand (borrowing from ducket-web)
 
 ### Demo
 
@@ -122,16 +122,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EVID-01 | Phase 5 | Complete |
 | EVID-02 | Phase 5 | Complete |
 | EVID-03 | Phase 5 | Complete |
-| ESCR-01 | Phase 6 | Pending |
-| ESCR-02 | Phase 6 | Pending |
-| ESCR-03 | Phase 6 | Pending |
-| ESCR-04 | Phase 6 | Pending |
-| ESCR-05 | Phase 6 | Pending |
-| ESCR-06 | Phase 6 | Pending |
-| DASH-01 | Phase 7 | Pending |
-| DASH-02 | Phase 7 | Pending |
-| DASH-03 | Phase 7 | Pending |
-| DASH-04 | Phase 7 | Pending |
+| ESCR-01 | Phase 6 | Complete |
+| ESCR-02 | Phase 6 | Complete |
+| ESCR-03 | Phase 6 | Complete |
+| ESCR-04 | Phase 6 | Complete |
+| ESCR-05 | Phase 6 | Complete |
+| ESCR-06 | Phase 6 | Complete |
+| DASH-01 | Phase 7 | Complete |
+| DASH-02 | Phase 7 | Complete |
+| DASH-03 | Phase 7 | Complete |
+| DASH-04 | Phase 7 | Complete |
 | DEMO-01 | Phase 8 | Pending |
 | DEMO-02 | Phase 8 | Pending |
 | DEMO-03 | Phase 8 | Pending |

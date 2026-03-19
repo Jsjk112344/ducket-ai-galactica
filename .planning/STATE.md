@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-02-PLAN.md (escrow enforcement wiring)
-last_updated: "2026-03-19T12:10:11.193Z"
+stopped_at: Completed 07-01-PLAN.md (dashboard toolchain)
+last_updated: "2026-03-19T12:55:21.252Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
   completed_phases: 6
-  total_plans: 11
-  completed_plans: 11
+  total_plans: 14
+  completed_plans: 12
   percent: 31
 ---
 
@@ -61,6 +61,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 05-classification-engine-evidence P03 | 5 | 2 tasks | 2 files |
 | Phase 06-escrow-enforcement-wiring P01 | 20 | 2 tasks | 3 files |
 | Phase 06-escrow-enforcement-wiring P02 | 2 | 2 tasks | 2 files |
+| Phase 07-react-dashboard P01 | 4 | 1 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -97,6 +98,10 @@ Recent decisions affecting current work:
 - [Phase 06-escrow-enforcement-wiring]: Static analysis for scan-loop.js tests: read source as string to avoid launching cron on import
 - [Phase 06-escrow-enforcement-wiring]: bondSlashed flag prevents double-slash of organizer bond — slashed exactly once on first confirmed fraud
 - [Phase 06-escrow-enforcement-wiring]: BOUNTY_POOL_ADDRESS env var with hardcoded FraudEscrow address fallback — bond slash never fails due to missing env var
+- [Phase 07-react-dashboard]: @vitejs/plugin-react@^6 required for Vite 8 (v4 caps at Vite 7)
+- [Phase 07-react-dashboard]: Tailwind v4: @theme{} CSS blocks replace tailwind.config.js; @import 'tailwindcss' replaces @tailwind directives
+- [Phase 07-react-dashboard]: fileURLToPath(import.meta.url) for ESM path resolution in Express server — __dirname undefined in ESM
+- [Phase 07-react-dashboard]: 5-second Promise.race timeout + cachedWallet fallback on /api/wallet — prevents dashboard stall on slow Sepolia RPC during demo
 
 ### Pending Todos
 
@@ -119,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T12:10:11.191Z
-Stopped at: Completed 06-02-PLAN.md (escrow enforcement wiring)
+Last session: 2026-03-19T12:55:21.236Z
+Stopped at: Completed 07-01-PLAN.md (dashboard toolchain)
 Resume file: None
