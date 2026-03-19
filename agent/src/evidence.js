@@ -9,7 +9,7 @@
 //   writeCaseFile(listing, classificationResult, actionTaken) -> filepath string
 //   isCaseFileExists(url) -> boolean (idempotency check by URL hash)
 
-import { writeFile, mkdir, readdir } from 'node:fs/promises';
+import { writeFile, mkdir, readdir, readFile } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'url';
 import { createHash } from 'node:crypto';
@@ -140,6 +140,45 @@ ${enforcementText}
   // Log to stderr — keeps stdout clean for JSON piping (same pattern as scrapers)
   process.stderr.write(`[Evidence] Case file written: ${filename}\n`);
   return filepath;
+}
+
+/**
+ * updateCaseFileEscrow(filepath, txHash, action) — update case file with confirmed Etherscan link.
+ *
+ * After a successful escrow transaction, replaces the "_(pending escrow transaction)_" placeholder
+ * with the actual Etherscan link and marks the action as confirmed.
+ *
+ * The case file format written by writeCaseFile() contains:
+ *   | Etherscan Link | _(pending escrow transaction)_ |
+ *   | Action Taken   | ${action} |
+ *
+ * @param {string} filepath  Absolute path to the case file
+ * @param {string} txHash    Transaction hash (0x-prefixed)
+ * @param {string} action    Classification category or action label for the "(confirmed)" marker
+ * @returns {Promise<void>}
+ */
+export async function updateCaseFileEscrow(filepath, txHash, action) {
+  const link = `https://sepolia.etherscan.io/tx/${txHash}`;
+  // Short display hash: first 10 chars is enough for human readability in the table
+  const shortHash = txHash.slice(0, 10);
+
+  let content = await readFile(filepath, 'utf8');
+
+  // Replace Etherscan placeholder with real link
+  content = content.replace(
+    '| Etherscan Link | _(pending escrow transaction)_ |',
+    `| Etherscan Link | [${shortHash}...](${link}) |`
+  );
+
+  // Mark action as confirmed — appends "(confirmed)" to the action row value
+  content = content.replace(
+    `| Action Taken | ${action} |`,
+    `| Action Taken | ${action} (confirmed) |`
+  );
+
+  await writeFile(filepath, content, 'utf8');
+  // Log to stderr — keeps stdout clean for JSON piping (same pattern as scrapers)
+  process.stderr.write(`[Evidence] Case file updated with Etherscan link: ${shortHash}...\n`);
 }
 
 /**
