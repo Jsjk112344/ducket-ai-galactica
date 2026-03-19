@@ -1,12 +1,52 @@
 # Ducket AI Galactica
 
-Autonomous fraud detection agent with USDT escrow enforcement for the Tether Hackathon Galactica: WDK Edition 1.
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-## What It Does
+Autonomous fraud detection agent that scans secondary ticket markets, classifies fraud with AI, and enforces outcomes via USDT escrow on Sepolia — no human in the loop.
 
-An autonomous agent that scans secondary ticketing marketplaces (StubHub, Viagogo, Facebook Marketplace) for fraudulent or overpriced ticket listings, classifies each listing (scalping, scam, counterfeit, legitimate), and enforces outcomes on-chain via USDT escrow — all without human intervention.
+## Architecture
 
-**Core loop:** Scan -> Classify -> Act (no human triggers)
+```
+                     Ducket AI Galactica
+                ============================
+
+  +-----------+     +-----------+     +------------+
+  | StubHub   |     | Viagogo   |     | Facebook   |
+  | Scraper   |     | Scraper   |     | Marketplace|
+  +-----+-----+     +-----+-----+     +------+-----+
+        |                 |                   |
+        +--------+--------+--------+----------+
+                 |                 |
+                 v                 v
+        +--------+--------+  +----+-----+
+        | Scan Loop       |  | Evidence  |
+        | (node-cron 5m)  |  | Case Files|
+        +--------+--------+  +----------+
+                 |
+                 v
+        +--------+--------+
+        | Classification  |
+        | (Rules + Claude)|
+        +--------+--------+
+                 |
+                 v
+        +--------+--------+
+        | Escrow Engine   |
+        | (WDK + Sepolia) |
+        +--------+--------+
+                 |
+                 v
+        +--------+--------+
+        | FraudEscrow.sol |
+        | (USDT on-chain) |
+        +-----------------+
+
+  +---------------------------+
+  | React Dashboard (Vite)    |
+  | Listings + Classifications|
+  | Escrow Status + Wallet    |
+  +---------------------------+
+```
 
 ## Quick Start
 
@@ -17,74 +57,75 @@ An autonomous agent that scans secondary ticketing marketplaces (StubHub, Viagog
 
 ### Setup
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/niccoloducket/ducket-ai-galactica.git
-   cd ducket-ai-galactica
-   ```
+```bash
+git clone https://github.com/niccoloducket/ducket-ai-galactica.git
+cd ducket-ai-galactica
+npm install
+cp .env.example .env
+# Fill in your API keys (see .env.example for details)
+```
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Run
 
-3. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your actual values (see .env.example for required variables)
-   ```
+```bash
+npm run demo
+# Starts agent scan loop + React dashboard simultaneously
+# Agent: polls StubHub/Viagogo/Facebook every 5 minutes
+# Dashboard: http://localhost:5173
+```
 
-4. Run the agent:
-   ```bash
-   npm run dev:agent
-   ```
+## How It Works
 
-5. Run the dashboard:
-   ```bash
-   npm run dev:dashboard
-   ```
+The demo covers four segments:
+
+1. **Agent Intelligence** — Autonomous scan loop polls 3 platforms on a 5-minute cron schedule, no human trigger required. Each listing is hash-deduplicated and appended to `agent/memory/LISTINGS.md`.
+
+2. **Wallet Flow** — WDK non-custodial USDT wallet runs on Sepolia. Keys never leave the client. The agent derives the escrow wallet address and checks balance before every action.
+
+3. **Payment Lifecycle** — Escrow deposit/release/refund/slash are driven entirely by classification outcome. Confidence >= 85 and non-LEGITIMATE category triggers `escrow_deposit`; release or slash follow from the resolution path.
+
+4. **Live Full Loop** — Event input → scan → classify → escrow action runs end-to-end in under 5 minutes via `npm run demo`. The React dashboard shows live listing data, classification results, and escrow state.
 
 ## Project Structure
 
 ```
 ducket-ai-galactica/
-├── agent/          # Autonomous fraud detection agent
-├── dashboard/      # React dashboard for live monitoring
-├── contracts/      # FraudEscrow.sol smart contract
-├── .env.example    # Required environment variables (copy to .env)
-├── LICENSE         # Apache 2.0
-└── README.md       # This file
+  agent/             Autonomous fraud detection agent
+    src/             Core pipeline (scan-loop, classify, escrow, evidence)
+    tools/           Platform scrapers (StubHub, Viagogo, Facebook)
+    memory/          Scan results (LISTINGS.md)
+    cases/           Evidence case files per listing
+  dashboard/         React dashboard (Vite + Tailwind v4)
+    src/             UI components
+    server/          Express API serving agent data
+  contracts/         FraudEscrow.sol (Hardhat 3)
 ```
 
-## Third-Party Services Disclosure
+## Demo Video
 
-This project uses the following external services. See individual service terms for usage restrictions.
+[VIDEO LINK — to be added before submission]
 
-| Service | Provider | Purpose | Required? |
-|---------|----------|---------|-----------|
-| Claude API | Anthropic | AI-powered fraud classification engine | Yes |
-| WDK (Wallet Development Kit) | TinyFish / Tetherto | Non-custodial USDT wallet on Sepolia | Yes |
-| Patchright | microsoft/playwright fork | Anti-bot browser automation for scraping | Yes |
-| OpenClaw | OpenClaw | Autonomous agent heartbeat loop orchestration | Yes |
-| Sepolia Testnet | Ethereum Foundation | Testnet blockchain for USDT escrow (no real funds) | Yes |
+## Third-Party Disclosures
+
+| Service | Provider | Purpose |
+|---------|----------|---------|
+| Claude API | Anthropic | AI fraud classification |
+| WDK | Tether | Non-custodial USDT wallet |
+| Patchright | playwright fork | Anti-bot scraping |
+| ethers.js | ethers | Blockchain interaction |
+| node-cron | node-cron | Scan loop scheduling |
+| Vite | Vite | Dashboard build tool |
+| React | Meta | Dashboard UI |
+| Tailwind CSS | Tailwind Labs | Dashboard styling |
+| Sepolia Testnet | Ethereum Foundation | Test blockchain |
 
 All third-party services are used in accordance with their respective terms of service.
 No mainnet funds are used — Sepolia testnet only.
 
 ## Environment Variables
 
-See `.env.example` for the full list of required environment variables. Key variables:
-
-| Variable | Purpose |
-|----------|---------|
-| `CLAUDE_API_KEY` | Anthropic Claude API key for fraud classification |
-| `ESCROW_WALLET_SEED` | WDK wallet seed phrase (never commit real values) |
-| `WDK_API_KEY` | WDK API key |
-| `SEPOLIA_RPC_URL` | Sepolia Ethereum RPC endpoint |
-| `SEPOLIA_USDT_CONTRACT` | USDT contract address on Sepolia testnet |
-| `SCAN_INTERVAL_MINUTES` | How often the agent polls marketplaces (default: 5) |
-| `FRAUD_CONFIDENCE_THRESHOLD` | Minimum confidence to trigger escrow action (default: 85) |
+See `.env.example` for all required variables with explaining comments.
 
 ## License
 
-Apache 2.0 — see [LICENSE](./LICENSE) for full text.
+Apache 2.0 — see [LICENSE](./LICENSE)
