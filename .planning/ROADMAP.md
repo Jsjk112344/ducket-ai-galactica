@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: WDK Wallet + Escrow Contract** - Self-custodial USDT wallet on Sepolia via WDK smoke-tested and FraudEscrow.sol deployed
 - [x] **Phase 3: StubHub Scraper** - First and highest-risk scraper validated against live FIFA World Cup 2026 listings with anti-bot resolution (completed 2026-03-19)
 - [x] **Phase 4: Viagogo + Facebook Marketplace Scrapers + Scan Loop** - Complete the scan pipeline: all three platforms returning structured JSON, deduplication, autonomous heartbeat polling (completed 2026-03-19)
-- [ ] **Phase 5: Classification Engine + Evidence** - Claude-powered fraud classification with confidence gating, Zod validation, and timestamped case file output
+- [x] **Phase 5: Classification Engine + Evidence** - Claude-powered fraud classification with confidence gating, Zod validation, and timestamped case file output (completed 2026-03-19)
 - [ ] **Phase 6: Escrow Enforcement Wiring** - Full escrow lifecycle (deposit, release, refund, slash, legitimacy bond) end-to-end with on-chain confirmation
 - [ ] **Phase 7: React Dashboard** - Live listings table, classification badges with reasoning panels, escrow status, wallet inspector, Ducket brand styling
 - [ ] **Phase 8: Demo Integration + Submission** - Full 5-minute demo loop rehearsed 3 consecutive times, mock fallback configured, submission checklist passed
@@ -86,7 +86,7 @@ Plans:
   3. Price delta percentage vs official face value is calculated and stored on every listing object
   4. Escrow enforcement action is only triggered when confidence exceeds the configured threshold (default 85%) — a listing with confidence 60% produces no escrow action
   5. A timestamped case file exists in `agent/cases/` for every classified listing, containing screenshot path, URL, prices, classification result, confidence, action taken, and drafted enforcement text
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [ ] 05-01-PLAN.md — Hybrid fraud classifier (rules + Claude API) with @anthropic-ai/sdk structured output
 - [ ] 05-02-PLAN.md — Evidence case file writer with enforcement text drafting and idempotency
@@ -151,7 +151,7 @@ Phase 1 (scaffold)
 | 2. WDK Wallet + Escrow Contract (Track A) | 0/2 | Planning complete | - |
 | 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
 | 4. Viagogo + Facebook Marketplace + Scan Loop | 2/2 | Complete   | 2026-03-19 |
-| 5. Classification Engine + Evidence | 2/3 | In Progress|  |
+| 5. Classification Engine + Evidence | 3/3 | Complete   | 2026-03-19 |
 | 6. Escrow Enforcement Wiring (needs A+B) | 0/TBD | Not started | - |
 | 7. React Dashboard | 0/TBD | Not started | - |
 | 8. Demo Integration + Submission | 0/TBD | Not started | - |

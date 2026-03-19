@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-01-PLAN.md (hybrid classifier + 23-test suite)
-last_updated: "2026-03-19T10:13:54.214Z"
+stopped_at: Completed 05-03-PLAN.md (scan-loop + classification + evidence pipeline integration)
+last_updated: "2026-03-19T10:17:48.100Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 31
 ---
 
@@ -58,6 +58,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 04-viagogo-fb-scrapers-scan-loop P02 | 7 | 2 tasks | 2 files |
 | Phase 05-classification-engine-evidence P02 | 2 | 2 tasks | 2 files |
 | Phase 05-classification-engine-evidence P01 | 8 | 2 tasks | 4 files |
+| Phase 05-classification-engine-evidence P03 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -85,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 05-classification-engine-evidence]: FRAUD_CONFIDENCE_THRESHOLD read at call time (not module init) — allows test override
 - [Phase 05-classification-engine-evidence]: classifyByRules exported for unit testing without API dependency; CLAUDE_MODEL updated to claude-sonnet-4-6 for output_config support
 - [Phase 05-classification-engine-evidence]: Rule-based first pass skips Claude when confidence >= 85; mock source guard prevents synthetic data from consuming API quota
+- [Phase 05-classification-engine-evidence]: Classification loop placed after LISTINGS.md append — log first, classify second
+- [Phase 05-classification-engine-evidence]: FRAUD_CONFIDENCE_THRESHOLD gate inline in scan-loop: confidence >= 85 && category != LEGITIMATE -> escrow_deposit, else logged_only
+- [Phase 05-classification-engine-evidence]: Pipeline test delegates to existing unit test scripts via execSync to avoid duplicating 49 assertions
 
 ### Pending Todos
 
@@ -107,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T10:13:54.212Z
-Stopped at: Completed 05-01-PLAN.md (hybrid classifier + 23-test suite)
+Last session: 2026-03-19T10:17:48.098Z
+Stopped at: Completed 05-03-PLAN.md (scan-loop + classification + evidence pipeline integration)
 Resume file: None
