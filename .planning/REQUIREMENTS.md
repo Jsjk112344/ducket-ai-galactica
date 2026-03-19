@@ -17,10 +17,10 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 
 ### Classification
 
-- [ ] **CLAS-01**: Agent classifies each listing as one of: SCALPING_VIOLATION, LIKELY_SCAM, COUNTERFEIT_RISK, or LEGITIMATE
-- [ ] **CLAS-02**: Each classification includes a confidence score (0-100) and reasoning text
-- [ ] **CLAS-03**: Agent calculates price delta percentage vs official face value per listing
-- [ ] **CLAS-04**: Classification is confidence-gated — escrow slash only fires above configurable threshold (e.g. >85%)
+- [x] **CLAS-01**: Agent classifies each listing as one of: SCALPING_VIOLATION, LIKELY_SCAM, COUNTERFEIT_RISK, or LEGITIMATE
+- [x] **CLAS-02**: Each classification includes a confidence score (0-100) and reasoning text
+- [x] **CLAS-03**: Agent calculates price delta percentage vs official face value per listing
+- [x] **CLAS-04**: Classification is confidence-gated — escrow slash only fires above configurable threshold (e.g. >85%)
 
 ### Wallet
 
@@ -115,10 +115,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCAN-01 | Phase 4 | Complete |
 | SCAN-03 | Phase 4 | Complete |
 | SCAN-04 | Phase 4 | Complete |
-| CLAS-01 | Phase 5 | Pending |
-| CLAS-02 | Phase 5 | Pending |
-| CLAS-03 | Phase 5 | Pending |
-| CLAS-04 | Phase 5 | Pending |
+| CLAS-01 | Phase 5 | Complete |
+| CLAS-02 | Phase 5 | Complete |
+| CLAS-03 | Phase 5 | Complete |
+| CLAS-04 | Phase 5 | Complete |
 | EVID-01 | Phase 5 | Complete |
 | EVID-02 | Phase 5 | Complete |
 | EVID-03 | Phase 5 | Complete |

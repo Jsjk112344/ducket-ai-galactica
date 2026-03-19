@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-02-PLAN.md (evidence case file writer, 26/26 tests passing)
-last_updated: "2026-03-19T10:12:45.496Z"
+stopped_at: Completed 05-01-PLAN.md (hybrid classifier + 23-test suite)
+last_updated: "2026-03-19T10:13:54.214Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
   completed_phases: 4
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 31
 ---
 
@@ -57,6 +57,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 04-viagogo-fb-scrapers-scan-loop P01 | 5 | 2 tasks | 3 files |
 | Phase 04-viagogo-fb-scrapers-scan-loop P02 | 7 | 2 tasks | 2 files |
 | Phase 05-classification-engine-evidence P02 | 2 | 2 tasks | 2 files |
+| Phase 05-classification-engine-evidence P01 | 8 | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Recent decisions affecting current work:
 - [Phase 04-viagogo-fb-scrapers-scan-loop]: Immediate first cycle on startup before cron schedule — demo shows output instantly without waiting 5 minutes
 - [Phase 05-classification-engine-evidence]: evidence.js logs to stderr to keep stdout clean for JSON piping
 - [Phase 05-classification-engine-evidence]: FRAUD_CONFIDENCE_THRESHOLD read at call time (not module init) — allows test override
+- [Phase 05-classification-engine-evidence]: classifyByRules exported for unit testing without API dependency; CLAUDE_MODEL updated to claude-sonnet-4-6 for output_config support
+- [Phase 05-classification-engine-evidence]: Rule-based first pass skips Claude when confidence >= 85; mock source guard prevents synthetic data from consuming API quota
 
 ### Pending Todos
 
@@ -104,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T10:12:45.494Z
-Stopped at: Completed 05-02-PLAN.md (evidence case file writer, 26/26 tests passing)
+Last session: 2026-03-19T10:13:54.212Z
+Stopped at: Completed 05-01-PLAN.md (hybrid classifier + 23-test suite)
 Resume file: None
