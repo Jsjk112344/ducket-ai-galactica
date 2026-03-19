@@ -17,7 +17,12 @@ import { dirname, join } from 'path';
 
 // Load .env from project root (two levels up from agent/tools/)
 const __dirname = dirname(fileURLToPath(import.meta.url));
-dotenv.config({ path: join(__dirname, '../../.env') });
+// quiet: true suppresses the dotenv tip message on stdout — keeps JSON output clean when piped
+dotenv.config({ path: join(__dirname, '../../.env'), quiet: true });
+
+// All operational logs go to stderr so stdout stays clean for JSON output when piped.
+// This makes `node scrape-stubhub.js | jq` and Phase 4 module import both work correctly.
+const log = (...args) => console.error(...args);
 
 // FIFA World Cup 2026 face value lookup table.
 // Source: FIFA.com official pricing + ESPN/SI.com reporting (2026-03-19).
@@ -96,7 +101,7 @@ async function withRetry(fn, maxRetries = 3) {
     } catch (err) {
       if (attempt === maxRetries - 1) throw err;
       const delay = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
-      console.log(`[StubHub] Retry ${attempt + 1}/${maxRetries} after ${delay}ms: ${err.message}`);
+      log(`[StubHub] Retry ${attempt + 1}/${maxRetries} after ${delay}ms: ${err.message}`);
       await setTimeout(delay);
     }
   }
@@ -106,7 +111,7 @@ async function withRetry(fn, maxRetries = 3) {
 // source: 'mock' label ensures downstream classifiers know this is synthetic data.
 // Covers 4 fraud archetypes for demo visibility: scalping, scam (below face), legitimate, counterfeit.
 function getMockListings(eventName) {
-  console.log('[StubHub] WARNING: returning mock data — live scrape failed or was blocked');
+  log('[StubHub] WARNING: returning mock data — live scrape failed or was blocked');
   return [
     {
       platform: 'StubHub',
@@ -177,7 +182,7 @@ async function scrapeStubHub(eventName) {
     let browser;
 
     try {
-      console.log(`[StubHub] Scraping listings for: ${eventName}`);
+      log(`[StubHub] Scraping listings for: ${eventName}`);
 
       // Launch Patchright-patched Chromium.
       // Patchright patches: navigator.webdriver=false, removes --enable-automation flag,
@@ -221,7 +226,7 @@ async function scrapeStubHub(eventName) {
           const array = json.items ?? json.listing ?? json.listings ?? json.events ?? json.results ?? json.data;
           if (Array.isArray(array) && array.length > 0) {
             listings.push(...array);
-            console.log(`[StubHub] Intercepted ${array.length} listings from ${url}`);
+            log(`[StubHub] Intercepted ${array.length} listings from ${url}`);
           }
         } catch {
           // Response was not JSON (e.g. HTML challenge page from Akamai) — skip silently
@@ -245,7 +250,7 @@ async function scrapeStubHub(eventName) {
       if (listings.length === 0) {
         // No XHR listing data intercepted — Akamai likely blocked or the URL patterns
         // didn't match. Fall back to mock data rather than returning an empty array.
-        console.log('[StubHub] No listings intercepted from XHR — falling back to mock data');
+        log('[StubHub] No listings intercepted from XHR — falling back to mock data');
         return getMockListings(eventName);
       }
 
@@ -263,7 +268,7 @@ async function scrapeStubHub(eventName) {
         }
       }
 
-      console.log(`[StubHub] Found ${result.length} unique listings`);
+      log(`[StubHub] Found ${result.length} unique listings`);
       return result;
 
     } finally {
@@ -276,7 +281,7 @@ async function scrapeStubHub(eventName) {
   } catch (err) {
     // Outer catch: any unhandled error (browser crash, network timeout, etc.)
     // Returns mock data so the caller always receives a valid array — demo never fails.
-    console.log(`[StubHub] Scrape error (${err.message}) — falling back to mock data`);
+    log(`[StubHub] Scrape error (${err.message}) — falling back to mock data`);
     return getMockListings(eventName);
   }
 }
