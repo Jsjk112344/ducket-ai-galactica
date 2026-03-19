@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-03-PLAN.md (Dashboard visual verification)
-last_updated: "2026-03-19T13:13:19.546Z"
+stopped_at: Completed 08-01-PLAN.md (Demo script, README, .env.example)
+last_updated: "2026-03-19T13:33:31.909Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
   completed_phases: 7
-  total_plans: 14
-  completed_plans: 14
+  total_plans: 16
+  completed_plans: 15
   percent: 31
 ---
 
@@ -64,6 +64,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 07-react-dashboard P01 | 4 | 1 tasks | 10 files |
 | Phase 07-react-dashboard P02 | 5 | 2 tasks | 9 files |
 | Phase 07-react-dashboard P03 | checkpoint | 1 tasks | 0 files |
+| Phase 08-demo-integration-submission P01 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,8 @@ Recent decisions affecting current work:
 - [Phase 07-react-dashboard]: Fragment with explicit keys for expandable rows — React requires key on both data row and expanded detail row
 - [Phase 07-react-dashboard]: activeEscrows = max(deposits - releases, 0) — prevents negative count when data is inconsistent
 - [Phase 07-react-dashboard]: No code changes required — all 5 ROADMAP dashboard criteria passed visual inspection on first review
+- [Phase 08-demo-integration-submission]: concurrently added to root devDeps — npm run demo launches scan-loop + dashboard from single command
+- [Phase 08-demo-integration-submission]: README rewritten with architecture diagram, disclosures, video placeholder — submission-ready
 
 ### Pending Todos
 
@@ -130,6 +133,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T13:13:19.539Z
-Stopped at: Completed 07-03-PLAN.md (Dashboard visual verification)
+Last session: 2026-03-19T13:33:31.904Z
+Stopped at: Completed 08-01-PLAN.md (Demo script, README, .env.example)
 Resume file: None

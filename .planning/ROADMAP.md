@@ -133,7 +133,7 @@ Plans:
   2. The demo uses FIFA World Cup 2026 with live secondary market data from at least one platform (others may use mock fallback if scrapers are flaky)
   3. Running `/demo-ready` reports all 4 demo segments as passing with no blockers
   4. A new developer can clone the repo, follow `README.md` setup instructions, and reach a running agent + dashboard without contacting the team — `/hackathon-submit` checklist passes with zero failures
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 08-01-PLAN.md — Demo script, README rewrite, and .env.example completion
 - [ ] 08-02-PLAN.md — End-to-end demo validation and human verification
@@ -164,4 +164,4 @@ Phase 1 (scaffold)
 | 5. Classification Engine + Evidence | 3/3 | Complete   | 2026-03-19 |
 | 6. Escrow Enforcement Wiring (needs A+B) | 2/2 | Complete   | 2026-03-19 |
 | 7. React Dashboard | 3/3 | Complete   | 2026-03-19 |
-| 8. Demo Integration + Submission | 0/2 | Planning complete | - |
+| 8. Demo Integration + Submission | 1/2 | In Progress|  |

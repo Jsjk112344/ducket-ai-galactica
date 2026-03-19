@@ -53,10 +53,10 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 
 ### Demo
 
-- [ ] **DEMO-01**: Full demo loop completable in ≤5 minutes: event input → scan → classify → escrow action
-- [ ] **DEMO-02**: Demo uses real event (FIFA World Cup 2026) with live secondary market data
-- [ ] **DEMO-03**: Demo shows all 4 required segments: agent logic, wallet flow, payment lifecycle, live full loop
-- [ ] **DEMO-04**: Project runs out of the box for judges (clear setup instructions, no special environment)
+- [x] **DEMO-01**: Full demo loop completable in ≤5 minutes: event input → scan → classify → escrow action
+- [x] **DEMO-02**: Demo uses real event (FIFA World Cup 2026) with live secondary market data
+- [x] **DEMO-03**: Demo shows all 4 required segments: agent logic, wallet flow, payment lifecycle, live full loop
+- [x] **DEMO-04**: Project runs out of the box for judges (clear setup instructions, no special environment)
 
 ### Compliance
 
@@ -132,10 +132,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DASH-02 | Phase 7 | Complete |
 | DASH-03 | Phase 7 | Complete |
 | DASH-04 | Phase 7 | Complete |
-| DEMO-01 | Phase 8 | Pending |
-| DEMO-02 | Phase 8 | Pending |
-| DEMO-03 | Phase 8 | Pending |
-| DEMO-04 | Phase 8 | Pending |
+| DEMO-01 | Phase 8 | Complete |
+| DEMO-02 | Phase 8 | Complete |
+| DEMO-03 | Phase 8 | Complete |
+| DEMO-04 | Phase 8 | Complete |
 
 **Coverage:**
 - v1 requirements: 34 total
