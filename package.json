@@ -5,11 +5,13 @@
   "description": "Autonomous fraud detection agent with USDT escrow enforcement",
   "workspaces": ["agent", "dashboard", "contracts"],
   "scripts": {
+    "demo": "concurrently --names agent,dashboard --prefix-colors blue,green \"node agent/src/scan-loop.js\" \"npm run dev --workspace=dashboard\"",
     "dev:agent": "npm run dev --workspace=agent",
     "dev:dashboard": "npm run dev --workspace=dashboard",
     "build": "npm run build --workspaces --if-present"
   },
   "devDependencies": {
+    "concurrently": "^9.2.1",
     "typescript": "^5.9.3"
   },
   "engines": {
