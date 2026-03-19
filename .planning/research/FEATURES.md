@@ -1,194 +1,206 @@
 # Feature Research
 
-**Domain:** Autonomous ticket fraud detection agent with on-chain USDT escrow enforcement
-**Researched:** 2026-03-19
-**Confidence:** HIGH (hackathon requirements explicit; domain patterns well-documented)
+**Domain:** P2P ticket resale with AI fraud verification + USDT escrow (Ducket AI Galactica v2.0)
+**Researched:** 2026-03-20
+**Confidence:** HIGH (v1.0 capabilities confirmed by codebase; P2P resale flow patterns HIGH from competitor analysis)
+
+---
+
+## Context: What Is Already Built (v1.0 — Not To Rebuild)
+
+These are existing dependencies. v2.0 builds on top of them, not replacing them.
+
+| Built Capability | What It Provides to v2.0 |
+|-----------------|--------------------------|
+| Autonomous scanner (StubHub, Viagogo, FB Marketplace) | Listing discovery with mock fallback for demo resilience |
+| Hybrid classifier (rules + Claude API) | `SCALPING_VIOLATION`, `LIKELY_SCAM`, `COUNTERFEIT_RISK`, `LEGITIMATE` + confidence + `reasoning` string |
+| WDK self-custodial USDT escrow | deposit, release, refund, slash on Sepolia via `/api/escrow/:action` |
+| React dashboard | Listings table, classification badges, escrow status, wallet inspector |
+| Express API | `/api/listings`, `/api/wallet`, `/api/scan`, `/api/escrow/:action` |
+| `Listing`, `Classification`, `WalletInfo` TypeScript contracts | Shared types across agent + dashboard |
+| Evidence case files | Timestamped JSON per classified listing with on-chain tx hash |
 
 ---
 
 ## Feature Landscape
 
-### Table Stakes (Judges Won't Take It Seriously Without These)
+### Table Stakes (Judges Won't Take the Pivot Seriously Without These)
 
-These are the baseline features that directly map to the 7 judging criteria. Missing any of these means the submission fails to even land in contention.
+These are the baseline features a judge expects from any P2P resale product. Missing them makes the "safe P2P resale" framing feel like a rebrand with no substance.
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| **Autonomous scan loop** — agent polls platforms on a schedule without human trigger | Judging criterion #1 is agent autonomy; a button-triggered scan is a script, not an agent | MEDIUM | OpenClaw scheduler or a polling loop; must demonstrate it fires on its own |
-| **Multi-platform scraper** — Carousell, Viagogo, and at least one social channel (Telegram/FB) | Three sources shows real-world applicability; one source is a toy demo | HIGH | Playwright/TinyFish for anti-bot pages; this is the hardest build component |
-| **Listing classification** — scalping violation, likely scam, counterfeit risk, legitimate | Without classification the agent is just a crawler; the LLM call is the intelligence layer | MEDIUM | Claude API with structured output; 4-class labels plus confidence score and rationale |
-| **WDK wallet instantiation** — agent creates and holds its own self-custodial USDT wallet | Judging criterion #2; submission is disqualified without WDK | HIGH | Team has no prior WDK experience; this is the #1 risk item |
-| **Escrow deposit** — agent can lock USDT into escrow against an event | Judging criterion #4 (agentic payment design); deposit is the first step of the payment lifecycle | HIGH | Requires WDK + smart contract; must demo this working on Sepolia testnet |
-| **Escrow release/refund** — agent conditionally releases or refunds USDT based on classification outcome | Judges need to see the full payment lifecycle (deposit → verdict → release/refund) | HIGH | Triggered by classification result; release to organizer on legitimate, refund on fraud |
-| **Escrow slash** — agent burns or withholds USDT when fraud is confirmed | Differentiates enforcement from mere flagging; closes the "what happens next" loop | HIGH | The enforcement action with real economic consequence; what makes this non-trivial |
-| **Evidence case file** — timestamped, structured record per listing (screenshot, URL, price delta, classification, confidence, action taken) | Agents that act without audit trail are untrustworthy; judges will want to see provenance | MEDIUM | JSON/structured file per case; screenshot capture via Playwright |
-| **React dashboard** — live listings table with classification badges and USDT escrow status | Judging criterion #7 (polish); judges watch the demo — a terminal log is not enough | MEDIUM | Single-page app; table + status badges + wallet balance widget |
-| **Full demo loop** — event input → scan → classify → escrow action, completable in ≤5 min | Hard requirement from PROJECT.md; video must cover all 4 demo segments | MEDIUM | Needs deterministic demo path; mock data fallback for flaky scrapers |
+| Feature | Why Expected | Complexity | Dependency on v1.0 | Notes |
+|---------|--------------|------------|---------------------|-------|
+| Seller listing form | Core of any P2P flow — there must be a way for a seller to submit a ticket. Without it there is no "P2P", just a monitoring tool. | LOW | None (new UI component) | Fields: event name, section, quantity, asking price, face value. On submit, trigger classification pipeline. |
+| Buyer USDT lock step | Without a visible "buyer locks funds" moment there is no escrow story. Judges will ask "where does the money come from?" | LOW | Escrow deposit via WDK (already built) | UI button that calls `/api/escrow/deposit` with listing ID. WDK wallet executes the actual transfer on Sepolia. |
+| AI verification step (visible) | Judges expect to see the AI make a decision — not just a badge but a narrative. "The AI checked and said..." | LOW | `Classification.reasoning` already populated | Surface full `Classification.reasoning` string in a prominent per-listing panel, not buried in a tooltip. |
+| Escrow settlement outcome | The escrow lifecycle needs a visible end state. Release on legitimate, refund/slash on fraud. | LOW | release/refund/slash already built | UI calls `/api/escrow/release` or `/api/escrow/refund` based on classification result. Show Etherscan link. |
+| Ducket brand styling | Dashboard must look like a product, not a scaffold. Judges score polish and judges watch a video demo. | MEDIUM | None (new CSS/components) | Purple `#7C3AED`, yellow `#FACC15`, Outfit headings, shadcn component library. Replace plain Tailwind scaffold. |
+| Demo narrative framing | README and demo script must use "safe P2P resale" language, not "fraud monitoring tool". The story shapes how judges receive everything else. | LOW | None (writing, not code) | Update README intro, CLAUDE.md overview, demo script buyer/seller persona framing. |
 
 ### Differentiators (What Wins vs. What Just Qualifies)
 
-These features separate a winning submission from a qualifying one. All align with judging criteria #1 (autonomy) and #4 (agentic payment design), which carry the most weight.
+Features that make Ducket stand out vs other hackathon submissions and vs TicketSwap/StubHub. These directly hit the top judging criteria.
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| **Legitimacy bond staking** — organizer stakes USDT upfront; agent slashes bond on confirmed fraud activity | Creates a direct economic incentive loop: the agent's decisions have real financial consequences for the organizer, not just the buyer | HIGH | Adds a second actor (organizer wallet) to the payment lifecycle; judging criterion #4 explicitly rewards this kind of designed payment flow |
-| **Autonomous enforcement drafting** — agent generates platform takedown requests and public warning text per case, without human prompt | Demonstrates the agent acts beyond detection into remediation; judges see full agentic loop | MEDIUM | Claude API call with case file as context; output is draft text, not submitted (avoids real-world side effects in demo) |
-| **Real-time price delta scoring** — agent calculates percentage markup vs. face value per listing | Makes scalping classification quantitative and defensible, not just vibes-based | LOW | Face value sourced from official event page at scan time; simple arithmetic but highly credible signal |
-| **Multi-agent sub-task architecture** — separate agents for scanning, classifying, and escrow actions communicating over ACP | Judges evaluating #1 (agent intelligence) understand agentic patterns; a single monolithic agent is less impressive than a coordinated swarm | HIGH | OpenClaw supports ACP; adds demo complexity but is a strong technical differentiator |
-| **Confidence-gated enforcement** — escrow slash only fires when classification confidence exceeds threshold (e.g., >85%); lower confidence routes to "flag for review" | Demonstrates agent knows its own limits; prevents false-positive financial penalties | LOW | Single conditional check; high signal-to-noise value for judges assessing autonomy quality |
-| **Non-custodial proof in demo** — explicitly show WDK private key stays client-side, never touches a server | WDK requirement #2 from PROJECT.md; demonstrating it is more compelling than just claiming it | LOW | Add a "wallet inspector" UI element showing key storage location; 30 minutes of work with outsized credibility |
-| **Sepolia testnet faucet + setup doc** — one-command setup that funds the demo wallet from faucet | Judging criterion: must be runnable without special setup; removing friction for judges is a form of polish | LOW | Script in README; faucet API call + WDK wallet funding |
+| Feature | Value Proposition | Complexity | Dependency on v1.0 | Notes |
+|---------|-------------------|------------|---------------------|-------|
+| Non-custodial USDT escrow (no middleman) | TicketSwap holds funds in a bank for up to 5 business days. Ducket holds on-chain in a WDK self-custodial wallet — neither party can be stiffed or exit-scammed. | LOW (already built) | WDK + escrow contract | Strongest differentiator. Emphasize "no platform custody" explicitly in UI and README. |
+| Full AI reasoning per listing | Competitors use black-box moderation. Ducket shows "flagged for 340% markup over face value; seller account 2 days old; FIFA scalping pattern detected across 3 platforms. Confidence: 94%." | LOW (render existing data) | `Classification.reasoning` | Turn into a full-width Agent Decision Panel component per listing. The existing reasoning string is rich enough — it just needs to be prominent. |
+| Cross-platform scan (3 marketplaces) | No single marketplace enforces rules across all resale channels. Ducket's agent watches StubHub, Viagogo, and Facebook Marketplace simultaneously. | NONE (already built) | Scanner | Demo narrative: "agent detected same FIFA ticket listed on both StubHub and Viagogo at 3x face value." |
+| Conditional escrow slash (fraud has a cost) | TicketSwap refunds buyers but does not penalize sellers financially. Ducket's contract slashes a legitimacy bond when fraud is confirmed. This is enforceable, not advisory. | LOW (already built) | Escrow slash | Frame as "fraud has a cost — bad actors lose their stake." Judges scoring Agentic Payment Design (#4) respond strongly to this. |
+| Autonomous pipeline (not a button that calls AI) | The scan → classify → escrow action loop runs without human trigger. The UI is evidence the agent already acted, not a control panel waiting for input. | NONE (already built) | Scan loop | Make the autonomy narrative explicit: show "Agent last ran: 30s ago" and a log of actions taken without prompting. |
+| Seed data with pre-classified FIFA listings | Demo resilience — if live scrapers hit anti-bot blocks during video recording, the narrative runs end-to-end on seed data. | LOW | Mock fallback already exists | Prepare 4 seed listings: 1 LEGITIMATE, 1 SCALPING_VIOLATION, 1 LIKELY_SCAM, 1 COUNTERFEIT_RISK — each with rich reasoning text. |
 
 ### Anti-Features (Deliberately Not Building)
 
-Features that look valuable but would consume time without improving the submission's score, given the 3-day constraint and judging priority order.
-
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Historical analytics / trend charts** | Looks professional; "shows patterns over time" | Polish (#6) not autonomy (#1); Chart.js time-series takes a day to build right | Single "scan history" table in the dashboard is enough — chronological list of case files |
-| **Email/webhook notifications when fraud detected** | Real-world system would alert a human | Adds external dependency (SMTP/webhook service); demo complexity with no judging upside; autonomy criterion rewards agents that act, not agents that ask humans to act | Agent logs action to case file + dashboard update is sufficient evidence of detection |
-| **Mainnet USDT transactions** | "Shows it's real" | Disallowed by PROJECT.md (testnet only); introduces real financial risk in a demo; confuses judges about whether demo actions are real | Explicit "TESTNET — Sepolia" label in the UI; shows identical mechanics |
-| **OAuth / user login** | Dashboard needs authentication | Wrong threat model for this product — organizer is the only user; auth adds 0 to any judging criterion | Single hardcoded organizer config; no auth needed for hackathon demo |
-| **Polygon NFT ticket contract integration** | "Full Ducket stack demo" | Different chain than WDK escrow; integration creates cross-chain complexity with no judging benefit; scope risk is extreme in 3 days | Reference Ducket's existing contracts in README as context; agent is a standalone product |
-| **Real-time websocket dashboard updates** | "Live" feel | Polling every 30s looks the same to a judge watching a 5-min video; WebSocket requires a persistent server and adds infrastructure complexity | 30-second polling interval with visible "Last scanned" timestamp is indistinguishable in demo |
-| **ML model fine-tuning for classification** | "Custom model shows technical depth" | Claude API with a strong system prompt outperforms a fine-tuned model trained on a small dataset; fine-tuning is weeks of work | Invest that time in prompt engineering and structured output schemas for the classification call |
-| **Full DMCA / legal takedown submission pipeline** | "Autonomous enforcement means actually submitting" | Legal risk in a demo; platform APIs for takedown are gated behind business agreements; judges can see the draft and understand the intent | Show generated draft text in UI with a "Submit (disabled in demo)" button |
+| Real user accounts / auth | "Real P2P needs real users" | Adds auth complexity blocking demo in under 5 min; judges don't create accounts in a video demo | Hardcode two mock personas — "Seller: Alice", "Buyer: Bob". Tells the story without any login friction. |
+| Real USDT on mainnet | "More impressive with real money" | Hackathon rules require testnet; mainnet introduces irreversible financial risk and legal exposure | Sepolia testnet USDT with explicit "TESTNET" label. Judges in Web3 hackathons understand this convention. |
+| WebSocket real-time updates | "Listings should update live" | Socket infrastructure adds setup complexity; 30s polling is visually indistinguishable in a 5-min demo | Keep existing polling. Add "Last updated: X seconds ago" timestamp to signal freshness. |
+| Barcode invalidation (SecureSwap pattern) | "TicketSwap invalidates original barcodes — we should too" | Requires integration with ticketing providers' APIs (not available); weeks of partnership negotiation | Frame AI verification as the replacement: "We verify legitimacy before funds release, eliminating the need to invalidate barcodes after entry." |
+| Multi-step dispute resolution | "What if buyer and seller disagree?" | Dispute resolution is a full product in itself — arbitration, multi-sig, timers, appeals | State in README: "v1.0 auto-resolves via AI verdict. Human dispute resolution is on the roadmap." |
+| Mobile-responsive UI | "Users are on mobile" | Extra CSS work consuming time from core agent story; adds risk of breaking desktop layout | Widescreen dashboard is appropriate framing for an "AI command center". Judges watch a demo, not try the app on their phone. |
+| Historical analytics / charts | "Show trends over time" | Polish (#6) not autonomy (#1); Chart.js time-series takes a day to implement correctly | Case files already capture timestamped evidence. Link to them as the audit trail — structured JSON is sufficient. |
+| Polygon NFT ticket contract integration | "Full Ducket stack" | Different chain from WDK escrow; cross-chain complexity with zero judging benefit; extreme scope risk | Reference Ducket's existing Polygon contracts in README as context for the broader product vision. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[WDK Wallet Instantiation]
-    └──required by──> [Escrow Deposit]
-                          └──required by──> [Escrow Release / Refund]
-                          └──required by──> [Escrow Slash]
-                          └──required by──> [Legitimacy Bond Staking]
+[Seller Listing Form]
+    └──triggers──> [Hybrid Classifier] (v1.0)
+                       └──populates──> [Classification.reasoning]
+                                           └──renders in──> [Agent Decision Panel]
+                                           └──drives──> [Escrow Settlement Outcome]
 
-[Multi-Platform Scraper]
-    └──required by──> [Listing Classification]
-                          └──required by──> [Price Delta Scoring]
-                          └──required by──> [Evidence Case File]
-                          └──required by──> [Confidence-Gated Enforcement]
-                          └──feeds──> [Escrow Slash / Release]
+[Buyer USDT Lock Step]
+    └──calls──> [Escrow Deposit via WDK] (v1.0)
+                    └──unlocks──> [Escrow Settlement Outcome]
+                                      ├──LEGITIMATE──> [Release to seller]
+                                      ├──SCAM/COUNTERFEIT──> [Refund to buyer]
+                                      └──SCALPING──> [Slash legitimacy bond]
 
-[Evidence Case File]
-    └──required by──> [Enforcement Drafting]
-    └──required by──> [React Dashboard — listings table]
+[Seed Data with Pre-classified Listings]
+    └──powers──> [Full demo without live scrapers]
+                     └──uses──> [Mock fallback] (v1.0)
 
-[Autonomous Scan Loop]
-    └──orchestrates──> [Multi-Platform Scraper]
-    └──orchestrates──> [Listing Classification]
-    └──orchestrates──> [Escrow Actions]
+[Ducket Brand Styling]
+    └──wraps──> [All UI components]
+                    └──replaces──> [Plain Tailwind scaffold] (v1.0)
 
-[Confidence-Gated Enforcement]
-    └──controls──> [Escrow Slash]  (slash only above threshold)
-    └──controls──> [Legitimacy Bond Staking]  (slash bond only above threshold)
+[Demo Narrative Framing]
+    └──contextualizes──> [All UI features]
+    └──updates──> [README + demo script]
 ```
 
 ### Dependency Notes
 
-- **WDK wallet must work before any escrow feature**: This is the critical path. WDK is new to the team and has no fallback. If WDK blocks, nothing downstream (deposit, release, slash) is demonstrable. Build WDK first on Day 1 as a spike.
-- **Scraper must deliver structured listing data before classification**: The Claude API classification prompt depends on structured fields (title, price, platform, event name, seller history). Scraper output schema must be stable before classification prompt is written.
-- **Evidence case file is a side-effect of classification**: Generate the case file as part of the classification step — same LLM call that produces the label should also produce the structured evidence record. No separate build step needed.
-- **Multi-agent architecture enhances but does not block**: The single-agent version (scan → classify → escrow in one agent) is the MVP. Splitting into sub-agents is a differentiator layered on top once the monolith works.
-- **Dashboard is an observer, not a driver**: The dashboard reads from case files / a local store. It does not control the agent. This means dashboard can be built in parallel with agent development.
+- **Seller listing form requires classifier:** The form submission must trigger or simulate a classification call so the AI reasoning panel has data to display. Without this the "AI verifies" step is empty.
+- **Buyer USDT lock requires escrow deposit:** WDK wallet must execute the deposit. This is already built — the UI is a thin wrapper calling existing API endpoints.
+- **Escrow settlement requires classification result:** The release vs refund vs slash decision is driven by the `category` field on the `Classification` object. This wiring is the only new backend logic in v2.0.
+- **Agent Decision Panel enhances both listing form and buyer lock step:** Showing reasoning at each stage of the flow makes the AI feel active throughout the transaction, not just as a post-hoc badge.
+- **Ducket brand styling does NOT block logic features:** Apply after the buyer/seller flow is wired. Never let styling work gate the escrow demo path.
+- **Seed data does NOT block any feature:** Prepare it in parallel. It is a fixture file, not a dependency.
 
 ---
 
 ## MVP Definition
 
-### Launch With (Hackathon Submission — March 22, 2026)
+### Launch With (v2.0 — Hackathon Deadline March 22, 2026)
 
-The minimum set that demonstrates all 7 judging criteria and completes the 4-segment demo in ≤5 minutes.
+The minimum set needed to tell the P2P resale story credibly to judges in under 5 minutes.
 
-- [ ] **WDK wallet instantiation** — agent has its own self-custodial USDT wallet on Sepolia. Without this the submission is disqualified.
-- [ ] **Autonomous scan loop** — agent polls at least 2 platforms (Carousell + Viagogo) on a 60-second timer without human trigger. Demonstrates autonomy.
-- [ ] **Listing classification** — 4-class output (scalping / scam / counterfeit / legitimate) with confidence score and rationale via Claude API.
-- [ ] **Escrow deposit + release/refund** — full payment lifecycle on testnet. This is what "agentic payment design" means concretely.
-- [ ] **Escrow slash** — fires on confirmed fraud above confidence threshold. The economic enforcement action.
-- [ ] **Evidence case file** — one JSON record per classified listing; timestamped, includes source URL and screenshot path.
-- [ ] **React dashboard** — listings table with classification badges and live USDT wallet balance widget.
-- [ ] **Demo-ready full loop** — Guns N' Roses Singapore as demo event; deterministic path through all 4 demo segments.
+- [ ] **Seller listing form** — Submit ticket details, trigger AI classification, show reasoning immediately
+- [ ] **Agent Decision Panel** — Full `Classification.reasoning` text visible per listing in a prominent, styled component
+- [ ] **Buyer USDT lock step** — UI button calling escrow deposit, shows WDK wallet address and Etherscan link
+- [ ] **Escrow settlement outcome** — UI shows release/refund/slash result with on-chain tx link, driven by classification
+- [ ] **Ducket brand styling** — Purple/yellow theme, Outfit headings, shadcn components applied to existing dashboard
+- [ ] **Seed data with pre-classified FIFA listings** — 4 listings covering all classification types, each with rich reasoning text
+- [ ] **Demo narrative reframe** — README intro and demo script updated to P2P resale framing with buyer/seller personas
 
-### Add After Validation (Post-Hackathon v1.x)
+### Add After Validation (v2.x — Post-hackathon)
 
-- [ ] **Legitimacy bond staking** — if WDK integration is solid and time permits on Day 3, this elevates the payment design score; otherwise defer to post-hackathon.
-- [ ] **Autonomous enforcement drafting** — lower priority than escrow mechanics; add if Day 2 is ahead of schedule.
-- [ ] **Price delta scoring** — adds credibility to scalping classification; 2-hour build, add after escrow is working.
-- [ ] **Telegram/FB Marketplace scraper** — third platform; add only after Carousell + Viagogo are stable.
+- [ ] **Real seller/buyer accounts** — Add when auth is needed for real users (post-hackathon product decision)
+- [ ] **Barcode invalidation** — Add when a ticketing provider API partnership is in place
+- [ ] **Dispute resolution flow** — Add when user research surfaces it as a trust blocker
 
-### Future Consideration (v2+)
+### Future Consideration (v3+)
 
-- [ ] **Multi-agent architecture** — meaningful engineering investment; prove the monolith first, then decompose.
-- [ ] **Historical analytics dashboard** — post-hackathon feature for real organizer use.
-- [ ] **Live takedown submission pipeline** — requires business agreements with platforms; post-product-market fit.
-- [ ] **Polygon NFT integration** — connecting escrow enforcement to Ducket's existing ticket contracts; different chain, significant complexity.
+- [ ] **Mobile UI** — Defer until product-market fit is established
+- [ ] **Historical analytics** — Defer until time-series data pipeline is in place
+- [ ] **Multi-chain escrow** — Defer until WDK supports additional chains beyond Sepolia
 
 ---
 
 ## Feature Prioritization Matrix
 
 | Feature | Judge Value | Implementation Cost | Priority |
-|---------|------------|---------------------|----------|
-| WDK wallet instantiation | HIGH (criterion #2, disqualification risk) | HIGH | P1 |
-| Autonomous scan loop | HIGH (criterion #1) | MEDIUM | P1 |
-| Listing classification | HIGH (criterion #1, #3) | MEDIUM | P1 |
-| Escrow deposit + release/refund | HIGH (criterion #4) | HIGH | P1 |
-| Escrow slash | HIGH (criterion #4, #3) | MEDIUM | P1 |
-| Evidence case file | MEDIUM (criterion #3, #6) | MEDIUM | P1 |
-| React dashboard | MEDIUM (criterion #7) | MEDIUM | P1 |
-| Legitimacy bond staking | HIGH (criterion #4, #5) | HIGH | P2 |
-| Confidence-gated enforcement | MEDIUM (criterion #1 quality) | LOW | P2 |
-| Price delta scoring | MEDIUM (criterion #1 quality) | LOW | P2 |
-| Autonomous enforcement drafting | MEDIUM (criterion #1, #5) | MEDIUM | P2 |
-| Non-custodial proof in UI | MEDIUM (criterion #2 clarity) | LOW | P2 |
-| Telegram/FB scraper | LOW (breadth, not depth) | HIGH | P3 |
-| Multi-agent architecture | MEDIUM (criterion #1 depth) | HIGH | P3 |
-| Historical analytics | LOW (criterion #6 polish) | HIGH | P3 |
+|---------|-------------|---------------------|----------|
+| Agent Decision Panel (surface existing reasoning) | HIGH — Criterion #1 Agent Intelligence | LOW — render `Classification.reasoning` string | P1 |
+| Buyer USDT lock step | HIGH — Criterion #2 WDK Integration | LOW — call existing deposit API | P1 |
+| Escrow settlement outcome | HIGH — Criterion #4 Agentic Payment Design | LOW — call existing release/refund/slash | P1 |
+| Seller listing form | HIGH — makes P2P pivot credible to judges | LOW — form component + classify trigger | P1 |
+| Seed data (pre-classified FIFA listings) | HIGH — demo resilience, no blank state | LOW — JSON fixture file | P1 |
+| Ducket brand styling | MEDIUM — Criterion #6 Polish | MEDIUM — rebrand existing components with shadcn | P2 |
+| Demo narrative reframe (README, script) | MEDIUM — Criterion #7 Presentation | LOW — writing, not code | P2 |
 
 **Priority key:**
-- P1: Must have for hackathon submission (8 features)
-- P2: Should have, add when P1 is working and time allows (5 features)
-- P3: Nice to have, add only if surprisingly ahead of schedule (3 features)
+- P1: Must have — without this the demo fails or the P2P pivot is not believable
+- P2: Should have — measurably improves score, completable within deadline
+- P3: Nice to have — post-hackathon
 
 ---
 
 ## Competitor Feature Analysis
 
-Secondary marketplaces and existing fraud detection tools do not combine agent autonomy with on-chain enforcement. The combination is what makes this novel.
+| Feature | TicketSwap | StubHub | Ducket v2.0 |
+|---------|------------|---------|-------------|
+| Fraud prevention | SecureSwap barcode invalidation (partner events only); manual review otherwise | Seller guarantee + refund policy | AI classification with full visible reasoning + on-chain evidence hash |
+| Payment security | Platform holds funds in bank for up to 5 business days | Fiat payout 5-10 days after event | WDK non-custodial USDT — funds on-chain, auto-release by AI verdict |
+| Price cap enforcement | 20% above face value (soft; no financial penalty) | No cap | Scalping classification triggers refund/slash — economically enforceable |
+| Transparency | Seller name/photo/sales history visible | Limited | Full AI reasoning log + Etherscan tx link per classification |
+| Decentralization | None — centralized platform custody | None | Self-custodial WDK wallet; no platform holds funds |
+| Settlement speed | Up to 5 business days | 5-10 business days | Near-instant on Sepolia testnet |
+| Cross-platform enforcement | No | No | Agent scans 3 platforms simultaneously; same ticket flagged across venues |
 
-| Feature | Viagogo / Ticketmaster | Traditional Fraud Tools (Sardine, TrustDecision) | Ducket AI Galactica |
-|---------|----------------------|--------------------------------------------------|---------------------|
-| Fraud detection | Manual review + bot detection | ML classification, real-time signals | Autonomous agent, LLM classification |
-| Enforcement | Platform ban, refund | Alert, block transaction | On-chain USDT slash — economic consequence |
-| Payment settlement | Fiat | Fiat | USDT on-chain, self-custodial via WDK |
-| Operator custody | Centralized (platform holds money) | N/A | Non-custodial (WDK; agent holds own wallet) |
-| Audit trail | Internal logs (opaque) | Internal logs | Public case files, on-chain transaction hash |
-| Autonomy | Human-in-the-loop for enforcement | Alert → human decides | Agent decides and acts within confidence threshold |
+**Key insight from research:** TicketSwap's SecureSwap is the closest competitor feature — but it only works for partnered events, applies only to barcodes (not AI reasoning), and gives buyers no visibility into why a ticket was accepted or rejected. Ducket's differentiator is not just safety — it is *explainable, enforceable* safety backed by on-chain funds that don't depend on platform goodwill or partnership agreements.
 
-The key differentiating combination: **LLM classification + confidence-gated escrow slash + self-custodial WDK wallet + no human in the loop**. No existing product combines all four.
+---
+
+## What Makes AI Verification Compelling for Judges
+
+Based on winning agentic payment hackathon patterns (Arc/USDC, AgentVerse, x402 Berlin ideathon) and the Tether Hackathon's explicit judging criteria:
+
+**1. Visible reasoning, not just a verdict.**
+"This ticket is suspicious" scores low. "Price is 340% above face value. Seller account created 2 days ago. Listing pattern matches FIFA scalping campaigns detected across StubHub and Viagogo simultaneously. Confidence: 94%." scores high. The `Classification.reasoning` string from the Claude API already contains this — it just needs to be front and center in the UI.
+
+**2. Money movement that is conditional on AI output.**
+The agent deciding whether USDT releases or gets slashed makes the AI consequential — not decorative. Criterion #4 (Agentic Payment Design) is directly satisfied by this conditional escrow pattern. Judges from the agentic payments space understand "AI-gated funds release" as a novel primitive.
+
+**3. Autonomous pipeline, not a button that calls an API.**
+The scan → classify → escrow action loop running without a human trigger is the core story. The UI is evidence the agent already acted. Judges evaluating Criterion #1 (Agent Intelligence) distinguish between "agent that waits for prompts" and "agent that monitors and acts on its own schedule."
+
+**4. Escrow as trust infrastructure, not just payment.**
+The framing "buyer's USDT is held until the AI certifies the ticket is legitimate" positions escrow as a trust primitive that replaces platform reputation. This is the novel payment design angle. Competitors (TicketSwap, StubHub) use escrow as a payment delay — Ducket uses it as a conditional trust mechanism.
+
+**5. Economic consequence for fraud.**
+The slash action (confirmed fraud → legitimacy bond burned) is what separates detection from enforcement. Hackathon judges in the agentic finance space consistently reward designs where the agent's decisions have real (testnet) economic consequences.
 
 ---
 
 ## Sources
 
-- [Tether Hackathon Galactica: WDK Edition 1 — DoraHacks](https://dorahacks.io/hackathon/hackathon-galactica-wdk-2026-01) — judging criteria, prize structure
-- [Hackathon Galactica: WDK Edition 1 — Blockchain.news flash summary](https://blockchain.news/flashnews/hackathon-galactica-launches-wallet-development-kit-innovation-with-30k-prizes) — prize pool, autonomy focus
-- [Wallet Development Kit by Tether](https://wdk.tether.io/) — WDK capabilities, non-custodial design, AI agent support
-- [Agentic AI for Fraud Detection — Evoketechnologies](https://www.evoketechnologies.com/blog/business-blogs/agentic-ai-fraud-detection-prevent-losses-compliance) — agentic fraud detection feature patterns
-- [Rise of AI Agents for Fraud Detection — Rishabh Software](https://www.rishabhsoft.com/blog/ai-agents-for-fraud-detection) — classification, evidence aggregation, autonomous investigation
-- [AI-Powered Escrow Agent — Circle / ZenML](https://www.zenml.io/llmops-database/ai-powered-escrow-agent-for-programmable-money-settlement) — escrow lifecycle, deposit/release/condition patterns
-- [Why Agentic Finance Needs Smart Contracts — RebelFi](https://rebelfi.io/blog/why-agentic-finance-needs-smart-contracts-not-just-messaging-protocols) — enforcement layer architecture
-- [Stablecoins in Agentic Commerce — insights4vc](https://insights4vc.substack.com/p/stablecoins-in-agentic-commerce) — USDT/USDC escrow in agentic payment design
-- [Preventing Ticketing Fraud in 2026 — Softjourn](https://softjourn.com/insights/prevent-ticketing-fraud) — ticket-specific fraud classification patterns
-- [Ticket Scalping and Fraud Risk — Anura](https://www.anura.io/fraud-tidbits/what-is-ticket-scalping) — scalping detection signals and feature patterns
-- [Agentic AI in FinCrime Investigations — Lucinity](https://lucinity.com/blog/from-assistant-to-investigator-how-agentic-ai-transforms-fincrime-operations) — evidence case file structure, audit trail requirements
-- [Sardine: Agentic AI Failure Modes](https://www.sardine.ai/blog/agentic-ai-financial-crime-failure-modes) — confidence thresholds, human escalation design
-- [OpenClaw Framework — DigitalOcean guide](https://www.digitalocean.com/resources/articles/what-is-openclaw) — agent skills system, ACP, scheduler capabilities
-- [OpenClaw Architecture 2026 — Valletta Software](https://vallettasoftware.com/blog/post/openclaw-2026-guide) — multi-agent ACP communication patterns
-- [Viagogo Scam Patterns — Action Fraud](https://www.actionfraud.org.uk/viagogo-scams/) — real-world secondary market fraud signals
+- [TicketSwap: How it works](https://www.ticketswap.com/how-does-it-work) — Buyer/seller flow reference, SecureSwap verification pattern
+- [TicketSwap SecureSwap feature](https://help.ticketswap.com/en/articles/5123901-what-is-secureswap) — Competitor verification mechanism details
+- [P2PTIX platform](https://p2ptix.com/) — P2P escrow-hold flow pattern (payment held until receipt confirmed)
+- [Smart Escrow for Marketplaces 2026](https://rebelfi.io/blog/how-smart-escrow-unlocks-new-business-models-for-marketplaces-and-b2b) — Smart escrow market context and conditional release patterns
+- [x402 Ideathon Berlin: agentic commerce patterns](https://algorand.co/blog/x402-ideathon-berlin-recap-web3-builders-exploring-agentic-commerce) — Winning hackathon agentic payment patterns
+- [Agentic Payments Hackathon (YC HQ)](https://events.ycombinator.com/agenticpaymentshackathon) — Judging criteria context for agentic payment design
+- [NFT Ticketing 2026 market context](https://www.ticketfairy.com/blog/mastering-nft-ticketing-for-event-marketing-in-2026-blockchain-boosts-security-fan-engagement) — Blockchain ticket verification market and demand
+- [Smart Contract Escrow Development 2026](https://ericaai.tech.blog/2026/03/13/smart-contract-escrow-development/) — Technical escrow flow patterns
+- Ducket v1.0 codebase — `dashboard/src/types.ts`, `dashboard/src/components/` — confirmed built capabilities
 
 ---
-*Feature research for: Autonomous ticket fraud detection agent with USDT escrow enforcement*
-*Researched: 2026-03-19*
+*Feature research for: P2P ticket resale with AI fraud verification + USDT escrow (Ducket AI Galactica v2.0)*
+*Researched: 2026-03-20*
