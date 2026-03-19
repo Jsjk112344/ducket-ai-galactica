@@ -9,9 +9,9 @@ Requirements for the P2P resale pivot. Each maps to roadmap phases.
 
 ### Narrative
 
-- [ ] **NARR-01**: README rewritten with P2P resale framing (buyer/seller personas, no "monitoring tool" language)
-- [ ] **NARR-02**: CLAUDE.md updated with P2P resale context and decision rules
-- [ ] **NARR-03**: Demo script rewritten with resale narrative (seller lists → buyer locks → AI verifies → settles)
+- [x] **NARR-01**: README rewritten with P2P resale framing (buyer/seller personas, no "monitoring tool" language)
+- [x] **NARR-02**: CLAUDE.md updated with P2P resale context and decision rules
+- [x] **NARR-03**: Demo script rewritten with resale narrative (seller lists → buyer locks → AI verifies → settles)
 
 ### Branding
 
@@ -55,9 +55,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| NARR-01 | Phase 9 | Pending |
-| NARR-02 | Phase 9 | Pending |
-| NARR-03 | Phase 9 | Pending |
+| NARR-01 | Phase 9 | Complete |
+| NARR-02 | Phase 9 | Complete |
+| NARR-03 | Phase 9 | Complete |
 | BRAND-01 | Phase 10 | Complete |
 | BRAND-02 | Phase 10 | Complete |
 | BRAND-03 | Phase 10 | Complete |

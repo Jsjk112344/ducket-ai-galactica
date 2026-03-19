@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Safe P2P Ticket Resale
-status: in-progress
-stopped_at: "Completed 10-01-PLAN.md"
-last_updated: "2026-03-20T20:43:43Z"
-last_activity: "2026-03-20 — Phase 10 Plan 01 complete (brand tokens + shadcn primitives)"
+status: executing
+stopped_at: Completed 09-reframe-narrative-01-PLAN.md
+last_updated: "2026-03-19T20:47:30.850Z"
+last_activity: 2026-03-20 — Phase 10 Plan 01 complete
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 2
-  completed_plans: 1
+  completed_phases: 1
+  total_plans: 3
+  completed_plans: 2
   percent: 20
 ---
 
@@ -48,6 +48,7 @@ Phase 10 decisions (Plan 01):
 - Used relative path `../../lib/utils` in shadcn ui components — avoids adding @/* path alias to tsconfig
 - Kept existing src/components/Badge.tsx untouched; shadcn badge is a separate primitive in src/components/ui/badge.tsx
 - Installed @radix-ui/react-slot for Button asChild prop (verbatim shadcn Button copy)
+- [Phase 09-reframe-narrative]: README/CLAUDE.md/DEMO-SCRIPT.md rewritten with P2P resale framing; Alice/Bob reserved for demo script only; FraudEscrow.sol kept as technical filename; demo script targets Phase 10-11 UI screens
 
 ### Blockers/Concerns
 
@@ -56,6 +57,6 @@ Phase 10 decisions (Plan 01):
 
 ## Session Continuity
 
-Last session: 2026-03-20T20:43:43Z
-Stopped at: Completed 10-01-PLAN.md
-Resume file: .planning/phases/10-dashboard-rebrand/10-02-PLAN.md
+Last session: 2026-03-19T20:47:30.848Z
+Stopped at: Completed 09-reframe-narrative-01-PLAN.md
+Resume file: None
