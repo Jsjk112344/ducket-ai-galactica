@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Safe P2P Ticket Resale
 status: executing
-stopped_at: Completed 09-reframe-narrative-01-PLAN.md
-last_updated: "2026-03-19T20:47:30.850Z"
+stopped_at: "Completed 10-02-PLAN.md — awaiting checkpoint:human-verify for visual confirmation"
+last_updated: "2026-03-19T20:51:21.903Z"
 last_activity: 2026-03-20 — Phase 10 Plan 01 complete
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 3
-  completed_plans: 2
+  completed_plans: 3
   percent: 20
 ---
 
@@ -49,6 +49,9 @@ Phase 10 decisions (Plan 01):
 - Kept existing src/components/Badge.tsx untouched; shadcn badge is a separate primitive in src/components/ui/badge.tsx
 - Installed @radix-ui/react-slot for Button asChild prop (verbatim shadcn Button copy)
 - [Phase 09-reframe-narrative]: README/CLAUDE.md/DEMO-SCRIPT.md rewritten with P2P resale framing; Alice/Bob reserved for demo script only; FraudEscrow.sol kept as technical filename; demo script targets Phase 10-11 UI screens
+- [Phase 10]: TrustBadges renders above both empty-state and table via fragment — always visible regardless of data state
+- [Phase 10]: Badge.tsx left untouched — classification semantic colors are not brand palette replacements
+- [Phase 10]: StatCard upgraded to shadcn Card+CardContent — bg-card token from index.css replaces bg-bg-card div
 
 ### Blockers/Concerns
 
@@ -57,6 +60,6 @@ Phase 10 decisions (Plan 01):
 
 ## Session Continuity
 
-Last session: 2026-03-19T20:47:30.848Z
-Stopped at: Completed 09-reframe-narrative-01-PLAN.md
+Last session: 2026-03-19T20:51:21.901Z
+Stopped at: Completed 10-02-PLAN.md — awaiting checkpoint:human-verify for visual confirmation
 Resume file: None

@@ -18,7 +18,7 @@ Requirements for the P2P resale pivot. Each maps to roadmap phases.
 - [x] **BRAND-01**: Dashboard themed with Ducket colors (primary #3D2870, accent #F5C842, dark mode purple bg)
 - [x] **BRAND-02**: Outfit headings + Inter body text via self-hosted @fontsource-variable
 - [x] **BRAND-03**: shadcn/ui components integrated (Button, Card, Badge, Input, Label, Separator) via manual copy
-- [ ] **BRAND-04**: Trust badges displayed in UI ("Price cap protected", "Verified on-chain", "Non-custodial")
+- [x] **BRAND-04**: Trust badges displayed in UI ("Price cap protected", "Verified on-chain", "Non-custodial")
 
 ### Resale Flow
 
@@ -61,7 +61,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRAND-01 | Phase 10 | Complete |
 | BRAND-02 | Phase 10 | Complete |
 | BRAND-03 | Phase 10 | Complete |
-| BRAND-04 | Phase 10 | Pending |
+| BRAND-04 | Phase 10 | Complete |
 | RESALE-01 | Phase 11 | Pending |
 | RESALE-02 | Phase 11 | Pending |
 | RESALE-03 | Phase 11 | Pending |
