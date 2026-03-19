@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Project Scaffold + Compliance** - Monorepo structure, license, secrets hygiene, and CI baseline so the repo is always submittable (completed 2026-03-19)
 - [ ] **Phase 2: WDK Wallet + Escrow Contract** - Self-custodial USDT wallet on Sepolia via WDK smoke-tested and FraudEscrow.sol deployed
-- [ ] **Phase 3: StubHub Scraper** - First and highest-risk scraper validated against live FIFA World Cup 2026 listings with anti-bot resolution
+- [x] **Phase 3: StubHub Scraper** - First and highest-risk scraper validated against live FIFA World Cup 2026 listings with anti-bot resolution (completed 2026-03-19)
 - [ ] **Phase 4: Viagogo + Facebook Marketplace Scrapers + Scan Loop** - Complete the scan pipeline: all three platforms returning structured JSON, deduplication, autonomous heartbeat polling
 - [ ] **Phase 5: Classification Engine + Evidence** - Claude-powered fraud classification with confidence gating, Zod validation, and timestamped case file output
 - [ ] **Phase 6: Escrow Enforcement Wiring** - Full escrow lifecycle (deposit, release, refund, slash, legitimacy bond) end-to-end with on-chain confirmation
@@ -61,7 +61,9 @@ Plans:
   2. The scraper does not throw a bot-detection error or return an empty array against the live StubHub site
   3. Price is parsed as a numeric value in USD (not a raw string like "$280")
   4. Re-running the scraper within 5 minutes returns the same listings deduplicated by URL hash (no duplicates in output)
-**Plans**: TBD
+**Plans:** 1/1 plans complete
+Plans:
+- [ ] 03-01-PLAN.md — Patchright scraper with XHR interception, structured JSON output, and mock fallback
 
 ### Phase 4: Viagogo + Facebook Marketplace Scrapers + Scan Loop
 **Goal**: All three platform scrapers return structured listing JSON and the autonomous heartbeat loop polls them on schedule without human trigger
@@ -143,7 +145,7 @@ Phase 1 (scaffold)
 |-------|----------------|--------|-----------|
 | 1. Project Scaffold + Compliance | 1/1 | Complete   | 2026-03-19 |
 | 2. WDK Wallet + Escrow Contract (Track A) | 0/2 | Planning complete | - |
-| 3. StubHub Scraper (Track B) | 0/TBD | Not started | - |
+| 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
 | 4. Viagogo + Facebook Marketplace + Scan Loop | 0/TBD | Not started | - |
 | 5. Classification Engine + Evidence | 0/TBD | Not started | - |
 | 6. Escrow Enforcement Wiring (needs A+B) | 0/TBD | Not started | - |
