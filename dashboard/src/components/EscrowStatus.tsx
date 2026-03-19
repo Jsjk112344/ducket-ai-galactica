@@ -4,6 +4,7 @@
 // Apache 2.0 License
 
 import { Listing, WalletInfo } from '../types';
+import { Card, CardContent } from './ui/card';
 
 interface EscrowStatusProps {
   listings: Listing[];
@@ -17,10 +18,12 @@ interface StatCardProps {
 
 function StatCard({ label, value }: StatCardProps) {
   return (
-    <div className="bg-bg-card rounded-lg p-4">
-      <p className="text-2xl font-bold text-accent">{value}</p>
-      <p className="text-gray-400 text-sm mt-1">{label}</p>
-    </div>
+    <Card>
+      <CardContent className="p-4">
+        <p className="text-2xl font-bold text-brand-accent">{value}</p>
+        <p className="text-muted-foreground text-sm mt-1">{label}</p>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -42,12 +45,12 @@ export function EscrowStatus({ listings, wallet }: EscrowStatusProps) {
       {/* Header row: escrow contract + network badge */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Escrow Contract</p>
-          <p className="font-mono text-sm text-gray-300 mt-0.5">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Escrow Contract</p>
+          <p className="font-mono text-sm text-foreground mt-0.5">
             {wallet?.escrowContract ?? 'Contract address loading...'}
           </p>
         </div>
-        <span className="bg-accent/20 text-accent text-xs px-3 py-1 rounded-full">
+        <span className="bg-brand-primary/20 text-brand-accent text-xs px-3 py-1 rounded-full">
           Sepolia Testnet
         </span>
       </div>
@@ -62,7 +65,7 @@ export function EscrowStatus({ listings, wallet }: EscrowStatusProps) {
 
       {/* Empty state */}
       {totalScanned === 0 && (
-        <p className="text-gray-500 text-sm animate-pulse">Waiting for scan cycle...</p>
+        <p className="text-muted-foreground text-sm animate-pulse">Waiting for scan cycle...</p>
       )}
     </div>
   );

@@ -27,14 +27,14 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
       ? 'text-success'
       : actionTaken === 'escrow_deposit'
       ? 'text-warn-red'
-      : 'text-gray-300';
+      : 'text-foreground';
 
   return (
-    <div className="bg-bg-card/50 border border-accent/20 rounded-lg p-4 space-y-3">
+    <div className="bg-bg-card/50 border border-brand-primary/40 rounded-lg p-4 space-y-3">
       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
         {/* Category */}
         <div>
-          <span className="text-xs text-gray-500 uppercase tracking-wide">Category</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">Category</span>
           <div className="mt-1">
             <Badge category={category} />
           </div>
@@ -42,7 +42,7 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
 
         {/* Confidence */}
         <div>
-          <span className="text-xs text-gray-500 uppercase tracking-wide">Confidence</span>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">Confidence</span>
           <div className="mt-1">
             <ConfidenceBar value={confidence} />
           </div>
@@ -50,20 +50,20 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
 
         {/* Reasoning */}
         <div className="col-span-2">
-          <span className="text-xs text-gray-500 uppercase tracking-wide">Reasoning</span>
-          <p className="mt-1 text-gray-300 text-sm">{reasoning}</p>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">Reasoning</span>
+          <p className="mt-1 text-foreground text-sm">{reasoning}</p>
         </div>
 
         {/* Classification Source */}
         <div>
-          <span className="text-xs text-gray-500 uppercase tracking-wide">Classification Source</span>
-          <p className="mt-1 text-gray-400 text-sm">{classificationSource}</p>
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">Classification Source</span>
+          <p className="mt-1 text-muted-foreground text-sm">{classificationSource}</p>
         </div>
 
         {/* Action Taken (conditional) */}
         {actionTaken && (
           <div>
-            <span className="text-xs text-gray-500 uppercase tracking-wide">Action Taken</span>
+            <span className="text-xs text-muted-foreground uppercase tracking-wide">Action Taken</span>
             <p className={`mt-1 text-sm font-semibold ${actionColor}`}>
               {actionTaken.replace(/_/g, ' ')}
             </p>
@@ -73,14 +73,14 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
 
       {/* Etherscan link (conditional) */}
       {etherscanLink && (
-        <div className="pt-1 border-t border-accent/10">
-          <span className="text-xs text-gray-500 uppercase tracking-wide">On-Chain Evidence</span>
+        <div className="pt-1 border-t border-brand-primary/20">
+          <span className="text-xs text-muted-foreground uppercase tracking-wide">On-Chain Evidence</span>
           <div className="mt-1">
             <a
               href={etherscanLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent underline font-mono text-xs break-all"
+              className="text-brand-accent underline font-mono text-xs break-all"
             >
               {etherscanLink}
             </a>

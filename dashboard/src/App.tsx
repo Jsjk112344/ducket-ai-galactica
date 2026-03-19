@@ -27,8 +27,8 @@ export function App() {
     <div className="min-h-screen bg-bg-primary p-6 max-w-7xl mx-auto">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Ducket AI Galactica</h1>
-        <p className="text-gray-400 mt-1">Autonomous Fraud Detection Agent</p>
+        <h1 className="text-2xl font-bold text-white">Ducket</h1>
+        <p className="text-muted-foreground mt-1">Safe P2P ticket resale — buyer protected by escrow</p>
       </div>
 
       {/* Tab bar */}
@@ -39,8 +39,8 @@ export function App() {
             onClick={() => setActiveTab(tab.id)}
             className={`px-6 py-2 rounded-t-lg text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'bg-accent text-white'
-                : 'bg-bg-card text-gray-400 hover:text-gray-200'
+                ? 'bg-brand-primary text-white'
+                : 'bg-bg-card text-muted-foreground hover:text-foreground'
             }`}
           >
             {tab.label}
@@ -52,7 +52,7 @@ export function App() {
       </div>
 
       {/* Last updated timestamp */}
-      <div className="text-xs text-gray-500 mb-4">
+      <div className="text-xs text-muted-foreground mb-4">
         {listingsLoading
           ? 'Loading...'
           : lastUpdated
@@ -68,7 +68,7 @@ export function App() {
       </div>
 
       {/* Footer */}
-      <p className="text-gray-600 text-xs text-center mt-8">
+      <p className="text-muted-foreground text-xs text-center mt-8">
         Powered by WDK + Claude AI
       </p>
     </div>

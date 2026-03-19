@@ -8,6 +8,7 @@ import { Listing } from '../types';
 import { Badge } from './Badge';
 import { ConfidenceBar } from './ConfidenceBar';
 import { AgentDecisionPanel } from './AgentDecisionPanel';
+import { TrustBadges } from './TrustBadges';
 
 interface ListingsTableProps {
   listings: Listing[];
@@ -30,17 +31,22 @@ export function ListingsTable({ listings }: ListingsTableProps) {
 
   if (listings.length === 0) {
     return (
-      <div className="flex items-center justify-center h-48 text-gray-500 animate-pulse">
-        Waiting for scan cycle...
-      </div>
+      <>
+        <TrustBadges />
+        <div className="flex items-center justify-center h-48 text-muted-foreground animate-pulse">
+          Waiting for scan cycle...
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg">
+    <>
+      <TrustBadges />
+      <div className="overflow-x-auto rounded-lg">
       <table className="w-full text-sm text-left">
         <thead>
-          <tr className="bg-bg-card text-gray-400 uppercase text-xs tracking-wider">
+          <tr className="bg-bg-card text-muted-foreground uppercase text-xs tracking-wider">
             <th className="px-4 py-3">Platform</th>
             <th className="px-4 py-3">Seller</th>
             <th className="px-4 py-3">Price</th>
@@ -57,7 +63,7 @@ export function ListingsTable({ listings }: ListingsTableProps) {
               <tr
                 key={listing.url}
                 onClick={() => toggleRow(listing.url)}
-                className={`hover:bg-bg-card/70 cursor-pointer border-t border-gray-800 ${
+                className={`hover:bg-bg-card/70 cursor-pointer border-t border-border ${
                   idx % 2 === 1 ? 'bg-bg-card/30' : ''
                 }`}
               >
@@ -68,7 +74,7 @@ export function ListingsTable({ listings }: ListingsTableProps) {
                     className={`ml-2 text-xs px-1.5 py-0.5 rounded ${
                       listing.source === 'live'
                         ? 'bg-success/20 text-success'
-                        : 'bg-gray-700 text-gray-400'
+                        : 'bg-bg-card text-muted-foreground'
                     }`}
                   >
                     {listing.source}
@@ -76,7 +82,7 @@ export function ListingsTable({ listings }: ListingsTableProps) {
                 </td>
 
                 {/* Seller */}
-                <td className="px-4 py-3 text-gray-300 font-mono text-xs">
+                <td className="px-4 py-3 text-foreground font-mono text-xs">
                   {listing.seller || '—'}
                 </td>
 
@@ -84,7 +90,7 @@ export function ListingsTable({ listings }: ListingsTableProps) {
                 <td className="px-4 py-3 text-white">${listing.price.toLocaleString()}</td>
 
                 {/* Face Value */}
-                <td className="px-4 py-3 text-gray-400">${listing.faceValue.toLocaleString()}</td>
+                <td className="px-4 py-3 text-muted-foreground">${listing.faceValue.toLocaleString()}</td>
 
                 {/* Delta% */}
                 <td className={`px-4 py-3 ${deltaColor(listing.priceDeltaPct)}`}>
@@ -102,14 +108,14 @@ export function ListingsTable({ listings }: ListingsTableProps) {
                 </td>
 
                 {/* Status */}
-                <td className="px-4 py-3 text-gray-400 text-xs">
+                <td className="px-4 py-3 text-muted-foreground text-xs">
                   {listing.classification?.actionTaken ?? 'pending'}
                 </td>
               </tr>
 
               {/* Expandable Agent Decision Panel row */}
               {expandedUrl === listing.url && listing.classification && (
-                <tr key={`${listing.url}-detail`} className="border-t border-accent/20">
+                <tr key={`${listing.url}-detail`} className="border-t border-brand-primary/20">
                   <td colSpan={8} className="px-4 py-3 bg-bg-primary/50">
                     <AgentDecisionPanel classification={listing.classification} />
                   </td>
@@ -119,6 +125,7 @@ export function ListingsTable({ listings }: ListingsTableProps) {
           ))}
         </tbody>
       </table>
-    </div>
+      </div>
+    </>
   );
 }
