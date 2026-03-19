@@ -24,10 +24,10 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 
 ### Wallet
 
-- [ ] **WLLT-01**: Agent creates and manages a self-custodial USDT wallet on Sepolia using WDK
-- [ ] **WLLT-02**: All wallet operations use WDK — no centralized custody, JS/TS only
-- [ ] **WLLT-03**: Private keys never leave the client; key persistence handled securely
-- [ ] **WLLT-04**: Wallet operations demonstrably non-custodial (verifiable in demo)
+- [x] **WLLT-01**: Agent creates and manages a self-custodial USDT wallet on Sepolia using WDK
+- [x] **WLLT-02**: All wallet operations use WDK — no centralized custody, JS/TS only
+- [x] **WLLT-03**: Private keys never leave the client; key persistence handled securely
+- [x] **WLLT-04**: Wallet operations demonstrably non-custodial (verifiable in demo)
 
 ### Escrow
 
@@ -106,10 +106,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | COMP-02 | Phase 1 | Complete |
 | COMP-03 | Phase 1 | Complete |
 | COMP-04 | Phase 1 | Complete |
-| WLLT-01 | Phase 2 | Pending |
-| WLLT-02 | Phase 2 | Pending |
-| WLLT-03 | Phase 2 | Pending |
-| WLLT-04 | Phase 2 | Pending |
+| WLLT-01 | Phase 2 | Complete |
+| WLLT-02 | Phase 2 | Complete |
+| WLLT-03 | Phase 2 | Complete |
+| WLLT-04 | Phase 2 | Complete |
 | SCAN-02 | Phase 3 | Pending |
 | SCAN-05 | Phase 3 | Pending |
 | SCAN-01 | Phase 4 | Pending |

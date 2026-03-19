@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-19T07:34:41.263Z"
-last_activity: 2026-03-19 — Roadmap and STATE.md initialized
+status: executing
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-03-19T07:49:00Z"
+last_activity: 2026-03-19 — Completed Phase 2 Plan 01 (WDK wallet module + smoke test)
 progress:
   total_phases: 8
   completed_phases: 1
-  total_plans: 1
-  completed_plans: 1
-  percent: 100
+  total_plans: 2
+  completed_plans: 2
+  percent: 25
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-19)
 
 **Core value:** An organizer defines the rules once. The agent monitors, detects, and enforces — autonomously. Value settles on-chain. No human in the loop.
-**Current focus:** Phase 1 — Project Scaffold + Compliance
+**Current focus:** Phase 2 — WDK Wallet + Escrow Contract
 
 ## Current Position
 
-Phase: 1 of 8 (Project Scaffold + Compliance)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-03-19 — Roadmap and STATE.md initialized
+Phase: 2 of 8 (WDK Wallet + Escrow Contract)
+Plan: 1 of 2 complete in current phase
+Status: Executing Phase 2
+Last activity: 2026-03-19 — Completed 02-01 WDK wallet module and smoke test
 
-Progress: [██████████] 100%
+Progress: [██░░░░░░░░] 25%
 
 ## Performance Metrics
 
@@ -51,6 +51,7 @@ Progress: [██████████] 100%
 
 *Updated after each plan completion*
 | Phase 01-project-scaffold-compliance P01 | 3 | 2 tasks | 15 files |
+| Phase 02-wdk-wallet-escrow-contract P01 | 12min | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -69,16 +70,23 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Decisions (Phase 02-01)
+
+- [Phase 02-01]: WDK pinned to 1.0.0-beta.8 (latest stable tag, not 2.0.0-rc.1)
+- [Phase 02-01]: type=module added to agent/package.json for ESM smoke test compatibility
+- [Phase 02-01]: sendTransaction (native ETH) used for 0-value smoke test — ERC20 transfer with 0n may revert on Sepolia USDT
+- [Phase 02-01]: SEPOLIA_DEPLOYER_PRIVATE_KEY added to .env.example for Plan 02-02 Hardhat deploy
+
 ### Blockers/Concerns
 
 - **WDK Sepolia endpoints unvalidated** — Official docs show mainnet examples only. Candide/Pimlico Sepolia bundler + paymaster URLs must be confirmed on Day 1 before any escrow code is written.
 - **Sepolia USDT contract address unverified** — 0x7169d38820dfd117c3fa1f22a697dba58d90ba06 found via search, must be verified on Sepolia Etherscan before hardcoding.
 - **Carousell anti-bot vendor unknown** — Patchright handles most, but Kasada/PerimeterX may require additional fingerprint work. Validate Day 1.
 - **Telegram channel access method unconfirmed** — gramjs MTProto requires phone-number-verified account. Confirm availability before Day 1.
-- **WDK npm package installable version unverified** — Run `npm info @tetherto/wdk-wallet-evm` before writing any dependency files.
+- RESOLVED: WDK npm package installable — confirmed @tetherto/wdk-wallet-evm@1.0.0-beta.8 installed successfully.
 
 ## Session Continuity
 
-Last session: 2026-03-19T07:34:41.261Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-19T07:49:00Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
