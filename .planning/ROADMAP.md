@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   5. Public GitHub repo is accessible without authentication and passes `/hackathon-submit` pre-flight checklist for compliance items
 **Plans:** 1/1 plans complete
 Plans:
-- [ ] 01-01-PLAN.md — Compliance files, monorepo scaffold, and README with third-party disclosures
+- [x] 01-01-PLAN.md — Compliance files, monorepo scaffold, and README with third-party disclosures
 
 ### Phase 2: WDK Wallet + Escrow Contract
 **Goal**: The agent holds a self-custodial USDT wallet on Sepolia that survives restarts and can send a real transaction — and FraudEscrow.sol is deployed with a confirmed contract address
@@ -47,7 +47,10 @@ Plans:
   3. Private key is never written to disk or logged — only the seed phrase in `.env` (which is git-ignored)
   4. `FraudEscrow.sol` is deployed to Sepolia with a verified contract address in `contracts/deployed.json`
   5. Running `/wdk-check` reports zero non-custodial violations
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 02-01-PLAN.md — WDK wallet module with singleton pattern, startup guard, and smoke test script
+- [ ] 02-02-PLAN.md — FraudEscrow.sol smart contract with Hardhat tooling, deploy script, and unit tests
 
 ### Phase 3: StubHub Scraper
 **Goal**: The agent can fetch real FIFA World Cup 2026 ticket listings from StubHub and return structured JSON — anti-bot protection is resolved
@@ -139,7 +142,7 @@ Phase 1 (scaffold)
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Project Scaffold + Compliance | 1/1 | Complete   | 2026-03-19 |
-| 2. WDK Wallet + Escrow Contract (Track A) | 0/TBD | Not started | - |
+| 2. WDK Wallet + Escrow Contract (Track A) | 0/2 | Planning complete | - |
 | 3. StubHub Scraper (Track B) | 0/TBD | Not started | - |
 | 4. Viagogo + Facebook Marketplace + Scan Loop | 0/TBD | Not started | - |
 | 5. Classification Engine + Evidence | 0/TBD | Not started | - |
