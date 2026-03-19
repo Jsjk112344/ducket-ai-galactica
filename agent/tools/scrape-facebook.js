@@ -15,6 +15,7 @@ import { setTimeout } from 'node:timers/promises';
 import * as dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { generateFacebookListings } from './mock-data.js';
 
 // Load .env from project root (two levels up from agent/tools/)
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -91,36 +92,7 @@ function toFacebookSchema(raw, eventName) {
 // Covers two fraud archetypes for demo: scalping (500 = 2.5x face) and scam (below face).
 function getMockFacebook(eventName) {
   log('[Facebook] WARNING: returning mock data — login wall blocked DOM extraction');
-  return [
-    {
-      platform: 'Facebook Marketplace',
-      seller: 'mock-fb-seller-001',
-      price: 500,
-      url: 'https://www.facebook.com/marketplace/item/mock-001',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price 2.5x face value', 'significant markup over face value'],
-      eventName,
-      section: null,
-      quantity: 1,
-      faceValue: 200,
-      priceDeltaPct: 150,
-      source: 'mock',
-    },
-    {
-      platform: 'Facebook Marketplace',
-      seller: 'mock-fb-seller-002',
-      price: 75,
-      url: 'https://www.facebook.com/marketplace/item/mock-002',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price below face value (possible scam)'],
-      eventName,
-      section: null,
-      quantity: 2,
-      faceValue: 200,
-      priceDeltaPct: -62.5,
-      source: 'mock',
-    },
-  ];
+  return generateFacebookListings(eventName, 3);
 }
 
 // Main scraper function — exported for Phase 4 scan loop import.

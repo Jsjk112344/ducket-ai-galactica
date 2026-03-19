@@ -1,0 +1,10 @@
+{
+  "sepolia": {
+    "FraudEscrow": "0xC92b40700C28F2a88A8f50627AA9eFA7dD794E30",
+    "MockUSDT": "0x98943F6332565872ebEe42984683C7Ed6AE50277",
+    "usdt": "0x98943F6332565872ebEe42984683C7Ed6AE50277",
+    "deployer": "0x5340D3787d58cfa2665f105e30522Db8631C77eB",
+    "mintedAmount": "10000",
+    "deployedAt": "2026-03-19T12:27:51.281Z"
+  }
+}

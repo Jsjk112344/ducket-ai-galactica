@@ -14,6 +14,7 @@ import { setTimeout } from 'node:timers/promises';
 import * as dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { generateStubHubListings } from './mock-data.js';
 
 // Load .env from project root (two levels up from agent/tools/)
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -112,64 +113,7 @@ async function withRetry(fn, maxRetries = 3) {
 // Covers 4 fraud archetypes for demo visibility: scalping, scam (below face), legitimate, counterfeit.
 function getMockListings(eventName) {
   log('[StubHub] WARNING: returning mock data — live scrape failed or was blocked');
-  return [
-    {
-      platform: 'StubHub',
-      seller: 'mock-seller-001',
-      price: 840,
-      url: 'https://www.stubhub.com/event/mock-001',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price 4x face value', 'significant markup over face value'],
-      eventName,
-      section: 'Section 201',
-      quantity: 2,
-      faceValue: 200,
-      priceDeltaPct: 320,
-      source: 'mock',
-    },
-    {
-      platform: 'StubHub',
-      seller: 'mock-seller-002',
-      price: 50,
-      url: 'https://www.stubhub.com/event/mock-002',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price below face value (possible scam)'],
-      eventName,
-      section: 'Section 105',
-      quantity: 4,
-      faceValue: 200,
-      priceDeltaPct: -75,
-      source: 'mock',
-    },
-    {
-      platform: 'StubHub',
-      seller: 'mock-seller-003',
-      price: 220,
-      url: 'https://www.stubhub.com/event/mock-003',
-      listingDate: new Date().toISOString(),
-      redFlags: [],
-      eventName,
-      section: 'Section 310',
-      quantity: 2,
-      faceValue: 200,
-      priceDeltaPct: 10,
-      source: 'mock',
-    },
-    {
-      platform: 'StubHub',
-      seller: 'mock-seller-004',
-      price: 150,
-      url: 'https://www.stubhub.com/event/mock-004',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price below face value (possible scam)', 'new seller account'],
-      eventName,
-      section: 'Lower Level',
-      quantity: 1,
-      faceValue: 200,
-      priceDeltaPct: -25,
-      source: 'mock',
-    },
-  ];
+  return generateStubHubListings(eventName, 4);
 }
 
 // Main scraper function — exported for Phase 4 scan loop import.

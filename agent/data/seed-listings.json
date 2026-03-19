@@ -1,0 +1,97 @@
+[
+  {
+    "match": "Mexico vs South Africa",
+    "round": "Group A (Match 1)",
+    "date": "2026-06-11T14:00:00",
+    "venue": "Estadio Azteca, Ciudad de México, Mexico",
+    "totalListings": 70,
+    "availabilityNote": "Only 4% of tickets left",
+    "listings": [
+      { "section": "South Africa Supporters Value Tier", "priceSGD": 3566, "quantity": 2, "remaining": 2, "rating": 10.0, "ratingLabel": "Amazing", "features": ["Clear view", "Best price"] },
+      { "section": "Category 3", "priceSGD": 3983, "quantity": 2, "remaining": 2, "rating": 9.3, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 4082, "quantity": 2, "remaining": 2, "rating": 9.0, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 4230, "quantity": 2, "remaining": 2, "rating": 8.9, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "South Africa Supporters Standard Tier", "priceSGD": 4167, "quantity": 2, "remaining": 4, "rating": 9.3, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "South Africa Supporters", "priceSGD": 4392, "quantity": 2, "remaining": 2, "rating": 9.2, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "South Africa Supporters Value Tier", "priceSGD": 4349, "quantity": 2, "remaining": 4, "rating": 9.1, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 4824, "quantity": 2, "remaining": 4, "rating": 8.7, "ratingLabel": "Amazing", "features": ["Clear view"] }
+    ],
+    "categoryPricesSGD": { "Category 1": 6163, "Category 2": 4491, "Category 3": 3983, "Category 4": 6312 }
+  },
+  {
+    "match": "Korea Republic vs TBD",
+    "round": "Group A (Match 2)",
+    "date": "2026-06-11T21:00:00",
+    "venue": "Estadio Akron (Chivas Stadium), Zapopan, Mexico",
+    "totalListings": 50,
+    "listings": [
+      { "section": "Category 3", "priceSGD": 549, "quantity": 2, "remaining": 2, "features": ["Clear view", "Best price"] },
+      { "section": "Category 3", "priceSGD": 552, "quantity": 2, "remaining": 2, "features": ["Clear view", "Last tickets"] },
+      { "section": "Category 2", "priceSGD": 592, "quantity": 2, "remaining": 2, "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 594, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 4", "priceSGD": 557, "quantity": 2, "remaining": 4, "features": ["Clear view"] }
+    ],
+    "categoryPricesSGD": { "Category 1": 756, "Category 2": 594, "Category 3": 552, "Category 4": 557 }
+  },
+  {
+    "match": "United States vs Paraguay",
+    "round": "Group D (Match 4)",
+    "date": "2026-06-12T18:00:00",
+    "venue": "SoFi Stadium, Inglewood, California, USA",
+    "totalListings": 69,
+    "listings": [
+      { "section": "Category 3", "priceSGD": 1802, "quantity": 2, "remaining": 2, "features": ["Clear view", "Best price"] },
+      { "section": "Category 4", "priceSGD": 1808, "quantity": 2, "remaining": 2, "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 1967, "quantity": 2, "remaining": 2, "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 2004, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 2041, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 2076, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 2115, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 2734, "quantity": 2, "remaining": 2, "features": ["Clear view"] },
+      { "section": "United States Supporters Value Tier", "priceSGD": 2463, "quantity": 2, "remaining": 2, "rating": 10.0, "ratingLabel": "Amazing", "features": ["Clear view", "Best deal"] },
+      { "section": "Section 550", "priceSGD": 2878, "quantity": 2, "remaining": 2, "rating": 7.9, "ratingLabel": "Great", "features": ["Clear view"] }
+    ],
+    "categoryPricesSGD": { "Category 1": 3221, "Category 2": 2734, "Category 3": 1802, "Category 4": 1808 }
+  },
+  {
+    "match": "Germany vs Curaçao",
+    "round": "Group E (Match 10)",
+    "date": "2026-06-14T12:00:00",
+    "venue": "NRG Stadium, Houston, Texas, USA",
+    "totalListings": 101,
+    "listings": [
+      { "section": "Category 3", "priceSGD": 571, "quantity": 2, "remaining": 2, "features": ["Clear view", "Best price"] },
+      { "section": "Category 4", "priceSGD": 569, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 696, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 1", "priceSGD": 734, "quantity": 2, "remaining": 2, "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 741, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 764, "quantity": 2, "remaining": 2, "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 779, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 779, "quantity": 2, "remaining": 4, "features": ["Clear view"] },
+      { "section": "Germany Supporters Value Tier", "priceSGD": 736, "quantity": 2, "remaining": 2, "rating": 10.0, "ratingLabel": "Amazing", "features": ["Clear view", "Best deal"] },
+      { "section": "Category 4", "priceSGD": 815, "quantity": 2, "remaining": 2, "features": ["Clear view"] }
+    ],
+    "categoryPricesSGD": { "Category 1": 734, "Category 2": 696, "Category 3": 571, "Category 4": 569 }
+  },
+  {
+    "match": "Qatar vs Switzerland",
+    "round": "Group B (Match 8)",
+    "date": "2026-06-13T12:00:00",
+    "venue": "Levi's Stadium, Santa Clara, California, USA",
+    "totalListings": 94,
+    "availabilityNote": "Selling fast",
+    "listings": [
+      { "section": "Category 3", "priceSGD": 359, "quantity": 2, "remaining": 2, "rating": 8.1, "ratingLabel": "Great", "features": ["Clear view", "Best price"] },
+      { "section": "Category 4", "priceSGD": 391, "quantity": 2, "remaining": 4, "rating": 7.7, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Section 402", "priceSGD": 404, "quantity": 2, "remaining": 2, "rating": 7.4, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 405, "quantity": 2, "remaining": 4, "rating": 7.6, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 418, "quantity": 2, "remaining": 2, "rating": 8.7, "ratingLabel": "Amazing", "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 434, "quantity": 2, "remaining": 4, "rating": 7.3, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 457, "quantity": 2, "remaining": 4, "rating": 8.4, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 457, "quantity": 2, "remaining": 4, "rating": 8.4, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Category 3", "priceSGD": 463, "quantity": 2, "remaining": 4, "rating": 7.0, "ratingLabel": "Great", "features": ["Clear view"] },
+      { "section": "Category 2", "priceSGD": 481, "quantity": 2, "remaining": 4, "rating": 8.2, "ratingLabel": "Great", "features": ["Clear view"] }
+    ],
+    "categoryPricesSGD": { "Category 1": 514, "Category 2": 418, "Category 3": 359, "Category 4": 391 }
+  }
+]

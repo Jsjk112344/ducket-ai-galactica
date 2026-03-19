@@ -14,6 +14,7 @@ import { setTimeout } from 'node:timers/promises';
 import * as dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { generateViagogoListings } from './mock-data.js';
 
 // Load .env from project root (two levels up from agent/tools/)
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -91,36 +92,7 @@ function toViagogoSchema(raw, eventName) {
 // Covers two fraud archetypes for demo: scalping (650 = 3x face) and scam (below face).
 function getMockViagogo(eventName) {
   log('[Viagogo] WARNING: returning mock data — live scrape blocked by Cloudflare');
-  return [
-    {
-      platform: 'Viagogo',
-      seller: 'mock-viagogo-seller-001',
-      price: 650,
-      url: 'https://www.viagogo.com/ticket/mock-001',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price 3x face value', 'significant markup over face value'],
-      eventName,
-      section: 'Category 2',
-      quantity: 2,
-      faceValue: 200,
-      priceDeltaPct: 225,
-      source: 'mock',
-    },
-    {
-      platform: 'Viagogo',
-      seller: 'mock-viagogo-seller-002',
-      price: 180,
-      url: 'https://www.viagogo.com/ticket/mock-002',
-      listingDate: new Date().toISOString(),
-      redFlags: ['price below face value (possible scam)'],
-      eventName,
-      section: 'Category 3',
-      quantity: 1,
-      faceValue: 200,
-      priceDeltaPct: -10,
-      source: 'mock',
-    },
-  ];
+  return generateViagogoListings(eventName, 3);
 }
 
 // Main scraper function — exported for Phase 4 scan loop import.
