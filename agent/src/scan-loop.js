@@ -19,6 +19,8 @@ import { fileURLToPath } from 'url';
 import * as dotenv from 'dotenv';
 import { classifyListing } from './classify.js';
 import { writeCaseFile, isCaseFileExists } from './evidence.js';
+import { dispatchEscrowAction, depositEscrow, slashEscrow, makeBondEscrowId } from './escrow.js';
+import { updateCaseFileEscrow } from './evidence.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Load .env from project root (two levels up from agent/src/)
@@ -33,6 +35,11 @@ const FRAUD_CONFIDENCE_THRESHOLD = parseInt(process.env.FRAUD_CONFIDENCE_THRESHO
 // Cross-run dedup: in-memory Set persists as long as process runs.
 // Listings seen in prior cron cycles within the same session are not re-appended.
 const seen = new Set();
+
+// Organizer bond state — deposited once on startup, slashed once on first confirmed fraud
+let bondDeposited = false;
+let bondSlashed = false;
+let bondEscrowId = null;
 
 // SHA-256 URL hash sliced to 16 chars — used as deduplication key.
 // Short slice is sufficient for collision-resistance at hackathon scale (~hundreds of listings).
@@ -105,7 +112,7 @@ async function runScanCycle() {
   // Classification + Evidence pipeline — Phase 5
   // Runs for every fresh listing after the LISTINGS.md append (log first, then classify).
   // Each listing is classified inline, gated for enforcement, and has a case file written.
-  let classified = 0, gated = 0, skipped = 0;
+  let classified = 0, gated = 0, skipped = 0, enforced = 0, totalUsdtLocked = 0;
   for (const listing of fresh) {
     // Idempotency: skip listings already classified in a prior session
     if (await isCaseFileExists(listing.url)) {
@@ -121,18 +128,45 @@ async function runScanCycle() {
     const meetsThreshold = result.confidence >= FRAUD_CONFIDENCE_THRESHOLD && result.category !== 'LEGITIMATE';
     const actionTaken = meetsThreshold ? 'escrow_deposit' : 'logged_only';
 
-    await writeCaseFile(listing, result, actionTaken);
+    const caseFilePath = await writeCaseFile(listing, result, actionTaken);
     classified++;
 
     if (meetsThreshold) {
-      console.log(`[ScanLoop] ENFORCEMENT GATE PASSED — ${result.category} at ${result.confidence}% — escrow action pending (Phase 6)`);
+      console.log(`[ScanLoop] ENFORCEMENT GATE PASSED — ${result.category} at ${result.confidence}%`);
+
+      // Dispatch escrow action: deposit + category-specific action (release/refund/slash)
+      const escrowResult = await dispatchEscrowAction({
+        category: result.category,
+        listing,
+        caseFilePath,
+        timestamp: Date.now(),
+      });
+
+      if (escrowResult) {
+        enforced++;
+        totalUsdtLocked += 10;
+        console.log(`[ScanLoop] Escrow enforced: ${result.category} -> ${escrowResult.etherscanLink}`);
+      } else {
+        console.log(`[ScanLoop] Escrow action skipped (insufficient balance or tx error)`);
+      }
+
+      // Bond slash: first confirmed fraud above threshold slashes the organizer bond exactly once
+      if (bondDeposited && !bondSlashed && bondEscrowId) {
+        const bountyPool = process.env.BOUNTY_POOL_ADDRESS ?? '0x6427d51c4167373bF59712715B1930e80EcA8102';
+        const slashResult = await slashEscrow({ escrowId: bondEscrowId, bountyPool });
+        if (slashResult) {
+          bondSlashed = true;
+          console.log(`[ScanLoop] Organizer bond SLASHED: ${slashResult.etherscanLink}`);
+        }
+      }
+
       gated++;
     } else {
       console.log(`[ScanLoop] Below threshold (${result.confidence}% < ${FRAUD_CONFIDENCE_THRESHOLD}%) or LEGITIMATE — logged only`);
     }
   }
 
-  console.log(`[ScanLoop] Classification: ${classified} classified, ${gated} enforcement-gated, ${skipped} skipped (already classified)`);
+  console.log(`[ScanLoop] Classification: ${classified} classified, ${gated} enforcement-gated, ${enforced} enforced, ${skipped} skipped | ${totalUsdtLocked} USDT locked this cycle`);
 
   console.log(`[ScanLoop] Cycle complete: ${new Date().toISOString()}\n`);
 }
@@ -154,6 +188,21 @@ console.log('[ScanLoop] Ducket AI Galactica — Autonomous Scan Loop');
 console.log(`[ScanLoop] Event: ${EVENT_NAME}`);
 console.log('[ScanLoop] Schedule: every 5 minutes');
 console.log('[ScanLoop] Running initial cycle...\n');
+
+// Organizer legitimacy bond — deposit on startup per CONTEXT.md decision.
+// Bond is slashed exactly once on first confirmed fraud above threshold.
+try {
+  bondEscrowId = makeBondEscrowId(EVENT_NAME);
+  const bondResult = await depositEscrow({ escrowId: bondEscrowId, isBond: true });
+  if (bondResult) {
+    bondDeposited = true;
+    console.log(`[ScanLoop] Organizer bond deposited: ${bondResult.etherscanLink}`);
+  } else {
+    console.log('[ScanLoop] Organizer bond deposit skipped (insufficient balance or error)');
+  }
+} catch (err) {
+  console.error(`[ScanLoop] Organizer bond deposit failed: ${err.message}`);
+}
 
 // Run one cycle immediately on startup — critical for demo visibility.
 // Without this, judges would have to wait up to 5 minutes to see any output.
