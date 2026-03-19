@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: StubHub Scraper** - First and highest-risk scraper validated against live FIFA World Cup 2026 listings with anti-bot resolution (completed 2026-03-19)
 - [x] **Phase 4: Viagogo + Facebook Marketplace Scrapers + Scan Loop** - Complete the scan pipeline: all three platforms returning structured JSON, deduplication, autonomous heartbeat polling (completed 2026-03-19)
 - [x] **Phase 5: Classification Engine + Evidence** - Claude-powered fraud classification with confidence gating, Zod validation, and timestamped case file output (completed 2026-03-19)
-- [ ] **Phase 6: Escrow Enforcement Wiring** - Full escrow lifecycle (deposit, release, refund, slash, legitimacy bond) end-to-end with on-chain confirmation
+- [x] **Phase 6: Escrow Enforcement Wiring** - Full escrow lifecycle (deposit, release, refund, slash, legitimacy bond) end-to-end with on-chain confirmation (completed 2026-03-19)
 - [ ] **Phase 7: React Dashboard** - Live listings table, classification badges with reasoning panels, escrow status, wallet inspector, Ducket brand styling
 - [ ] **Phase 8: Demo Integration + Submission** - Full 5-minute demo loop rehearsed 3 consecutive times, mock fallback configured, submission checklist passed
 
@@ -103,7 +103,7 @@ Plans:
   4. A listing classified as `SCALPING_VIOLATION` above the confidence threshold triggers a slash transaction — USDT moves to bounty pool with a confirmed txHash
   5. An organizer legitimacy bond is deposited and slashed correctly when fraud is confirmed above threshold
   6. Every escrow action has a clickable Sepolia Etherscan link stored in its case file — the transaction is verifiable externally
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [ ] 06-01-PLAN.md — Escrow module (deposit/release/refund/slash) with WDK signer bridge + unit tests
 - [ ] 06-02-PLAN.md — Wire escrow into scan-loop with organizer bond and per-cycle summary
@@ -155,6 +155,6 @@ Phase 1 (scaffold)
 | 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
 | 4. Viagogo + Facebook Marketplace + Scan Loop | 2/2 | Complete   | 2026-03-19 |
 | 5. Classification Engine + Evidence | 3/3 | Complete   | 2026-03-19 |
-| 6. Escrow Enforcement Wiring (needs A+B) | 1/2 | In Progress|  |
+| 6. Escrow Enforcement Wiring (needs A+B) | 2/2 | Complete   | 2026-03-19 |
 | 7. React Dashboard | 0/TBD | Not started | - |
 | 8. Demo Integration + Submission | 0/TBD | Not started | - |

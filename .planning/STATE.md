@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 06-01-PLAN.md (escrow enforcement module)
-last_updated: "2026-03-19T12:05:48.817Z"
+stopped_at: Completed 06-02-PLAN.md (escrow enforcement wiring)
+last_updated: "2026-03-19T12:10:11.193Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 11
-  completed_plans: 10
+  completed_plans: 11
   percent: 31
 ---
 
@@ -60,6 +60,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 05-classification-engine-evidence P01 | 8 | 2 tasks | 4 files |
 | Phase 05-classification-engine-evidence P03 | 5 | 2 tasks | 2 files |
 | Phase 06-escrow-enforcement-wiring P01 | 20 | 2 tasks | 3 files |
+| Phase 06-escrow-enforcement-wiring P02 | 2 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -93,6 +94,9 @@ Recent decisions affecting current work:
 - [Phase 06-escrow-enforcement-wiring]: Lazy wallet import in escrow.js: dynamic import() deferred to first WDK call so unit tests can load module without env vars
 - [Phase 06-escrow-enforcement-wiring]: Two-key pattern: WDK wallet for deposit (mandatory WDK req); ethers.Wallet(SEPOLIA_DEPLOYER_PRIVATE_KEY) for onlyOwner calls (release/refund/slash)
 - [Phase 06-escrow-enforcement-wiring]: Fixed 10 USDT per escrow action; balance guard returns null (not throw) for demo resilience
+- [Phase 06-escrow-enforcement-wiring]: Static analysis for scan-loop.js tests: read source as string to avoid launching cron on import
+- [Phase 06-escrow-enforcement-wiring]: bondSlashed flag prevents double-slash of organizer bond — slashed exactly once on first confirmed fraud
+- [Phase 06-escrow-enforcement-wiring]: BOUNTY_POOL_ADDRESS env var with hardcoded FraudEscrow address fallback — bond slash never fails due to missing env var
 
 ### Pending Todos
 
@@ -115,6 +119,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T12:05:48.814Z
-Stopped at: Completed 06-01-PLAN.md (escrow enforcement module)
+Last session: 2026-03-19T12:10:11.191Z
+Stopped at: Completed 06-02-PLAN.md (escrow enforcement wiring)
 Resume file: None
