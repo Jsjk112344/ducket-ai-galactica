@@ -10,10 +10,10 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 ### Scanning
 
 - [ ] **SCAN-01**: Agent autonomously polls secondary marketplaces on a configurable schedule without human trigger
-- [ ] **SCAN-02**: Agent scrapes StubHub for ticket listings matching a given event name
-- [ ] **SCAN-03**: Agent scrapes Viagogo for ticket listings matching a given event name
-- [ ] **SCAN-04**: Agent scrapes Facebook Marketplace for ticket listings matching a given event name
-- [ ] **SCAN-05**: Each scraped listing returns structured data: platform, seller, price, URL, listing date, red flags
+- [x] **SCAN-02**: Agent scrapes StubHub for ticket listings matching a given event name
+- [x] **SCAN-03**: Agent scrapes Viagogo for ticket listings matching a given event name
+- [x] **SCAN-04**: Agent scrapes Facebook Marketplace for ticket listings matching a given event name
+- [x] **SCAN-05**: Each scraped listing returns structured data: platform, seller, price, URL, listing date, red flags
 
 ### Classification
 
@@ -110,11 +110,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WLLT-02 | Phase 2 | Complete |
 | WLLT-03 | Phase 2 | Complete |
 | WLLT-04 | Phase 2 | Complete |
-| SCAN-02 | Phase 3 | Pending |
-| SCAN-05 | Phase 3 | Pending |
+| SCAN-02 | Phase 3 | Complete |
+| SCAN-05 | Phase 3 | Complete |
 | SCAN-01 | Phase 4 | Pending |
-| SCAN-03 | Phase 4 | Pending |
-| SCAN-04 | Phase 4 | Pending |
+| SCAN-03 | Phase 4 | Complete |
+| SCAN-04 | Phase 4 | Complete |
 | CLAS-01 | Phase 5 | Pending |
 | CLAS-02 | Phase 5 | Pending |
 | CLAS-03 | Phase 5 | Pending |

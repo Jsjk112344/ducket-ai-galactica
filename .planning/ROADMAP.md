@@ -146,7 +146,7 @@ Phase 1 (scaffold)
 | 1. Project Scaffold + Compliance | 1/1 | Complete   | 2026-03-19 |
 | 2. WDK Wallet + Escrow Contract (Track A) | 0/2 | Planning complete | - |
 | 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
-| 4. Viagogo + Facebook Marketplace + Scan Loop | 0/TBD | Not started | - |
+| 4. Viagogo + Facebook Marketplace + Scan Loop | 1/2 | In Progress|  |
 | 5. Classification Engine + Evidence | 0/TBD | Not started | - |
 | 6. Escrow Enforcement Wiring (needs A+B) | 0/TBD | Not started | - |
 | 7. React Dashboard | 0/TBD | Not started | - |

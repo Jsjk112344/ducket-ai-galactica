@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: "Completed 03-01-PLAN.md"
-last_updated: "2026-03-19T09:30:00.000Z"
-last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool
+stopped_at: Completed 04-01-PLAN.md (both scrapers built and verified)
+last_updated: "2026-03-19T09:38:15.824Z"
+last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
   completed_phases: 3
@@ -54,6 +54,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 02-wdk-wallet-escrow-contract P01 | 12min | 2 tasks | 6 files |
 | Phase 02-wdk-wallet-escrow-contract P02 | 8 | 2 tasks | 7 files |
 | Phase 03-stubhub-scraper P01 | 14 | 1 tasks | 2 files |
+| Phase 04-viagogo-fb-scrapers-scan-loop P01 | 5 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -72,6 +73,8 @@ Recent decisions affecting current work:
 - [Phase 03-stubhub-scraper]: Logs route to stderr via log() helper — keeps stdout clean for JSON piping
 - [Phase 03-stubhub-scraper]: STUBHUB_TIMEOUT env var controls navigation timeout — fast test cycles without code changes
 - [Phase 03-stubhub-scraper]: Akamai bot detection triggers mock fallback on non-residential IPs — source:"mock" is labeled and acceptable for hackathon demo
+- [Phase 04-viagogo-fb-scrapers-scan-loop]: Logs routed to stderr via log() helper in Viagogo and Facebook scrapers — keeps stdout clean for JSON piping (same pattern as Phase 3 StubHub)
+- [Phase 04-viagogo-fb-scrapers-scan-loop]: Facebook scraper uses domcontentloaded (NOT networkidle) — networkidle triggers full auth wall before DOM listing tiles can be extracted
 
 ### Pending Todos
 
@@ -94,6 +97,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T09:30:00.000Z
-Stopped at: Completed 03-01-PLAN.md (all tasks complete, human-verify checkpoint approved)
+Last session: 2026-03-19T09:38:15.822Z
+Stopped at: Completed 04-01-PLAN.md (both scrapers built and verified)
 Resume file: None
