@@ -54,7 +54,7 @@ Plans:
   2. All headings render in Outfit Variable font and body text renders in Inter — fonts load from self-hosted @fontsource packages with no Google Fonts CDN calls
   3. At least Button, Card, Badge, Input, Label, and Separator render as shadcn components — no shadcn CLI init artifact (tailwind.config.js) present in the repo
   4. Trust badges ("Price cap protected", "Verified on-chain", "Non-custodial") are visible in the UI without scrolling on the main resale view
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 10-01-PLAN.md — Install deps, update CSS theme tokens, swap fonts to @fontsource-variable, create cn() utility, copy 6 shadcn components
 - [ ] 10-02-PLAN.md — Apply Ducket rebrand to all dashboard components, create TrustBadges, wire shadcn Card into EscrowStatus
@@ -103,7 +103,7 @@ Plans:
 | 7. React Dashboard | v1.0 | 3/3 | Complete | 2026-03-19 |
 | 8. Demo Integration + Submission | v1.0 | 1/2 | Complete* | 2026-03-19 |
 | 9. Reframe Narrative | v2.0 | 0/1 | Planning | - |
-| 10. Dashboard Rebrand | v2.0 | 0/2 | Planning | - |
+| 10. Dashboard Rebrand | 1/2 | In Progress|  | - |
 | 11. Resale Flow UI | v2.0 | 0/TBD | Not started | - |
 | 12. Seed Data + AI Visibility | v2.0 | 0/TBD | Not started | - |
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |

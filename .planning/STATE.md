@@ -1,77 +1,61 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: MVP
-status: complete
-stopped_at: v1.0 milestone archived
-last_updated: "2026-03-19"
-last_activity: 2026-03-19 — v1.0 MVP milestone completed and archived
+milestone: v2.0
+milestone_name: Safe P2P Ticket Resale
+status: in-progress
+stopped_at: "Completed 10-01-PLAN.md"
+last_updated: "2026-03-20T20:43:43Z"
+last_activity: "2026-03-20 — Phase 10 Plan 01 complete (brand tokens + shadcn primitives)"
 progress:
-  total_phases: 8
-  completed_phases: 8
-  total_plans: 16
-  completed_plans: 15
-  percent: 100
+  total_phases: 5
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 20
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-19)
+See: .planning/PROJECT.md (updated 2026-03-20)
 
-**Core value:** An organizer defines the rules once. The agent monitors, detects, and enforces — autonomously. Value settles on-chain. No human in the loop.
-**Current focus:** v1.0 MVP shipped — preparing for submission
+**Core value:** Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket legitimacy, smart contract releases or refunds automatically.
+**Current focus:** Phase 9 — Reframe Narrative
 
 ## Current Position
 
-Milestone: v1.0 MVP — SHIPPED
-Phase: 8 of 8 complete
-Status: Milestone archived
-Last activity: 2026-03-19 — v1.0 milestone completed
+Phase: 10 of 13 (Dashboard Rebrand)
+Plan: 1 of 2 in current phase (Plan 01 complete)
+Status: In progress
+Last activity: 2026-03-20 — Phase 10 Plan 01 complete
 
-Progress: [██████████] 100%
-
-## Performance Metrics
-
-**Velocity:**
-- Total plans completed: 15
-- Timeline: ~7 hours (single day)
-- Files changed: 79
-
-**By Phase:**
-
-| Phase | Plans | Tasks | Files |
-|-------|-------|-------|-------|
-| 01-project-scaffold-compliance P01 | 3 min | 2 tasks | 15 files |
-| 02-wdk-wallet-escrow-contract P01 | 12 min | 2 tasks | 6 files |
-| 02-wdk-wallet-escrow-contract P02 | 8 min | 2 tasks | 7 files |
-| 03-stubhub-scraper P01 | 14 min | 1 task | 2 files |
-| 04-viagogo-fb-scrapers-scan-loop P01 | 5 min | 2 tasks | 3 files |
-| 04-viagogo-fb-scrapers-scan-loop P02 | 7 min | 2 tasks | 2 files |
-| 05-classification-engine-evidence P01 | 8 min | 2 tasks | 4 files |
-| 05-classification-engine-evidence P02 | 2 min | 2 tasks | 2 files |
-| 05-classification-engine-evidence P03 | 5 min | 2 tasks | 2 files |
-| 06-escrow-enforcement-wiring P01 | 20 min | 2 tasks | 3 files |
-| 06-escrow-enforcement-wiring P02 | 2 min | 2 tasks | 2 files |
-| 07-react-dashboard P01 | 4 min | 1 task | 10 files |
-| 07-react-dashboard P02 | 5 min | 2 tasks | 9 files |
-| 07-react-dashboard P03 | checkpoint | 1 task | 0 files |
-| 08-demo-integration-submission P01 | 5 min | 2 tasks | 3 files |
+Progress: [██░░░░░░░░] 20% (v2.0 milestone)
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table. 14 decisions with outcomes recorded.
+All v1.0 decisions logged in PROJECT.md Key Decisions table. 14 decisions with outcomes recorded.
+
+Key v2.0 constraints from research:
+- All changes must be additive — never mutate Listing/Classification interfaces
+- shadcn components: manual file copy only, never run shadcn CLI init
+- Seed data written before any UI code — AgentDecisionPanel requires Classification object to expand
+- Rebrand hard time-boxed at 4 hours total
+
+Phase 10 decisions (Plan 01):
+- Used relative path `../../lib/utils` in shadcn ui components — avoids adding @/* path alias to tsconfig
+- Kept existing src/components/Badge.tsx untouched; shadcn badge is a separate primitive in src/components/ui/badge.tsx
+- Installed @radix-ui/react-slot for Button asChild prop (verbatim shadcn Button copy)
 
 ### Blockers/Concerns
 
-All v1.0 blockers resolved or accepted as known gaps:
-- 08-02 (E2E demo validation) deferred — demo script works, full rehearsal not completed
+- 08-02 (E2E demo validation) deferred from v1.0 — DEMO-03 in Phase 13 closes this gap
+- Deadline: March 22, 2026 — phases 9-13 must complete in ~2 days
 
 ## Session Continuity
 
-Last session: 2026-03-19
-Stopped at: v1.0 milestone archived
-Resume file: None
+Last session: 2026-03-20T20:43:43Z
+Stopped at: Completed 10-01-PLAN.md
+Resume file: .planning/phases/10-dashboard-rebrand/10-02-PLAN.md
