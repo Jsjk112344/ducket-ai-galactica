@@ -38,3 +38,8 @@ coverage/
 
 # Build artifacts
 *.js.map
+
+# Hardhat generated artifacts
+contracts/artifacts/
+contracts/cache/
+contracts/types/
