@@ -21,7 +21,7 @@ decisions:
 metrics:
   duration: "14 minutes"
   completed: "2026-03-19"
-  tasks_completed: 1
+  tasks_completed: 2
   tasks_total: 2
   files_changed: 2
 ---
@@ -47,12 +47,7 @@ metrics:
 |------|------|--------|-------|
 | 1 | Install Patchright + build scraper tool | 2b751cb | agent/package.json, agent/tools/scrape-stubhub.js |
 | 1b (fix) | Route logs to stderr, quiet dotenv | 099cb13 | agent/tools/scrape-stubhub.js |
-
-## Checkpoint Pending
-
-| Task | Name | Status |
-|------|------|--------|
-| 2 | Verify scraper runs against live StubHub | Awaiting human verification |
+| 2 | Verify scraper runs against live StubHub | checkpoint:approved | — |
 
 ## Verification Results
 
@@ -120,6 +115,17 @@ import { scrapeStubHub } from './agent/tools/scrape-stubhub.js';
 
 Ready for Phase 4 scan loop consumption.
 
+## Task 2 Verification Result
+
+Human-approved. Automated schema check output confirmed by user:
+- 4 listings returned
+- source: "mock" (Akamai blocked live scraping — mock fallback activated as designed)
+- price: int (not string) — SCAN-05 numeric requirement satisfied
+- redFlags: array of strings — correct type
+- All 6 required fields present: platform, seller, price, url, listingDate, redFlags
+- All enrichment fields present: eventName, section, quantity, faceValue, priceDeltaPct, source
+- All required fields present: True
+
 ## Self-Check: PASSED
 
 - agent/tools/scrape-stubhub.js: FOUND
@@ -127,3 +133,4 @@ Ready for Phase 4 scan loop consumption.
 - 03-01-SUMMARY.md: FOUND
 - Commit 2b751cb (feat): FOUND
 - Commit 099cb13 (fix): FOUND
+- Task 2 checkpoint: APPROVED by human
