@@ -17,6 +17,8 @@ import { appendFile, writeFile, mkdir } from 'node:fs/promises';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'url';
 import * as dotenv from 'dotenv';
+import { classifyListing } from './classify.js';
+import { writeCaseFile, isCaseFileExists } from './evidence.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Load .env from project root (two levels up from agent/src/)
@@ -24,6 +26,9 @@ dotenv.config({ path: join(__dirname, '../../.env'), quiet: true });
 
 const LISTINGS_PATH = join(__dirname, '../memory/LISTINGS.md');
 const EVENT_NAME = process.env.EVENT_NAME ?? 'FIFA World Cup 2026';
+// Enforcement gate: listings with confidence >= threshold AND non-LEGITIMATE category trigger escrow_deposit.
+// Default 85 — matches the rule-based high-confidence cutoff in classify.js.
+const FRAUD_CONFIDENCE_THRESHOLD = parseInt(process.env.FRAUD_CONFIDENCE_THRESHOLD ?? '85');
 
 // Cross-run dedup: in-memory Set persists as long as process runs.
 // Listings seen in prior cron cycles within the same session are not re-appended.
@@ -96,6 +101,38 @@ async function runScanCycle() {
   } else {
     console.log('[ScanLoop] No new listings this cycle');
   }
+
+  // Classification + Evidence pipeline — Phase 5
+  // Runs for every fresh listing after the LISTINGS.md append (log first, then classify).
+  // Each listing is classified inline, gated for enforcement, and has a case file written.
+  let classified = 0, gated = 0, skipped = 0;
+  for (const listing of fresh) {
+    // Idempotency: skip listings already classified in a prior session
+    if (await isCaseFileExists(listing.url)) {
+      console.log(`[ScanLoop] Skipping already-classified: ${listing.url.slice(0, 60)}...`);
+      skipped++;
+      continue;
+    }
+
+    const result = await classifyListing(listing);
+    console.log(`[ScanLoop] ${listing.platform} | ${result.category} | ${result.confidence}% | ${result.classificationSource} | ${result.reasoning.slice(0, 80)}`);
+
+    // Enforcement gate: confidence >= threshold AND non-LEGITIMATE → escrow_deposit action
+    const meetsThreshold = result.confidence >= FRAUD_CONFIDENCE_THRESHOLD && result.category !== 'LEGITIMATE';
+    const actionTaken = meetsThreshold ? 'escrow_deposit' : 'logged_only';
+
+    await writeCaseFile(listing, result, actionTaken);
+    classified++;
+
+    if (meetsThreshold) {
+      console.log(`[ScanLoop] ENFORCEMENT GATE PASSED — ${result.category} at ${result.confidence}% — escrow action pending (Phase 6)`);
+      gated++;
+    } else {
+      console.log(`[ScanLoop] Below threshold (${result.confidence}% < ${FRAUD_CONFIDENCE_THRESHOLD}%) or LEGITIMATE — logged only`);
+    }
+  }
+
+  console.log(`[ScanLoop] Classification: ${classified} classified, ${gated} enforcement-gated, ${skipped} skipped (already classified)`);
 
   console.log(`[ScanLoop] Cycle complete: ${new Date().toISOString()}\n`);
 }
