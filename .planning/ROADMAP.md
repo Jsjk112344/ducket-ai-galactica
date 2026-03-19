@@ -103,7 +103,10 @@ Plans:
   4. A listing classified as `SCALPING_VIOLATION` above the confidence threshold triggers a slash transaction — USDT moves to bounty pool with a confirmed txHash
   5. An organizer legitimacy bond is deposited and slashed correctly when fraud is confirmed above threshold
   6. Every escrow action has a clickable Sepolia Etherscan link stored in its case file — the transaction is verifiable externally
-**Plans**: TBD
+**Plans:** 1/2 plans executed
+Plans:
+- [ ] 06-01-PLAN.md — Escrow module (deposit/release/refund/slash) with WDK signer bridge + unit tests
+- [ ] 06-02-PLAN.md — Wire escrow into scan-loop with organizer bond and per-cycle summary
 
 ### Phase 7: React Dashboard
 **Goal**: The React dashboard displays the live agent state — listings, classifications, escrow status, and wallet inspector — in real time using Ducket brand styling
@@ -152,6 +155,6 @@ Phase 1 (scaffold)
 | 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
 | 4. Viagogo + Facebook Marketplace + Scan Loop | 2/2 | Complete   | 2026-03-19 |
 | 5. Classification Engine + Evidence | 3/3 | Complete   | 2026-03-19 |
-| 6. Escrow Enforcement Wiring (needs A+B) | 0/TBD | Not started | - |
+| 6. Escrow Enforcement Wiring (needs A+B) | 1/2 | In Progress|  |
 | 7. React Dashboard | 0/TBD | Not started | - |
 | 8. Demo Integration + Submission | 0/TBD | Not started | - |
