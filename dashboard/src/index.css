@@ -1,0 +1,17 @@
+/* Ducket AI Galactica — Tailwind v4 theme */
+/* v4 pattern: @import "tailwindcss" + @theme{} — NO tailwind.config.js, NO @tailwind directives */
+/* Google Fonts import must precede @import "tailwindcss" (CSS @import ordering rule) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg-primary: #0A0E17;
+  --color-bg-card: #1A1F2E;
+  --color-accent: #6366F1;
+  --color-success: #10B981;
+  --color-warn-red: #EF4444;
+  --color-warn-orange: #F97316;
+  --color-warn-yellow: #EAB308;
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: ui-monospace, 'Courier New', monospace;
+}
