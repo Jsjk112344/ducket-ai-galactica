@@ -129,11 +129,14 @@ Plans:
 **Depends on**: Phase 7
 **Requirements**: DEMO-01, DEMO-02, DEMO-03, DEMO-04
 **Success Criteria** (what must be TRUE):
-  1. The full demo loop (event input → scan → classify → escrow action) completes in under 5 minutes, covering all 4 required segments: agent logic, wallet flow, payment lifecycle, live full loop
+  1. The full demo loop (event input -> scan -> classify -> escrow action) completes in under 5 minutes, covering all 4 required segments: agent logic, wallet flow, payment lifecycle, live full loop
   2. The demo uses FIFA World Cup 2026 with live secondary market data from at least one platform (others may use mock fallback if scrapers are flaky)
   3. Running `/demo-ready` reports all 4 demo segments as passing with no blockers
   4. A new developer can clone the repo, follow `README.md` setup instructions, and reach a running agent + dashboard without contacting the team — `/hackathon-submit` checklist passes with zero failures
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — Demo script, README rewrite, and .env.example completion
+- [ ] 08-02-PLAN.md — End-to-end demo validation and human verification
 
 ## Progress
 
@@ -161,4 +164,4 @@ Phase 1 (scaffold)
 | 5. Classification Engine + Evidence | 3/3 | Complete   | 2026-03-19 |
 | 6. Escrow Enforcement Wiring (needs A+B) | 2/2 | Complete   | 2026-03-19 |
 | 7. React Dashboard | 3/3 | Complete   | 2026-03-19 |
-| 8. Demo Integration + Submission | 0/TBD | Not started | - |
+| 8. Demo Integration + Submission | 0/2 | Planning complete | - |
