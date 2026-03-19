@@ -86,7 +86,11 @@ Plans:
   3. Price delta percentage vs official face value is calculated and stored on every listing object
   4. Escrow enforcement action is only triggered when confidence exceeds the configured threshold (default 85%) — a listing with confidence 60% produces no escrow action
   5. A timestamped case file exists in `agent/cases/` for every classified listing, containing screenshot path, URL, prices, classification result, confidence, action taken, and drafted enforcement text
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 05-01-PLAN.md — Hybrid fraud classifier (rules + Claude API) with @anthropic-ai/sdk structured output
+- [ ] 05-02-PLAN.md — Evidence case file writer with enforcement text drafting and idempotency
+- [ ] 05-03-PLAN.md — Wire classification + evidence into scan loop with enforcement gating
 
 ### Phase 6: Escrow Enforcement Wiring
 **Goal**: The agent executes the full USDT escrow lifecycle on Sepolia in response to classification outcomes — deposit, release, refund, and slash all produce confirmed on-chain transactions
@@ -147,7 +151,7 @@ Phase 1 (scaffold)
 | 2. WDK Wallet + Escrow Contract (Track A) | 0/2 | Planning complete | - |
 | 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
 | 4. Viagogo + Facebook Marketplace + Scan Loop | 2/2 | Complete   | 2026-03-19 |
-| 5. Classification Engine + Evidence | 0/TBD | Not started | - |
+| 5. Classification Engine + Evidence | 0/3 | Planning complete | - |
 | 6. Escrow Enforcement Wiring (needs A+B) | 0/TBD | Not started | - |
 | 7. React Dashboard | 0/TBD | Not started | - |
 | 8. Demo Integration + Submission | 0/TBD | Not started | - |
