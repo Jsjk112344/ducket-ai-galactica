@@ -40,9 +40,9 @@ Requirements for hackathon submission (March 22, 2026). Each maps to roadmap pha
 
 ### Evidence
 
-- [ ] **EVID-01**: Agent generates timestamped evidence case file per classified listing (JSON + human-readable)
-- [ ] **EVID-02**: Case file includes: screenshot, URL, prices, classification result, confidence, action taken
-- [ ] **EVID-03**: Agent autonomously drafts enforcement actions (takedown request, platform report, public warning) per case
+- [x] **EVID-01**: Agent generates timestamped evidence case file per classified listing (JSON + human-readable)
+- [x] **EVID-02**: Case file includes: screenshot, URL, prices, classification result, confidence, action taken
+- [x] **EVID-03**: Agent autonomously drafts enforcement actions (takedown request, platform report, public warning) per case
 
 ### Dashboard
 
@@ -119,9 +119,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLAS-02 | Phase 5 | Pending |
 | CLAS-03 | Phase 5 | Pending |
 | CLAS-04 | Phase 5 | Pending |
-| EVID-01 | Phase 5 | Pending |
-| EVID-02 | Phase 5 | Pending |
-| EVID-03 | Phase 5 | Pending |
+| EVID-01 | Phase 5 | Complete |
+| EVID-02 | Phase 5 | Complete |
+| EVID-03 | Phase 5 | Complete |
 | ESCR-01 | Phase 6 | Pending |
 | ESCR-02 | Phase 6 | Pending |
 | ESCR-03 | Phase 6 | Pending |
