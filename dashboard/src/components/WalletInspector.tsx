@@ -3,6 +3,7 @@
 // Apache 2.0 License
 
 import { WalletInfo } from '../types';
+import { Lock, Wallet } from 'lucide-react';
 
 interface WalletInspectorProps {
   wallet: WalletInfo | null;
@@ -12,7 +13,7 @@ interface WalletInspectorProps {
 export function WalletInspector({ wallet, loading }: WalletInspectorProps) {
   if (loading) {
     return (
-      <div className="bg-bg-card rounded-lg p-6 animate-pulse text-muted-foreground">
+      <div className="bg-bg-card rounded-lg p-6 animate-pulse text-muted-foreground border border-brand-primary/20">
         Connecting to Sepolia...
       </div>
     );
@@ -27,30 +28,37 @@ export function WalletInspector({ wallet, loading }: WalletInspectorProps) {
   }
 
   return (
-    <div className="bg-bg-card rounded-lg p-6 space-y-5">
+    <div className="bg-bg-card rounded-lg p-6 space-y-5 border border-brand-primary/20">
       {/* Row 1: Wallet address + non-custodial badge */}
       <div>
         <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Wallet Address</p>
         <div className="flex items-center flex-wrap gap-2">
           <p className="font-mono text-sm text-foreground break-all">{wallet.address}</p>
-          <span className="bg-brand-primary text-white text-xs px-2 py-0.5 rounded-full ml-2 whitespace-nowrap">
-            client-side only (WDK non-custodial)
+          <span className="inline-flex items-center gap-1.5 bg-brand-primary text-brand-accent text-xs px-2.5 py-0.5 rounded-full ml-2 whitespace-nowrap border border-brand-accent/30">
+            <Lock className="w-3 h-3" />
+            WDK non-custodial
           </span>
         </div>
       </div>
 
       {/* Row 2: Balance grid */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-bg-primary/50 rounded-lg p-3">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">ETH Balance</p>
-          <p className="font-mono text-lg text-white">
-            {parseFloat(wallet.ethBalance).toFixed(4)} ETH
+        <div className="bg-bg-primary/50 rounded-lg p-4 border border-brand-primary/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Wallet className="w-4 h-4 text-brand-accent" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">ETH Balance</p>
+          </div>
+          <p className="font-mono text-xl text-white font-bold">
+            {parseFloat(wallet.ethBalance).toFixed(4)} <span className="text-brand-accent text-sm">ETH</span>
           </p>
         </div>
-        <div className="bg-bg-primary/50 rounded-lg p-3">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">USDT Balance</p>
-          <p className="font-mono text-lg text-white">
-            {parseFloat(wallet.usdtBalance).toFixed(2)} USDT
+        <div className="bg-bg-primary/50 rounded-lg p-4 border border-brand-primary/20">
+          <div className="flex items-center gap-2 mb-2">
+            <Wallet className="w-4 h-4 text-brand-accent" />
+            <p className="text-xs text-muted-foreground uppercase tracking-wide">USDT Balance</p>
+          </div>
+          <p className="font-mono text-xl text-white font-bold">
+            {parseFloat(wallet.usdtBalance).toFixed(2)} <span className="text-brand-accent text-sm">USDT</span>
           </p>
         </div>
       </div>
@@ -65,7 +73,7 @@ export function WalletInspector({ wallet, loading }: WalletInspectorProps) {
       <div className="flex items-center gap-2">
         <p className="text-xs text-muted-foreground uppercase tracking-wide">Network</p>
         <span className="flex items-center gap-1.5 text-success text-sm">
-          <span className="w-2 h-2 bg-success rounded-full inline-block" />
+          <span className="w-2 h-2 bg-success rounded-full inline-block animate-pulse" />
           {wallet.network}
         </span>
       </div>

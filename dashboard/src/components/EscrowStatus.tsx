@@ -5,6 +5,7 @@
 
 import { Listing, WalletInfo } from '../types';
 import { Card, CardContent } from './ui/card';
+import { Shield } from 'lucide-react';
 
 interface EscrowStatusProps {
   listings: Listing[];
@@ -14,13 +15,14 @@ interface EscrowStatusProps {
 interface StatCardProps {
   label: string;
   value: number | string;
+  highlight?: boolean;
 }
 
-function StatCard({ label, value }: StatCardProps) {
+function StatCard({ label, value, highlight }: StatCardProps) {
   return (
-    <Card>
+    <Card className="border-brand-primary/30 bg-bg-card">
       <CardContent className="p-4">
-        <p className="text-2xl font-bold text-brand-accent">{value}</p>
+        <p className={`text-2xl font-bold ${highlight ? 'text-brand-accent' : 'text-white'}`}>{value}</p>
         <p className="text-muted-foreground text-sm mt-1">{label}</p>
       </CardContent>
     </Card>
@@ -50,7 +52,8 @@ export function EscrowStatus({ listings, wallet }: EscrowStatusProps) {
             {wallet?.escrowContract ?? 'Contract address loading...'}
           </p>
         </div>
-        <span className="bg-brand-primary/20 text-brand-accent text-xs px-3 py-1 rounded-full">
+        <span className="inline-flex items-center gap-1.5 bg-brand-primary/20 text-brand-accent text-xs px-3 py-1 rounded-full border border-brand-primary/40">
+          <Shield className="w-3 h-3" />
           Sepolia Testnet
         </span>
       </div>
@@ -58,9 +61,9 @@ export function EscrowStatus({ listings, wallet }: EscrowStatusProps) {
       {/* Summary stat cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <StatCard label="Total Scanned" value={totalScanned} />
-        <StatCard label="Escrow Deposits" value={escrowDeposits} />
+        <StatCard label="Escrow Deposits" value={escrowDeposits} highlight />
         <StatCard label="Releases" value={releases} />
-        <StatCard label="Active Escrows" value={activeEscrows < 0 ? 0 : activeEscrows} />
+        <StatCard label="Active Escrows" value={activeEscrows < 0 ? 0 : activeEscrows} highlight />
       </div>
 
       {/* Empty state */}

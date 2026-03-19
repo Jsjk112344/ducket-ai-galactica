@@ -68,3 +68,31 @@
     font-family: var(--font-family-heading);
   }
 }
+
+/* Ducket hero gradient — purple-to-dark with subtle yellow glow */
+.ducket-hero-gradient {
+  background: linear-gradient(135deg, hsl(263 50% 18%) 0%, hsl(263 50% 8%) 60%, hsl(45 30% 12%) 100%);
+}
+
+/* Ducket card with brand border glow */
+.ducket-card {
+  background: hsl(263 50% 10%);
+  border: 1px solid hsl(263 50% 22%);
+  box-shadow: 0 0 20px hsl(263 50% 15% / 0.3);
+}
+
+/* Yellow accent underline for headings */
+.ducket-accent-underline {
+  position: relative;
+  display: inline-block;
+}
+.ducket-accent-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #F5C842, #F5C842 60%, transparent);
+  border-radius: 2px;
+}

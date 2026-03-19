@@ -24,53 +24,74 @@ export function App() {
   const { wallet, loading: walletLoading } = useWallet();
 
   return (
-    <div className="min-h-screen bg-bg-primary p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Ducket</h1>
-        <p className="text-muted-foreground mt-1">Safe P2P ticket resale — buyer protected by escrow</p>
+    <div className="min-h-screen bg-bg-primary">
+      {/* Hero header with gradient + logo */}
+      <div className="ducket-hero-gradient border-b border-brand-primary/30">
+        <div className="max-w-7xl mx-auto px-6 py-5">
+          <div className="flex items-center gap-4">
+            <img
+              src="/images/logomark.png"
+              alt="Ducket"
+              className="h-10 w-auto"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Ducket</h1>
+              <p className="text-brand-accent/80 text-sm font-medium">
+                Safe P2P ticket resale — buyer protected by escrow
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Tab bar */}
-      <div className="flex gap-2 mb-1">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-2 rounded-t-lg text-sm font-medium transition-colors ${
-              activeTab === tab.id
-                ? 'bg-brand-primary text-white'
-                : 'bg-bg-card text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab.label}
-            {tab.id === 'listings' && !listingsLoading && (
-              <span className="ml-2 text-xs opacity-70">({listings.length})</span>
-            )}
-          </button>
-        ))}
-      </div>
+      {/* Main content */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Tab bar */}
+        <div className="flex gap-1 mb-1">
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-6 py-2.5 rounded-t-lg text-sm font-medium transition-colors border-t border-x ${
+                activeTab === tab.id
+                  ? 'bg-brand-primary border-brand-primary/60 text-brand-accent shadow-[0_-2px_10px_hsl(263_50%_30%/0.3)]'
+                  : 'bg-bg-card/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-bg-card'
+              }`}
+            >
+              {tab.label}
+              {tab.id === 'listings' && !listingsLoading && (
+                <span className="ml-2 text-xs opacity-70">({listings.length})</span>
+              )}
+            </button>
+          ))}
+        </div>
 
-      {/* Last updated timestamp */}
-      <div className="text-xs text-muted-foreground mb-4">
-        {listingsLoading
-          ? 'Loading...'
-          : lastUpdated
-          ? `Last updated: ${lastUpdated.toLocaleTimeString()} — auto-refreshes every 10s`
-          : 'No data yet'}
-      </div>
+        {/* Last updated timestamp */}
+        <div className="text-xs text-muted-foreground mb-4 pl-1">
+          {listingsLoading
+            ? 'Loading...'
+            : lastUpdated
+            ? `Last updated: ${lastUpdated.toLocaleTimeString()} — auto-refreshes every 10s`
+            : 'No data yet'}
+        </div>
 
-      {/* Tab content area */}
-      <div className="bg-bg-card/20 rounded-b-lg rounded-tr-lg p-4">
-        {activeTab === 'listings' && <ListingsTable listings={listings} />}
-        {activeTab === 'escrow' && <EscrowStatus listings={listings} wallet={wallet} />}
-        {activeTab === 'wallet' && <WalletInspector wallet={wallet} loading={walletLoading} />}
+        {/* Tab content area */}
+        <div className="ducket-card rounded-b-lg rounded-tr-lg p-5">
+          {activeTab === 'listings' && <ListingsTable listings={listings} />}
+          {activeTab === 'escrow' && <EscrowStatus listings={listings} wallet={wallet} />}
+          {activeTab === 'wallet' && <WalletInspector wallet={wallet} loading={walletLoading} />}
+        </div>
       </div>
 
       {/* Footer */}
-      <p className="text-muted-foreground text-xs text-center mt-8">
-        Powered by WDK + Claude AI
-      </p>
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="flex items-center justify-center gap-3 opacity-60">
+          <img src="/images/logomark.png" alt="" className="h-5 w-auto opacity-50" />
+          <p className="text-muted-foreground text-xs">
+            Powered by WDK + Claude AI
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
