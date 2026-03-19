@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 04-01-PLAN.md (both scrapers built and verified)
-last_updated: "2026-03-19T09:38:15.824Z"
+stopped_at: Completed 04-02-PLAN.md (scan loop built and human-verify checkpoint approved)
+last_updated: "2026-03-19T09:46:15.888Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 31
 ---
 
@@ -55,6 +55,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 02-wdk-wallet-escrow-contract P02 | 8 | 2 tasks | 7 files |
 | Phase 03-stubhub-scraper P01 | 14 | 1 tasks | 2 files |
 | Phase 04-viagogo-fb-scrapers-scan-loop P01 | 5 | 2 tasks | 3 files |
+| Phase 04-viagogo-fb-scrapers-scan-loop P02 | 7 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,9 @@ Recent decisions affecting current work:
 - [Phase 03-stubhub-scraper]: Akamai bot detection triggers mock fallback on non-residential IPs — source:"mock" is labeled and acceptable for hackathon demo
 - [Phase 04-viagogo-fb-scrapers-scan-loop]: Logs routed to stderr via log() helper in Viagogo and Facebook scrapers — keeps stdout clean for JSON piping (same pattern as Phase 3 StubHub)
 - [Phase 04-viagogo-fb-scrapers-scan-loop]: Facebook scraper uses domcontentloaded (NOT networkidle) — networkidle triggers full auth wall before DOM listing tiles can be extracted
+- [Phase 04-viagogo-fb-scrapers-scan-loop]: Promise.allSettled (not Promise.all) in scan loop — one blocked platform must not kill the cycle
+- [Phase 04-viagogo-fb-scrapers-scan-loop]: writeFile reset on startup + appendFile per cycle — clean session log, avoids unbounded growth across restarts
+- [Phase 04-viagogo-fb-scrapers-scan-loop]: Immediate first cycle on startup before cron schedule — demo shows output instantly without waiting 5 minutes
 
 ### Pending Todos
 
@@ -97,6 +101,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T09:38:15.822Z
-Stopped at: Completed 04-01-PLAN.md (both scrapers built and verified)
+Last session: 2026-03-19T09:46:15.886Z
+Stopped at: Completed 04-02-PLAN.md (scan loop built and human-verify checkpoint approved)
 Resume file: None

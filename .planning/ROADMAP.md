@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Project Scaffold + Compliance** - Monorepo structure, license, secrets hygiene, and CI baseline so the repo is always submittable (completed 2026-03-19)
 - [ ] **Phase 2: WDK Wallet + Escrow Contract** - Self-custodial USDT wallet on Sepolia via WDK smoke-tested and FraudEscrow.sol deployed
 - [x] **Phase 3: StubHub Scraper** - First and highest-risk scraper validated against live FIFA World Cup 2026 listings with anti-bot resolution (completed 2026-03-19)
-- [ ] **Phase 4: Viagogo + Facebook Marketplace Scrapers + Scan Loop** - Complete the scan pipeline: all three platforms returning structured JSON, deduplication, autonomous heartbeat polling
+- [x] **Phase 4: Viagogo + Facebook Marketplace Scrapers + Scan Loop** - Complete the scan pipeline: all three platforms returning structured JSON, deduplication, autonomous heartbeat polling (completed 2026-03-19)
 - [ ] **Phase 5: Classification Engine + Evidence** - Claude-powered fraud classification with confidence gating, Zod validation, and timestamped case file output
 - [ ] **Phase 6: Escrow Enforcement Wiring** - Full escrow lifecycle (deposit, release, refund, slash, legitimacy bond) end-to-end with on-chain confirmation
 - [ ] **Phase 7: React Dashboard** - Live listings table, classification badges with reasoning panels, escrow status, wallet inspector, Ducket brand styling
@@ -146,7 +146,7 @@ Phase 1 (scaffold)
 | 1. Project Scaffold + Compliance | 1/1 | Complete   | 2026-03-19 |
 | 2. WDK Wallet + Escrow Contract (Track A) | 0/2 | Planning complete | - |
 | 3. StubHub Scraper (Track B) | 1/1 | Complete   | 2026-03-19 |
-| 4. Viagogo + Facebook Marketplace + Scan Loop | 1/2 | In Progress|  |
+| 4. Viagogo + Facebook Marketplace + Scan Loop | 2/2 | Complete   | 2026-03-19 |
 | 5. Classification Engine + Evidence | 0/TBD | Not started | - |
 | 6. Escrow Enforcement Wiring (needs A+B) | 0/TBD | Not started | - |
 | 7. React Dashboard | 0/TBD | Not started | - |
