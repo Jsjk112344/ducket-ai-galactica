@@ -1,17 +1,70 @@
 /* Ducket AI Galactica — Tailwind v4 theme */
 /* v4 pattern: @import "tailwindcss" + @theme{} — NO tailwind.config.js, NO @tailwind directives */
-/* Google Fonts import must precede @import "tailwindcss" (CSS @import ordering rule) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@import "tw-animate-css";
+
+/* shadcn CSS variable definitions — required before @theme inline */
+:root {
+  --background: hsl(263 50% 8%);
+  --foreground: hsl(0 0% 98%);
+  --card: hsl(263 50% 10%);
+  --card-foreground: hsl(0 0% 98%);
+  --primary: hsl(263 50% 30%);
+  --primary-foreground: hsl(0 0% 98%);
+  --secondary: hsl(263 37% 20%);
+  --secondary-foreground: hsl(0 0% 98%);
+  --muted: hsl(263 50% 12%);
+  --muted-foreground: hsl(263 20% 60%);
+  --accent: hsl(45 90% 61%);
+  --accent-foreground: hsl(263 50% 10%);
+  --destructive: hsl(0 75% 55%);
+  --border: hsl(263 50% 18%);
+  --input: hsl(263 50% 18%);
+  --ring: hsl(263 50% 40%);
+  --radius: 0.5rem;
+}
 
 @theme {
-  --color-bg-primary: #0A0E17;
-  --color-bg-card: #1A1F2E;
-  --color-accent: #6366F1;
+  /* Ducket brand tokens */
+  --color-bg-primary: #0a0714;
+  --color-bg-card: #130f1f;
+  --color-brand-primary: #3D2870;
+  --color-brand-accent: #F5C842;
   --color-success: #10B981;
   --color-warn-red: #EF4444;
   --color-warn-orange: #F97316;
   --color-warn-yellow: #EAB308;
-  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-family-heading: 'Outfit Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-family-sans: 'Inter Variable', ui-sans-serif, system-ui, sans-serif;
   --font-family-mono: ui-monospace, 'Courier New', monospace;
+}
+
+/* Bridge shadcn CSS vars into Tailwind v4 utility classes */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 2px);
+}
+
+/* Apply Outfit Variable to all heading elements */
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-family-heading);
+  }
 }
