@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-01-PLAN.md (dashboard toolchain)
-last_updated: "2026-03-19T12:55:21.252Z"
+stopped_at: Completed 07-02-PLAN.md (React dashboard UI components)
+last_updated: "2026-03-19T13:02:23.377Z"
 last_activity: 2026-03-19 — Completed 03-01 StubHub scraper tool (all 2 tasks including human-verify checkpoint)
 progress:
   total_phases: 8
   completed_phases: 6
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 13
   percent: 31
 ---
 
@@ -62,6 +62,7 @@ Progress: [███░░░░░░░] 31%
 | Phase 06-escrow-enforcement-wiring P01 | 20 | 2 tasks | 3 files |
 | Phase 06-escrow-enforcement-wiring P02 | 2 | 2 tasks | 2 files |
 | Phase 07-react-dashboard P01 | 4 | 1 tasks | 10 files |
+| Phase 07-react-dashboard P02 | 5 | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -102,6 +103,9 @@ Recent decisions affecting current work:
 - [Phase 07-react-dashboard]: Tailwind v4: @theme{} CSS blocks replace tailwind.config.js; @import 'tailwindcss' replaces @tailwind directives
 - [Phase 07-react-dashboard]: fileURLToPath(import.meta.url) for ESM path resolution in Express server — __dirname undefined in ESM
 - [Phase 07-react-dashboard]: 5-second Promise.race timeout + cachedWallet fallback on /api/wallet — prevents dashboard stall on slow Sepolia RPC during demo
+- [Phase 07-react-dashboard]: URL as expandedUrl key in ListingsTable — listing.url is unique per listing
+- [Phase 07-react-dashboard]: Fragment with explicit keys for expandable rows — React requires key on both data row and expanded detail row
+- [Phase 07-react-dashboard]: activeEscrows = max(deposits - releases, 0) — prevents negative count when data is inconsistent
 
 ### Pending Todos
 
@@ -124,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-19T12:55:21.236Z
-Stopped at: Completed 07-01-PLAN.md (dashboard toolchain)
+Last session: 2026-03-19T13:02:23.360Z
+Stopped at: Completed 07-02-PLAN.md (React dashboard UI components)
 Resume file: None
