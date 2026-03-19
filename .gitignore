@@ -1,0 +1,40 @@
+# Node.js
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# Secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.secret
+*_secret*
+*_private*
+*credentials*
+*.keystore
+wallet.json
+keystore/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test artifacts
+coverage/
+.nyc_output/
+
+# Build artifacts
+*.js.map

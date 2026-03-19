@@ -1,0 +1,23 @@
+{
+  "name": "ducket-ai-galactica",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Autonomous fraud detection agent with USDT escrow enforcement",
+  "workspaces": ["agent", "dashboard", "contracts"],
+  "scripts": {
+    "dev:agent": "npm run dev --workspace=agent",
+    "dev:dashboard": "npm run dev --workspace=dashboard",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niccoloducket/ducket-ai-galactica"
+  }
+}

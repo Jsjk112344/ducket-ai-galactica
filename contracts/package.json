@@ -1,0 +1,11 @@
+{
+  "name": "@ducket/contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "echo 'Contracts not yet configured — see Phase 2'",
+    "deploy": "echo 'Contracts not yet configured — see Phase 2'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

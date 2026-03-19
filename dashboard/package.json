@@ -1,0 +1,11 @@
+{
+  "name": "@ducket/dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Dashboard not yet configured — see Phase 7'",
+    "build": "echo 'Dashboard not yet configured — see Phase 7'"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
