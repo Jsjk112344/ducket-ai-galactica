@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Safe P2P Ticket Resale
 status: executing
-stopped_at: Completed Phase 14 Plan 01 (14-01-PLAN.md)
-last_updated: "2026-03-20T05:54:59.144Z"
+stopped_at: Completed Phase 14 Plan 02 (14-02-PLAN.md)
+last_updated: "2026-03-20T06:00:21.413Z"
 last_activity: 2026-03-20 — Phase 12 Plan 01 complete (seed data + visual verification)
 progress:
   total_phases: 6
   completed_phases: 4
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 20
 ---
 
@@ -62,6 +62,8 @@ Phase 10 decisions (Plan 01):
 - [Phase 12]: Seed listings inserted as ## Seed Data before first ## Scan: block so they appear first in the API array
 - [Phase 14]: M3 tokens added to BOTH :root and @theme for shadcn CSS var() access + Tailwind utility generation
 - [Phase 14]: All M3 tokens prefixed m3- to avoid collision with shadcn @theme inline bridge tokens
+- [Phase 14]: bgClass must be literal string per StatCard — Tailwind v4 purges dynamically-constructed class names via .replace()
+- [Phase 14]: FAB button navigates to Resale Flow tab — additive navigation, not demo bypass
 
 ### Roadmap Evolution
 
@@ -80,6 +82,6 @@ Phase 10 decisions (Plan 01):
 
 ## Session Continuity
 
-Last session: 2026-03-20T05:54:51.523Z
-Stopped at: Completed Phase 14 Plan 01 (14-01-PLAN.md)
+Last session: 2026-03-20T06:00:13.511Z
+Stopped at: Completed Phase 14 Plan 02 (14-02-PLAN.md)
 Resume file: None
