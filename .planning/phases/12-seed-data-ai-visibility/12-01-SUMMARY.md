@@ -28,7 +28,7 @@ decisions:
 metrics:
   duration: "~10 minutes"
   completed_date: "2026-03-20"
-  tasks_completed: 2
+  tasks_completed: 3
   tasks_total: 3
   files_created: 6
   files_modified: 2
@@ -51,12 +51,13 @@ metrics:
 |------|------|--------|--------|
 | 1 | Create validation script and 4 seed case files | Complete | 38dc87a |
 | 2 | Add seed listing JSON blocks to LISTINGS.md and default-expand first row | Complete | eb6f95b |
-| 3 | Verify seed data renders in dashboard | Awaiting human-verify | — |
+| 3 | Verify seed data renders in dashboard | Complete (human-approved) | visual |
 
 ## Verification Results
 
 - `node scripts/validate-seed.js` — EXIT 0 — all 4 categories, 97-110 word reasoning strings
-- `cd dashboard && npm run build` — EXIT 0 — Vite production build succeeds
+- `cd dashboard && npm run build` — EXIT 0 — Vite production build succeeds (1757 modules, 208ms)
+- Visual verification (human-approved): 4 seed rows visible, first row (SCALPING_VIOLATION) auto-expanded, all AgentDecisionPanel data present
 
 ## Deviations from Plan
 
