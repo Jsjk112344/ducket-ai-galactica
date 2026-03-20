@@ -104,14 +104,19 @@ async function classifyWithClaude(listing, client) {
     model: process.env.CLAUDE_MODEL ?? 'claude-sonnet-4-6',
     max_tokens: 512,
     system: `You are a fraud detection agent for ticket marketplaces at FIFA World Cup 2026.
-Classify each ticket listing into exactly one category:
+You have access to an official face value database — the faceValue field is agent-sourced, NOT seller-reported.
+Classify each ticket listing into exactly one category.
+Return confidence as an integer from 0 to 100 (e.g. 85, not 0.85).
 
 SCALPING_VIOLATION: Price significantly above official face value (>2x, i.e. >100% markup). Core enforcement target.
 LIKELY_SCAM: Price below face value, missing legitimacy proof, or suspicious seller signals. Classic bait pricing.
 COUNTERFEIT_RISK: Known scam patterns — new accounts, no verifiable ticket source, missing seller proof.
 LEGITIMATE: Normal pricing (within 100% of face value), no red flags present.
 
+If faceValue is 0 or priceDeltaPct is null, the event is not in our database — use your knowledge of typical ticket prices to estimate and classify.
+
 Your reasoning must explain which signals drove the decision. Be specific about price percentages and flag details.
+Mention that face values were independently verified by the agent, not provided by the seller.
 Return ONLY the structured JSON object. Do not add commentary outside the JSON.`,
     messages: [
       {
@@ -128,7 +133,7 @@ Return ONLY the structured JSON object. Do not add commentary outside the JSON.`
           type: 'object',
           properties: {
             category: { type: 'string', enum: CATEGORIES },
-            confidence: { type: 'number', minimum: 0, maximum: 100 },
+            confidence: { type: 'number' },
             reasoning: { type: 'string' },
           },
           required: ['category', 'confidence', 'reasoning'],
@@ -142,6 +147,10 @@ Return ONLY the structured JSON object. Do not add commentary outside the JSON.`
   // Fallback to '{}' handles edge case where API returns no text block.
   const text = response.content.find((b) => b.type === 'text')?.text ?? '{}';
   const parsed = JSON.parse(text);
+  // Normalize confidence to 0-100 integer if Claude returned a 0-1 float
+  if (parsed.confidence != null && parsed.confidence <= 1) {
+    parsed.confidence = Math.round(parsed.confidence * 100);
+  }
   return { ...parsed, classificationSource: 'claude' };
 }
 

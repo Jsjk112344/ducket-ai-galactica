@@ -4,9 +4,20 @@
 
 An autonomous agent that scans secondary ticketing marketplaces (StubHub, Viagogo, Facebook Marketplace) for fraudulent or overpriced ticket listings, classifies each listing using a hybrid rules + Claude AI engine, and enforces outcomes on-chain via USDT escrow on Sepolia — all without human intervention. Built for the Tether Hackathon Galáctica: WDK Edition 1 (deadline: March 22, 2026) as an extension of Ducket's existing anti-fraud ticketing platform.
 
+## Current Milestone: v2.0 Safe P2P Ticket Resale
+
+**Goal:** Pivot from monitoring tool to safe P2P ticket resale platform — seller lists, buyer locks USDT, AI verifies, escrow settles.
+
+**Target features:**
+- Reframe narrative (README, CLAUDE.md, demo script) for P2P resale
+- Dashboard rebrand with Ducket purple/yellow theme, Outfit headings, shadcn components
+- Resale flow UI (seller lists ticket, buyer locks USDT, AI verifies, escrow settles)
+- Claude AI reasoning visible on mock/seed data for demo
+- Demo polish + video recording
+
 ## Core Value
 
-An organizer defines the rules once. The agent monitors, detects, and enforces — autonomously. Value settles on-chain. No human in the loop.
+Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket legitimacy, smart contract releases or refunds automatically. No middleman fees, no trust required.
 
 ## Requirements
 
@@ -25,7 +36,11 @@ An organizer defines the rules once. The agent monitors, detects, and enforces �
 
 ### Active
 
-(None — all v1 requirements validated)
+- [ ] Reframe narrative for P2P resale (README, CLAUDE.md, demo script)
+- [ ] Dashboard rebrand with Ducket brand tokens (purple/yellow, Outfit, shadcn)
+- [ ] Resale flow UI (seller lists, buyer locks USDT, AI verifies, escrow settles)
+- [ ] Claude AI reasoning visible on mock/seed data during demo
+- [ ] Demo polish and video recording
 
 ### Out of Scope
 
@@ -80,4 +95,4 @@ An organizer defines the rules once. The agent monitors, detects, and enforces �
 | Mock fallback for all scrapers | Anti-bot detection on non-residential IPs | ✓ Good — demo resilience, labeled as mock |
 
 ---
-*Last updated: 2026-03-19 after v1.0 milestone*
+*Last updated: 2026-03-20 after v2.0 milestone start*

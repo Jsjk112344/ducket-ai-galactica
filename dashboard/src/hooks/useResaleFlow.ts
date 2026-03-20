@@ -12,13 +12,12 @@ import { Listing } from '../types';
 
 export type ResaleStep = 1 | 2 | 3 | 4;
 
-/** Fields submitted by the seller in Step 1. */
+/** Fields submitted by the seller in Step 1. No face value — agent looks it up. */
 export interface NewListing {
   eventName: string;
   section: string;
   quantity: number;
   price: number;
-  faceValue: number;
 }
 
 /** Result returned by POST /api/escrow/deposit after USDT lock. */

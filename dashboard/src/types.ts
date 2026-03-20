@@ -13,7 +13,7 @@ export interface Listing {
   eventName: string;
   section: string | null;
   quantity: number;
-  source: 'mock' | 'live';
+  source: 'mock' | 'live' | 'form';
   // Populated by API from case file if it exists (agent ran enforcement on this listing)
   classification?: Classification;
 }

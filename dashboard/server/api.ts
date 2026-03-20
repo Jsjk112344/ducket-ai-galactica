@@ -17,6 +17,16 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { ethers } from 'ethers';
+// Lazy-import the real classification engine at first use (ESM dynamic import).
+// Avoids top-level import resolution issues between dashboard and agent packages.
+let _classifyListing: ((listing: Record<string, unknown>) => Promise<Record<string, unknown>>) | null = null;
+async function getClassifier() {
+  if (!_classifyListing) {
+    const mod = await import(join(__dirname, '../../agent/src/classify.js'));
+    _classifyListing = mod.classifyListing;
+  }
+  return _classifyListing!;
+}
 
 // ESM-compatible path resolution — avoids __dirname ReferenceError in ESM context
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +44,28 @@ let cachedWallet: object | null = null;
 // In-memory store for listings submitted via POST /api/listings during this server session.
 // Prepended to GET /api/listings so form-submitted listings appear immediately.
 const runtimeListings: Record<string, unknown>[] = [];
+
+// Agent-sourced face value database — the seller never sets this.
+// The agent independently knows official ticket prices and compares the seller's ask price.
+// Key format: "event|||section" (lowercased). Values are official face value in USD.
+const FACE_VALUE_DB: Record<string, number> = {
+  'fifa world cup 2026 — usa vs england|||category 1': 200,
+  'fifa world cup 2026 — usa vs england|||category 2': 120,
+  'fifa world cup 2026 — usa vs england|||category 3': 75,
+  'fifa world cup 2026 — usa vs england|||category 4': 40,
+  'fifa world cup 2026 — brazil vs france|||category 1': 250,
+  'fifa world cup 2026 — brazil vs france|||category 2': 150,
+  'fifa world cup 2026 — brazil vs france|||category 3': 90,
+  'fifa world cup 2026 — final|||category 1': 500,
+  'fifa world cup 2026 — final|||category 2': 300,
+  'fifa world cup 2026 — final|||category 3': 175,
+};
+
+/** Look up official face value for an event + section. Returns null if unknown. */
+function lookupFaceValue(eventName: string, section: string): number | null {
+  const key = `${eventName.toLowerCase()}|||${section.toLowerCase()}`;
+  return FACE_VALUE_DB[key] ?? null;
+}
 
 const app = express();
 app.use(express.json());
@@ -78,46 +110,72 @@ app.get('/api/listings', async (req, res) => {
 
 // ---------------------------------------------------------------------------
 // POST /api/listings
-// Accepts a new listing from the resale flow form, attaches a demo classification,
-// stores it in runtimeListings (prepended to GET /api/listings), and returns the full listing.
+// Accepts a new listing from the resale flow form, classifies it via the real
+// hybrid engine (rules + Claude API), stores it, and returns the full listing.
 // ---------------------------------------------------------------------------
-app.post('/api/listings', (req, res) => {
-  const { eventName, section, quantity, price, faceValue } = req.body as {
-    eventName: string;
-    section: string;
-    quantity: number;
-    price: number;
-    faceValue: number;
-  };
+app.post('/api/listings', async (req, res) => {
+  try {
+    const { eventName, section, quantity, price } = req.body as {
+      eventName: string;
+      section: string;
+      quantity: number;
+      price: number;
+    };
 
-  // Compute how far above (or below) face value the price is
-  const priceDeltaPct = Math.round(((price - faceValue) / faceValue) * 100);
-  // Unique demo URL for this listing — used for escrow ID generation downstream
-  const url = `https://ducket.demo/listing/${Date.now()}`;
+    // Agent independently looks up official face value — seller never sets this
+    const faceValue = lookupFaceValue(eventName, section);
+    // Compute markup; if event is unknown, priceDeltaPct is null (Claude decides)
+    const priceDeltaPct = faceValue !== null
+      ? Math.round(((price - faceValue) / faceValue) * 100)
+      : null;
+    // Unique demo URL for this listing — used for escrow ID generation downstream
+    const url = `https://ducket.demo/listing/${Date.now()}`;
 
-  // Assign a deterministic classification based on price delta (demo seed logic)
-  const classification = pickDemoClassification(priceDeltaPct);
+    const redFlags: string[] = [];
+    if (priceDeltaPct !== null && priceDeltaPct > 100) redFlags.push('price above face value');
+    if (faceValue === null) redFlags.push('unrecognized event — no official face value on file');
 
-  const listing = {
-    platform: 'Ducket',
-    seller: 'alice_seller',
-    price,
-    faceValue,
-    priceDeltaPct,
-    url,
-    listingDate: new Date().toISOString(),
-    // Flag obvious scalping so buyers see red flags in the listing table
-    redFlags: priceDeltaPct > 100 ? ['price above face value'] : [],
-    eventName,
-    section,
-    quantity,
-    source: 'mock' as const,
-    classification,
-  };
+    const listingData = {
+      platform: 'Ducket',
+      seller: 'alice_seller',
+      price,
+      faceValue: faceValue ?? 0,
+      priceDeltaPct,
+      url,
+      listingDate: new Date().toISOString(),
+      redFlags,
+      eventName,
+      section,
+      quantity,
+      source: 'form' as const,
+    };
 
-  // Store for immediate visibility in GET /api/listings
-  runtimeListings.unshift(listing);
-  res.json(listing);
+    // Real hybrid classification: rules first, Claude API for ambiguous cases
+    const classify = await getClassifier();
+    const classification = await classify(listingData);
+
+    // Map classification to escrow action for the settlement step
+    const actionTaken =
+      classification.category === 'SCALPING_VIOLATION' ? 'slash' :
+      classification.category === 'LIKELY_SCAM' ? 'refund' :
+      classification.category === 'COUNTERFEIT_RISK' ? 'refund' : 'release';
+
+    const listing = {
+      ...listingData,
+      classification: {
+        ...classification,
+        actionTaken,
+        etherscanLink: `https://sepolia.etherscan.io/tx/0x${createHash('sha256').update(url).digest('hex').slice(0, 64)}`,
+      },
+    };
+
+    // Store for immediate visibility in GET /api/listings
+    runtimeListings.unshift(listing);
+    res.json(listing);
+  } catch (err) {
+    console.error('[POST /api/listings] Classification error:', err);
+    res.status(500).json({ error: 'Classification failed' });
+  }
 });
 
 // ---------------------------------------------------------------------------

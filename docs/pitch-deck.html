@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ducket — Pitch Deck</title>
+<style>
+  /* Fonts: match dashboard exactly — Outfit Variable, Inter Variable, JetBrains Mono Variable */
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  /* ===== Exact token copy from dashboard/src/index.css ===== */
+  :root {
+    --background: hsl(263 50% 8%);
+    --foreground: hsl(0 0% 98%);
+    --card: hsl(263 50% 10%);
+    --card-foreground: hsl(0 0% 98%);
+    --primary: hsl(263 50% 30%);
+    --primary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(263 37% 20%);
+    --accent: hsl(45 90% 61%);
+    --destructive: hsl(0 75% 55%);
+    --border: hsl(263 50% 18%);
+    --muted-foreground: hsl(263 20% 60%);
+
+    --m3-primary: #d0bcff;
+    --m3-on-primary: #37226a;
+    --m3-primary-container: #3d2870;
+    --m3-secondary: #eec13c;
+    --m3-on-secondary: #3d2e00;
+    --m3-tertiary: #4edea3;
+    --m3-tertiary-container: #003f29;
+    --m3-surface: #15111f;
+    --m3-surface-container: #211d2c;
+    --m3-surface-container-high: #2c2837;
+    --m3-surface-container-highest: #373242;
+    --m3-surface-container-low: #1d1928;
+    --m3-surface-container-lowest: #0f0c1a;
+    --m3-error: #ffb4ab;
+    --m3-error-container: #93000a;
+    --m3-on-surface: #e7dff3;
+    --m3-on-surface-variant: #cac4d1;
+    --m3-outline: #948e9b;
+    --m3-outline-variant: #494550;
+
+    /* Ducket brand tokens */
+    --brand-primary: #3D2870;
+    --brand-accent: #F5C842;
+    --success: #10B981;
+    --warn-red: #EF4444;
+    --warn-orange: #F97316;
+    --warn-yellow: #EAB308;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    background: var(--m3-surface);
+    color: var(--m3-on-surface);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .deck { position: relative; width: 100vw; height: 100vh; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  .slide.active { display: flex; opacity: 1; }
+
+  /* ===== Typography: mirrors dashboard heading/body/mono ===== */
+  h1, h2, h3, h4 { font-family: 'Outfit', ui-sans-serif, system-ui, sans-serif; }
+  h1 { font-size: 3rem; font-weight: 900; line-height: 1.05; letter-spacing: -0.03em; }
+  h2 { font-size: 2rem; font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 8px; }
+  p, li { font-size: 1rem; line-height: 1.6; color: var(--m3-on-surface-variant); }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, 'Courier New', monospace; }
+
+  /* ===== Colors matching component usage ===== */
+  .gold { color: var(--m3-secondary); }
+  .purple { color: var(--m3-primary); }
+  .teal { color: var(--m3-tertiary); }
+  .red { color: var(--m3-error); }
+  .orange { color: var(--warn-orange); }
+  .yellow { color: var(--warn-yellow); }
+
+  /* ===== Ducket hero gradient — from index.css .ducket-hero-gradient ===== */
+  .hero-gradient {
+    background: linear-gradient(135deg, hsl(263 50% 18%) 0%, hsl(263 50% 8%) 60%, hsl(45 30% 12%) 100%);
+  }
+
+  /* ===== Cards — mirror EscrowStatus.tsx stat cards ===== */
+  .stat-card {
+    background: var(--m3-surface-container);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 4px solid var(--m3-primary);
+  }
+  .stat-card-gold { border-left-color: var(--m3-secondary); }
+  .stat-card-teal { border-left-color: var(--m3-tertiary); }
+  .stat-card-red { border-left-color: var(--m3-error); }
+  .stat-card-orange { border-left-color: var(--warn-orange); }
+  .stat-card-yellow { border-left-color: var(--warn-yellow); }
+  .stat-card .label {
+    font-size: 0.75rem;
+    color: var(--m3-outline);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .stat-card .value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--m3-on-surface);
+  }
+
+  /* ===== Badges — mirror Badge.tsx COLOR_MAP ===== */
+  .badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .badge-scalping { background: var(--m3-error-container); color: var(--m3-error); border: 1px solid rgba(255,180,171,0.3); }
+  .badge-scam { background: rgba(249,115,22,0.15); color: var(--warn-orange); border: 1px solid rgba(249,115,22,0.3); }
+  .badge-counterfeit { background: rgba(234,179,8,0.15); color: var(--warn-yellow); border: 1px solid rgba(234,179,8,0.3); }
+  .badge-legit { background: rgba(78,222,163,0.15); color: var(--m3-tertiary); border: 1px solid rgba(78,222,163,0.3); }
+
+  /* ===== Trust badges — mirror TrustBadges.tsx ===== */
+  .trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 100px;
+    background: var(--m3-surface-container);
+    color: var(--m3-tertiary);
+    border: 1px solid rgba(78,222,163,0.3);
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  /* ===== Glass panel — mirror AgentDecisionPanel.tsx ===== */
+  .glass-panel {
+    backdrop-filter: blur(12px);
+    background: rgba(33,29,44,0.6);
+    border: 1px solid rgba(148,142,155,0.2);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  /* ===== Content container — mirror App.tsx main area ===== */
+  .content-container {
+    background: var(--m3-surface-container);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(148,142,155,0.1);
+  }
+
+  /* ===== Ducket card — from index.css .ducket-card ===== */
+  .ducket-card {
+    background: hsl(263 50% 10%);
+    border: 1px solid hsl(263 50% 22%);
+    box-shadow: 0 0 20px hsl(263 50% 15% / 0.3);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  /* ===== Protocol badge — mirror App.tsx nav ===== */
+  .protocol-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    background: var(--m3-surface-container);
+    border: 1px solid rgba(148,142,155,0.3);
+    color: var(--m3-outline);
+    padding: 2px 10px;
+    border-radius: 100px;
+  }
+
+  /* ===== Accent underline — from index.css .ducket-accent-underline ===== */
+  .accent-underline {
+    position: relative;
+    display: inline-block;
+  }
+  .accent-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #F5C842, #F5C842 60%, transparent);
+    border-radius: 2px;
+  }
+
+  /* ===== Confidence bar — matches ConfidenceBar.tsx ===== */
+  .conf-bar {
+    height: 4px;
+    background: var(--m3-surface-container-highest);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 6px;
+  }
+  .conf-fill { height: 100%; border-radius: 2px; }
+
+  /* ===== Layouts ===== */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+  .flow { display: flex; align-items: center; gap: 8px; }
+  .flow-arrow { color: var(--m3-secondary); font-size: 1.2rem; flex-shrink: 0; }
+
+  /* ===== Table — matches ListingsTable.tsx style ===== */
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    padding: 8px 12px;
+    font-size: 0.7rem;
+    color: var(--m3-outline);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--m3-outline-variant);
+  }
+  td {
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    border-bottom: 1px solid var(--m3-outline-variant);
+    color: var(--m3-on-surface-variant);
+  }
+
+  /* ===== Code block ===== */
+  .code {
+    background: var(--m3-surface-container-low);
+    border: 1px solid var(--m3-outline-variant);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    color: var(--m3-on-surface-variant);
+  }
+  .code .kw { color: var(--m3-primary); }
+  .code .str { color: var(--m3-tertiary); }
+  .code .cmt { color: var(--m3-outline); font-style: italic; }
+  .code .fn { color: var(--m3-secondary); }
+
+  /* ===== Nav bar — mirrors fixed top nav from App.tsx ===== */
+  .slide-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(21,17,31,0.9);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(148,142,155,0.2);
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 12px;
+  }
+  .slide-nav .brand {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--m3-primary);
+  }
+
+  /* ===== Bottom controls ===== */
+  .controls {
+    position: fixed;
+    bottom: 16px;
+    right: 24px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    z-index: 100;
+  }
+  .controls button {
+    background: var(--m3-surface-container-high);
+    border: 1px solid var(--m3-outline-variant);
+    color: var(--m3-on-surface);
+    border-radius: 8px;
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.8rem;
+    transition: background 0.15s;
+  }
+  .controls button:hover { background: var(--m3-surface-container-highest); }
+  .slide-num {
+    color: var(--m3-outline);
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .small { font-size: 0.8rem; }
+  .xs { font-size: 0.7rem; }
+  .bold { font-weight: 700; color: var(--m3-on-surface); }
+  .muted { color: var(--m3-outline); }
+
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 3px 0; padding-left: 18px; position: relative; font-size: 0.9rem; }
+  ul li::before {
+    content: '›';
+    position: absolute;
+    left: 2px;
+    color: var(--m3-secondary);
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<!-- Top nav — matches App.tsx fixed nav -->
+<div class="slide-nav">
+  <img src="../dashboard/public/images/logomark.png" style="height: 28px; width: auto; margin-right: 4px;" alt="Ducket" />
+  <span class="brand">DUCKET</span>
+  <span class="protocol-badge">v2.0</span>
+  <div style="flex: 1;"></div>
+  <span class="trust-badge" style="color: var(--m3-tertiary); font-size: 0.7rem;">
+    <span style="width: 6px; height: 6px; background: var(--m3-tertiary); border-radius: 50%; display: inline-block;"></span>
+    Node Active
+  </span>
+</div>
+
+<div class="deck" id="deck">
+
+  <!-- ===== SLIDE 1: Title ===== -->
+  <div class="slide active" data-slide="1" style="padding: 0;">
+    <!-- Hero gradient — exact copy of .ducket-hero-gradient -->
+    <div class="hero-gradient" style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 56px 72px; padding-top: 110px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+        <img src="../dashboard/public/images/Logo_2.png" style="height: 42px; width: auto;" alt="Ducket" />
+        <span class="protocol-badge">Agentic Payments Hackathon</span>
+      </div>
+      <h1 style="font-size: 4rem; margin-bottom: 4px;">DUCKET</h1>
+      <p class="gold" style="font-size: 0.9rem; margin-bottom: 28px;">Safe P2P ticket resale — buyer protected by escrow</p>
+
+      <p style="max-width: 680px; margin-bottom: 28px; font-size: 1.05rem;">
+        Buying tickets from strangers requires trust. Ducket replaces that with an autonomous AI agent that scrapes live market data, classifies fraud, locks buyer funds in USDT escrow via WDK, and settles on-chain — zero humans in the loop.
+      </p>
+
+      <!-- 4-step flow -->
+      <div class="flow" style="margin-bottom: 28px;">
+        <div style="background: var(--m3-surface-container); border: 1px solid var(--m3-outline-variant); border-radius: 8px; padding: 10px 18px; text-align: center;">
+          <p class="xs muted">STEP 1</p>
+          <p class="bold small">Seller Lists</p>
+        </div>
+        <span class="flow-arrow">→</span>
+        <div style="background: var(--m3-surface-container); border: 1px solid rgba(238,193,60,0.3); border-radius: 8px; padding: 10px 18px; text-align: center;">
+          <p class="xs muted">STEP 2</p>
+          <p class="bold small gold">Lock USDT</p>
+        </div>
+        <span class="flow-arrow">→</span>
+        <div style="background: var(--m3-surface-container); border: 1px solid rgba(78,222,163,0.3); border-radius: 8px; padding: 10px 18px; text-align: center;">
+          <p class="xs muted">STEP 3</p>
+          <p class="bold small teal">AI Verifies</p>
+        </div>
+        <span class="flow-arrow">→</span>
+        <div style="background: var(--m3-surface-container); border: 1px solid rgba(208,188,255,0.3); border-radius: 8px; padding: 10px 18px; text-align: center;">
+          <p class="xs muted">STEP 4</p>
+          <p class="bold small purple">Auto-Settle</p>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 8px;">
+        <span class="trust-badge">WDK Non-Custodial</span>
+        <span class="trust-badge" style="color: var(--m3-primary); border-color: rgba(208,188,255,0.3);">Claude AI</span>
+        <span class="trust-badge" style="color: var(--m3-secondary); border-color: rgba(238,193,60,0.3);">USDT Escrow</span>
+        <span class="trust-badge" style="color: var(--m3-on-surface-variant); border-color: var(--m3-outline-variant);">Apache 2.0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 2: Agent Intelligence ===== -->
+  <div class="slide" data-slide="2" style="padding: 56px 64px; padding-top: 80px; justify-content: flex-start;">
+    <h2><span class="accent-underline">How the Agent Decides</span></h2>
+    <p style="margin-bottom: 18px; max-width: 700px;">Hybrid two-tier classification: deterministic rules catch obvious fraud instantly (zero cost), Claude handles ambiguous cases with structured reasoning. Every verdict is explainable — the dashboard shows exactly why.</p>
+
+    <div class="split">
+      <div>
+        <!-- Rules tier -->
+        <div class="stat-card" style="margin-bottom: 12px;">
+          <div class="label">Tier 1 — Deterministic Rules</div>
+          <p class="small" style="color: var(--m3-on-surface-variant); margin-bottom: 8px;">Instant classification. No API call needed. High-confidence matches (>=85%) skip Claude entirely.</p>
+          <table>
+            <tr>
+              <td class="mono small red" style="padding: 6px 8px;">priceDelta > 100%</td>
+              <td class="small" style="padding: 6px 8px;">→ SCALPING (confidence scales with markup)</td>
+            </tr>
+            <tr>
+              <td class="mono small orange" style="padding: 6px 8px;">priceDelta &lt; -10%</td>
+              <td class="small" style="padding: 6px 8px;">→ LIKELY SCAM (below-face = bait)</td>
+            </tr>
+            <tr>
+              <td class="mono small yellow" style="padding: 6px 8px;">"new seller" / "no proof"</td>
+              <td class="small" style="padding: 6px 8px;">→ COUNTERFEIT RISK</td>
+            </tr>
+          </table>
+        </div>
+        <!-- Claude tier -->
+        <div class="stat-card stat-card-teal">
+          <div class="label">Tier 2 — Claude API (ambiguous cases)</div>
+          <p class="small" style="color: var(--m3-on-surface-variant); margin-bottom: 6px;">Structured JSON output — guaranteed valid schema. System prompt includes official FIFA 2026 face value database (agent-sourced, not seller-reported).</p>
+          <ul>
+            <li class="small">Returns category + confidence (0-100) + reasoning text</li>
+            <li class="small">Claude fails → graceful fallback to rules-only result</li>
+          </ul>
+        </div>
+      </div>
+      <div>
+        <p class="xs muted" style="text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">Four enforcement outcomes</p>
+
+        <!-- Mirror Badge.tsx exactly -->
+        <div class="stat-card stat-card-red" style="margin-bottom: 10px; padding: 12px 16px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span class="badge badge-scalping">SCALPING VIOLATION</span>
+          </div>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Markup >100% of face value. Escrow <span class="bold red">slashed to bounty pool</span>.</p>
+        </div>
+        <div class="stat-card stat-card-orange" style="margin-bottom: 10px; padding: 12px 16px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span class="badge badge-scam">LIKELY SCAM</span>
+          </div>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Below face value — classic fraud bait. Buyer gets <span class="bold orange">full refund</span>.</p>
+        </div>
+        <div class="stat-card stat-card-yellow" style="margin-bottom: 10px; padding: 12px 16px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span class="badge badge-counterfeit">COUNTERFEIT RISK</span>
+          </div>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Unverified seller, no proof. Buyer gets <span class="bold yellow">full refund</span>.</p>
+        </div>
+        <div class="stat-card stat-card-teal" style="padding: 12px 16px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+            <span class="badge badge-legit">LEGITIMATE</span>
+          </div>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Fair price, verified provenance. USDT <span class="bold teal">released to seller</span>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 3: WDK + Escrow ===== -->
+  <div class="slide" data-slide="3" style="padding: 56px 64px; padding-top: 80px; justify-content: flex-start;">
+    <h2><span class="accent-underline">Wallet Flow & Escrow</span></h2>
+    <p style="margin-bottom: 18px; max-width: 720px;">WDK handles all wallet operations — non-custodial, keys in memory only. The smart contract enforces four conditional outcomes driven entirely by the agent's classification. No human mediator. No platform fee.</p>
+
+    <div class="split">
+      <div>
+        <p class="xs muted" style="text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">WDK Integration</p>
+        <div class="code" style="margin-bottom: 14px;">
+          <span class="cmt">// Non-custodial WDK singleton — BIP-44 HD keys in memory</span><br>
+          <span class="kw">import</span> { WalletManagerEvm } <span class="kw">from</span> <span class="str">'@tetherto/wdk-wallet-evm'</span><br><br>
+          <span class="cmt">// Sequential 2-step deposit — no race conditions</span><br>
+          <span class="kw">await</span> account.<span class="fn">approve</span>({ token: USDT, spender: ESCROW })<br>
+          <span class="kw">await</span> <span class="fn">waitForReceipt</span>(approveTx)<br>
+          <span class="kw">await</span> account.<span class="fn">sendTransaction</span>({ to: ESCROW, data })
+        </div>
+        <ul>
+          <li class="small">Keys derived from seed, disposed on process exit — never persisted</li>
+          <li class="small">Dashboard is read-only — all WDK ops in agent backend</li>
+          <li class="small">Approve must confirm on-chain before deposit fires</li>
+        </ul>
+        <div class="glass-panel" style="margin-top: 14px;">
+          <p class="small"><span class="bold gold">Key point:</span> The seller never touches buyer funds. The agent deposits via WDK, the agent dispatches settlement. Users see a clean dashboard — crypto complexity is invisible.</p>
+        </div>
+      </div>
+      <div>
+        <p class="xs muted" style="text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">FraudEscrow.sol — Sepolia</p>
+        <div class="ducket-card" style="margin-bottom: 14px;">
+          <p class="mono xs" style="color: var(--m3-primary); word-break: break-all;">0xC92b40700C28F2a88A8f50627AA9eFA7dD794E30</p>
+          <p class="xs muted" style="margin-top: 4px;">10 USDT per escrow | SafeERC20 | ReentrancyGuard | onlyOwner</p>
+        </div>
+        <table>
+          <tr><th>Function</th><th>When</th><th>Funds go to</th></tr>
+          <tr><td><span class="mono gold">deposit()</span></td><td class="small">Listing created</td><td class="small">Locked in contract</td></tr>
+          <tr><td><span class="mono teal">release()</span></td><td class="small">LEGITIMATE</td><td class="small">Seller wallet</td></tr>
+          <tr><td><span class="mono purple">refund()</span></td><td class="small">SCAM / COUNTERFEIT</td><td class="small">Buyer (depositor)</td></tr>
+          <tr><td><span class="mono red">slash()</span></td><td class="small">SCALPING</td><td class="small">Bounty pool</td></tr>
+        </table>
+        <div style="height: 14px;"></div>
+        <div class="grid-2" style="gap: 10px;">
+          <div class="stat-card stat-card-red" style="text-align: center; padding: 12px;">
+            <p class="xs muted">Traditional Escrow</p>
+            <p class="small" style="color: var(--m3-on-surface-variant);">Human mediator</p>
+            <p class="small muted">Days to weeks</p>
+            <p class="small bold red">20-25% fee</p>
+          </div>
+          <div class="stat-card stat-card-teal" style="text-align: center; padding: 12px;">
+            <p class="xs muted">Ducket Escrow</p>
+            <p class="small" style="color: var(--m3-on-surface-variant);">AI agent decides</p>
+            <p class="small muted">Seconds</p>
+            <p class="small bold teal">0% fee</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 4: Architecture + Pipeline ===== -->
+  <div class="slide" data-slide="4" style="padding: 56px 64px; padding-top: 80px; justify-content: flex-start;">
+    <h2><span class="accent-underline">Architecture</span></h2>
+    <p style="margin-bottom: 14px; max-width: 720px;">Three-workspace monorepo. The agent runs a 5-minute cron loop: scrape three platforms, classify every listing, enforce escrow if confidence hits the gate. One command to run everything.</p>
+
+    <!-- Pipeline — inline flow -->
+    <div style="display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; padding: 12px 16px; background: var(--m3-surface-container-low); border-radius: 10px; border: 1px solid var(--m3-outline-variant);">
+      <span style="padding: 4px 12px; border-radius: 6px; background: var(--m3-surface-container); font-size: 0.78rem;"><span class="gold bold">Cron</span> 5min</span>
+      <span class="flow-arrow" style="font-size: 1rem;">→</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: var(--m3-surface-container); font-size: 0.78rem;">StubHub</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: var(--m3-surface-container); font-size: 0.78rem;">Viagogo</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: var(--m3-surface-container); font-size: 0.78rem;">Facebook</span>
+      <span class="flow-arrow" style="font-size: 1rem;">→</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: rgba(238,193,60,0.08); border: 1px solid rgba(238,193,60,0.2); font-size: 0.78rem;">Dedup</span>
+      <span class="flow-arrow" style="font-size: 1rem;">→</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: rgba(208,188,255,0.08); border: 1px solid rgba(208,188,255,0.2); font-size: 0.78rem;">Classify</span>
+      <span class="flow-arrow" style="font-size: 1rem;">→</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: rgba(238,193,60,0.08); border: 1px solid rgba(238,193,60,0.2); font-size: 0.78rem;">Gate >=85%</span>
+      <span class="flow-arrow" style="font-size: 1rem;">→</span>
+      <span style="padding: 4px 12px; border-radius: 6px; background: rgba(78,222,163,0.08); border: 1px solid rgba(78,222,163,0.2); font-size: 0.78rem; font-weight: 600; color: var(--m3-tertiary);">Escrow</span>
+    </div>
+
+    <div class="grid-3" style="margin-bottom: 16px;">
+      <div class="stat-card">
+        <div class="label">Agent Backend</div>
+        <p class="mono xs muted">TypeScript / Node.js</p>
+        <ul style="margin-top: 6px;">
+          <li class="small">Scan loop (node-cron, every 5 min)</li>
+          <li class="small">3 scrapers via Patchright</li>
+          <li class="small">Hybrid classifier (rules + Claude)</li>
+          <li class="small">Evidence case file generator</li>
+          <li class="small">WDK wallet singleton</li>
+          <li class="small">Escrow dispatch + enforcement</li>
+        </ul>
+      </div>
+      <div class="stat-card stat-card-gold">
+        <div class="label">Dashboard</div>
+        <p class="mono xs muted">React + Vite + Tailwind v4</p>
+        <ul style="margin-top: 6px;">
+          <li class="small">M3 dark theme (19 CSS tokens)</li>
+          <li class="small">4-step Resale Flow panel</li>
+          <li class="small">Agent Decision Panel</li>
+          <li class="small">Wallet Inspector (WDK balances)</li>
+          <li class="small">Active Order Book table</li>
+          <li class="small">Trust badges + confidence bars</li>
+        </ul>
+      </div>
+      <div class="stat-card stat-card-teal">
+        <div class="label">Smart Contracts</div>
+        <p class="mono xs muted">Solidity / Sepolia</p>
+        <ul style="margin-top: 6px;">
+          <li class="small">FraudEscrow.sol (4 actions)</li>
+          <li class="small">MockUSDT ERC-20</li>
+          <li class="small">SafeERC20 for non-standard USDT</li>
+          <li class="small">ReentrancyGuard</li>
+          <li class="small">Indexed events for filtering</li>
+          <li class="small">Idempotent escrowId enforcement</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="grid-2" style="gap: 12px;">
+      <div class="glass-panel" style="padding: 14px 18px;">
+        <p class="small"><span class="bold">Resilient:</span> <span class="mono xs">Promise.allSettled()</span> for scrapers — one blocked platform never kills the pipeline. Claude failure falls back to rules-only. RPC timeout returns cached balances.</p>
+      </div>
+      <div class="glass-panel" style="padding: 14px 18px;">
+        <p class="small"><span class="bold">One command:</span> <span class="mono xs gold">npm install && npm run demo</span> — agent scan loop + Vite dashboard + Express API. Zero external setup, no database, no manual config.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 5: Close ===== -->
+  <div class="slide" data-slide="5" style="padding: 0;">
+    <div class="hero-gradient" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 56px 72px; padding-top: 80px;">
+      <img src="../dashboard/public/images/Logo_2.png" style="height: 48px; width: auto; margin-bottom: 12px;" alt="Ducket" />
+      <h1 style="font-size: 3.4rem; margin-bottom: 8px;">DUCKET</h1>
+      <p class="gold" style="font-size: 0.9rem; margin-bottom: 32px;">Safe P2P ticket resale — AI + WDK + USDT escrow</p>
+
+      <div class="grid-3" style="max-width: 600px; margin-bottom: 32px; gap: 12px; width: 100%;">
+        <div class="stat-card" style="text-align: center; padding: 14px;">
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-primary);">3</div>
+          <p class="xs muted">Platforms scraped</p>
+        </div>
+        <div class="stat-card stat-card-gold" style="text-align: center; padding: 14px;">
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-secondary);">4</div>
+          <p class="xs muted">Escrow outcomes</p>
+        </div>
+        <div class="stat-card stat-card-teal" style="text-align: center; padding: 14px;">
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-tertiary);">85%</div>
+          <p class="xs muted">Confidence gate</p>
+        </div>
+        <div class="stat-card stat-card-red" style="text-align: center; padding: 14px;">
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-error);">0</div>
+          <p class="xs muted">Humans in loop</p>
+        </div>
+        <div class="stat-card stat-card-gold" style="text-align: center; padding: 14px;">
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-secondary);">78</div>
+          <p class="xs muted">Case files</p>
+        </div>
+        <div class="stat-card stat-card-teal" style="text-align: center; padding: 14px;">
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-tertiary);">0%</div>
+          <p class="xs muted">Platform fee</p>
+        </div>
+      </div>
+
+      <div class="ducket-card" style="text-align: center; padding: 16px 28px; margin-bottom: 24px;">
+        <p class="mono" style="color: var(--m3-secondary); font-size: 0.95rem;">npm install && npm run demo</p>
+        <p class="xs muted" style="margin-top: 4px;">localhost:5173</p>
+      </div>
+
+      <div style="display: flex; gap: 8px; margin-bottom: 24px;">
+        <span class="trust-badge">WDK Non-Custodial</span>
+        <span class="trust-badge" style="color: var(--m3-primary); border-color: rgba(208,188,255,0.3);">Claude AI</span>
+        <span class="trust-badge" style="color: var(--m3-secondary); border-color: rgba(238,193,60,0.3);">Sepolia Testnet</span>
+        <span class="trust-badge" style="color: var(--m3-on-surface-variant); border-color: var(--m3-outline-variant);">Apache 2.0</span>
+      </div>
+      <!-- Footer — mirrors App.tsx -->
+      <div style="display: flex; align-items: center; gap: 8px; opacity: 0.5;">
+        <img src="../dashboard/public/images/logomark.png" style="height: 16px; width: auto; opacity: 0.5;" alt="" />
+        <p class="xs muted">Powered by WDK + Claude AI</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="controls">
+  <button onclick="prevSlide()">←</button>
+  <span class="slide-num" id="counter">1 / 5</span>
+  <button onclick="nextSlide()">→</button>
+</div>
+
+<script>
+  let current = 1;
+  const total = document.querySelectorAll('.slide').length;
+
+  function showSlide(n) {
+    document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+    document.querySelector(`[data-slide="${n}"]`).classList.add('active');
+    document.getElementById('counter').textContent = `${n} / ${total}`;
+  }
+
+  function nextSlide() { if (current < total) { current++; showSlide(current); } }
+  function prevSlide() { if (current > 1) { current--; showSlide(current); } }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+  });
+</script>
+
+</body>
+</html>
