@@ -6,7 +6,6 @@
 import { useState } from 'react';
 import { NewListing } from '../hooks/useResaleFlow';
 import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
@@ -31,10 +30,9 @@ export function ListingForm({ onSubmit }: ListingFormProps) {
   }
 
   return (
-    <Card>
-      <CardContent className="p-4">
-        <h2 className="text-lg font-heading font-semibold text-m3-on-surface mb-4">List a Ticket</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+    <div className="bg-m3-surface-container rounded-xl p-4">
+      <h2 className="text-lg font-heading font-semibold text-m3-on-surface mb-4">List a Ticket</h2>
+      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           {/* Event Name — full row */}
           <div className="col-span-2">
             <Label htmlFor="eventName">Event Name</Label>
@@ -89,8 +87,7 @@ export function ListingForm({ onSubmit }: ListingFormProps) {
               {submitting ? 'Submitting...' : 'Submit Listing'}
             </Button>
           </div>
-        </form>
-      </CardContent>
-    </Card>
+      </form>
+    </div>
   );
 }

@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { Listing, WalletInfo } from '../types';
 import { LockResult } from '../hooks/useResaleFlow';
 import { Button } from './ui/button';
-import { Card, CardContent } from './ui/card';
 import { EtherscanLink } from './EtherscanLink';
 
 interface BuyerLockStepProps {
@@ -28,9 +27,8 @@ export function BuyerLockStep({ listing, wallet, onLock, lockResult, onAdvance }
   }
 
   return (
-    <Card>
-      <CardContent className="p-4 space-y-4">
-        <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Buyer: Lock Funds in Escrow</h2>
+    <div className="bg-m3-surface-container rounded-xl p-4 space-y-4">
+      <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Buyer: Lock Funds in Escrow</h2>
 
         {/* WDK Wallet address */}
         <div>
@@ -55,7 +53,6 @@ export function BuyerLockStep({ listing, wallet, onLock, lockResult, onAdvance }
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }

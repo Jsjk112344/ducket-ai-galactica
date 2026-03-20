@@ -4,7 +4,6 @@
 // Apache 2.0 License
 
 import { Classification } from '../types';
-import { Card, CardContent } from './ui/card';
 import { EtherscanLink } from './EtherscanLink';
 
 // Maps action key to display config — M3 Celestial Ledger color tokens
@@ -48,9 +47,8 @@ export function SettleStep({ classification }: SettleStepProps) {
   const config = OUTCOME_CONFIG[outcomeKey];
 
   return (
-    <Card>
-      <CardContent className="p-6 space-y-4">
-        <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Settlement Outcome</h2>
+    <div className="bg-m3-surface-container rounded-xl p-6 space-y-4">
+      <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Settlement Outcome</h2>
 
         {/* Color-coded outcome card */}
         <div className={`border rounded-lg p-4 ${config.bg}`}>
@@ -65,7 +63,6 @@ export function SettleStep({ classification }: SettleStepProps) {
             <EtherscanLink href={classification.etherscanLink} />
           </div>
         )}
-      </CardContent>
-    </Card>
+    </div>
   );
 }
