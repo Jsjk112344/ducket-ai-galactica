@@ -6,22 +6,27 @@
 import { useState } from 'react';
 import { useListings } from './hooks/useListings';
 import { useWallet } from './hooks/useWallet';
+import { useResaleFlow } from './hooks/useResaleFlow';
 import { ListingsTable } from './components/ListingsTable';
 import { EscrowStatus } from './components/EscrowStatus';
 import { WalletInspector } from './components/WalletInspector';
+import { ResaleFlowPanel } from './components/ResaleFlowPanel';
 
-type Tab = 'listings' | 'escrow' | 'wallet';
+type Tab = 'resale' | 'listings' | 'escrow' | 'wallet';
 
 const TABS: { id: Tab; label: string }[] = [
+  { id: 'resale', label: 'Resale Flow' },
   { id: 'listings', label: 'Listings' },
   { id: 'escrow', label: 'Escrow' },
   { id: 'wallet', label: 'Wallet' },
 ];
 
 export function App() {
-  const [activeTab, setActiveTab] = useState<Tab>('listings');
+  const [activeTab, setActiveTab] = useState<Tab>('resale');
   const { listings, lastUpdated, loading: listingsLoading } = useListings();
   const { wallet, loading: walletLoading } = useWallet();
+  // Resale flow state lifted to App level — survives tab switches
+  const resaleFlow = useResaleFlow();
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -77,6 +82,17 @@ export function App() {
 
         {/* Tab content area */}
         <div className="ducket-card rounded-b-lg rounded-tr-lg p-5">
+          {activeTab === 'resale' && (
+            <ResaleFlowPanel
+              step={resaleFlow.step}
+              listing={resaleFlow.listing}
+              lockResult={resaleFlow.lockResult}
+              wallet={wallet}
+              submitListing={resaleFlow.submitListing}
+              lockFunds={resaleFlow.lockFunds}
+              advance={resaleFlow.advance}
+            />
+          )}
           {activeTab === 'listings' && <ListingsTable listings={listings} />}
           {activeTab === 'escrow' && <EscrowStatus listings={listings} wallet={wallet} />}
           {activeTab === 'wallet' && <WalletInspector wallet={wallet} loading={walletLoading} />}
