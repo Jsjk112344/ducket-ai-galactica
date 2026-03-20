@@ -33,6 +33,19 @@ Requirements for the P2P resale pivot. Each maps to roadmap phases.
 - [ ] **DEMO-02**: Demo video recorded (≤5 min) covering agent logic, wallet flow, payment lifecycle, full loop
 - [ ] **DEMO-03**: 3x end-to-end rehearsal completed before recording
 
+### UI/UX Overhaul
+
+- [x] **UI-01**: M3 dark token system (19 CSS vars in :root + 19 @theme mappings) with JetBrains Mono as font-mono
+- [x] **UI-02**: Fixed top nav with Ducket logomark, tab links, and v2.0 badge visible at all scroll positions
+- [x] **UI-03**: Hero section with Logo_2.png, "Celestial Ledger" title, Protocol v2.0 badge, and animated node status
+- [x] **UI-04**: FAB button (gold, bottom-right) visible on all tabs, navigates to Resale Flow
+- [x] **UI-05**: Stat cards with border-l-4 color coding (primary/secondary/tertiary/error) and progress bars
+- [x] **UI-06**: Active Order Book table header replacing plain listings table
+- [x] **UI-07**: M3 surface/outline row styling with hover states in listings table
+- [x] **UI-08**: M3 semantic badge colors (error-container for scalping, tertiary for legitimate) and glass panel AgentDecisionPanel
+- [x] **UI-09**: Chevron expand column with rotate-180 animation in listings table
+- [x] **UI-10**: All detail components migrated to M3 tokens (WalletInspector, ResaleFlowPanel, TrustBadges, resale steps, EtherscanLink)
+
 ## v1.0 Requirements (Validated)
 
 All v1.0 requirements shipped and validated. See PROJECT.md Validated section.
@@ -69,10 +82,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEMO-01 | Phase 12 | Complete |
 | DEMO-02 | Phase 13 | Pending |
 | DEMO-03 | Phase 13 | Pending |
+| UI-01 | Phase 14 | Complete |
+| UI-02 | Phase 14 | Complete |
+| UI-03 | Phase 14 | Complete |
+| UI-04 | Phase 14 | Complete |
+| UI-05 | Phase 14 | Complete |
+| UI-06 | Phase 14 | Complete |
+| UI-07 | Phase 14 | Complete |
+| UI-08 | Phase 14 | Complete |
+| UI-09 | Phase 14 | Complete |
+| UI-10 | Phase 14 | Complete |
 
 **Coverage:**
-- v2.0 requirements: 14 total
-- Mapped to phases: 14
+- v2.0 requirements: 24 total
+- Mapped to phases: 24
 - Unmapped: 0 ✓
 
 ---
