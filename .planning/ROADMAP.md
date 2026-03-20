@@ -28,7 +28,7 @@
 - [x] **Phase 9: Reframe Narrative** — Update README, CLAUDE.md, and demo script for P2P resale framing (completed 2026-03-19)
 - [x] **Phase 10: Dashboard Rebrand** — Apply Ducket purple/yellow theme, Outfit headings, shadcn components (completed 2026-03-19)
 - [x] **Phase 11: Resale Flow UI** — 4-step wizard: seller lists, buyer locks USDT, AI verifies, escrow settles (completed 2026-03-20)
-- [ ] **Phase 12: Seed Data + AI Visibility** — Pre-classified FIFA listings with 50+ word Claude reasoning visible in UI
+- [x] **Phase 12: Seed Data + AI Visibility** — Pre-classified FIFA listings with 50+ word Claude reasoning visible in UI (completed 2026-03-20)
 - [ ] **Phase 13: Demo Polish + Video** — End-to-end rehearsals and demo video recording
 
 ## Phase Details
@@ -81,7 +81,9 @@ Plans:
   1. At least one seed listing exists for each of the 4 classification categories (scalping violation, likely scam, counterfeit risk, legitimate) — each has a Classification object pre-attached
   2. Every seed listing's reasoning string is 50+ words and references specific fields from that listing (price markup percentage, account age, cross-platform pattern, or face value delta)
   3. Loading the resale flow tab immediately shows populated listings with expanded Agent Decision Panels — no "no listings" empty state visible on first load
-**Plans**: TBD
+**Plans:** 1/1 plans complete
+Plans:
+- [ ] 12-01-PLAN.md — Create 4 seed listings with case files, default-expand first row, validation script
 
 ### Phase 13: Demo Polish + Video
 **Goal**: A recorded demo video exists that covers all four judging segments in under 5 minutes — submission is ready to publish
@@ -91,7 +93,9 @@ Plans:
   1. Demo video is recorded, under 5 minutes, and covers all four required segments: agent logic, wallet flow, payment lifecycle, and full end-to-end loop
   2. Three end-to-end rehearsals are completed before the recording session — each rehearsal covers seller list through escrow settlement without a critical failure
   3. Repo is public, no .env or secrets committed, all third-party services disclosed in README — runnable by a judge with `npm install && npm run demo`
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 12-01-PLAN.md — Create 4 seed listings with case files, default-expand first row, validation script
 
 ## Progress
 
@@ -108,7 +112,7 @@ Plans:
 | 9. Reframe Narrative | 1/1 | Complete   | 2026-03-19 | - |
 | 10. Dashboard Rebrand | 2/2 | Complete    | 2026-03-19 | - |
 | 11. Resale Flow UI | 2/2 | Complete   | 2026-03-20 | - |
-| 12. Seed Data + AI Visibility | v2.0 | 0/TBD | Not started | - |
+| 12. Seed Data + AI Visibility | 1/1 | Complete   | 2026-03-20 | - |
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |
 
 _*08-02 (E2E demo validation) deferred — see MILESTONES.md for known gaps_

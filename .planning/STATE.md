@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Safe P2P Ticket Resale
 status: executing
-stopped_at: Completed 11-02-PLAN.md (checkpoint pending human verify)
-last_updated: "2026-03-20T02:17:30.681Z"
+stopped_at: "Phase 12 Plan 01 checkpoint:human-verify (Tasks 1-2 complete, awaiting visual check)"
+last_updated: "2026-03-20T04:59:59.748Z"
 last_activity: 2026-03-20 — Phase 10 Plan 01 complete
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 5
-  completed_plans: 5
+  completed_phases: 4
+  total_plans: 6
+  completed_plans: 6
   percent: 20
 ---
 
@@ -57,6 +57,7 @@ Phase 10 decisions (Plan 01):
 - [Phase 11]: lockFunds does NOT auto-advance step — user must review Etherscan link before clicking Proceed
 - [Phase 11]: useResaleFlow called at App level so step/listing/lockResult survive tab switches
 - [Phase 11-02]: SettleStep OUTCOME_CONFIG uses string.includes() matching for release/refund/slash action strings
+- [Phase 12]: SEED_URLS in ListingsTable initializes expandedUrl to SEED_URLS[0] — first seed row auto-expanded on load
 
 ### Blockers/Concerns
 
@@ -65,6 +66,6 @@ Phase 10 decisions (Plan 01):
 
 ## Session Continuity
 
-Last session: 2026-03-20T02:17:26.718Z
-Stopped at: Completed 11-02-PLAN.md (checkpoint pending human verify)
+Last session: 2026-03-20T04:59:55.363Z
+Stopped at: Phase 12 Plan 01 checkpoint:human-verify (Tasks 1-2 complete, awaiting visual check)
 Resume file: None

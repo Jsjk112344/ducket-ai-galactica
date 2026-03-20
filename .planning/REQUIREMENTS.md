@@ -29,7 +29,7 @@ Requirements for the P2P resale pivot. Each maps to roadmap phases.
 
 ### Demo
 
-- [ ] **DEMO-01**: Seed data covers all 4 classification categories with 50+ word AI reasoning strings
+- [x] **DEMO-01**: Seed data covers all 4 classification categories with 50+ word AI reasoning strings
 - [ ] **DEMO-02**: Demo video recorded (≤5 min) covering agent logic, wallet flow, payment lifecycle, full loop
 - [ ] **DEMO-03**: 3x end-to-end rehearsal completed before recording
 
@@ -66,7 +66,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RESALE-02 | Phase 11 | Complete |
 | RESALE-03 | Phase 11 | Complete |
 | RESALE-04 | Phase 11 | Complete |
-| DEMO-01 | Phase 12 | Pending |
+| DEMO-01 | Phase 12 | Complete |
 | DEMO-02 | Phase 13 | Pending |
 | DEMO-03 | Phase 13 | Pending |
 
