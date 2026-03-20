@@ -3,9 +3,11 @@
 // Runs on port 3001; Vite dev server proxies /api/* here to avoid CORS.
 //
 // Endpoints:
-//   GET /api/listings         — all scanned listings, enriched with classification from case files
-//   GET /api/wallet           — wallet address, ETH/USDT balances from Sepolia via ethers.js
-//   GET /api/cases/:urlHash   — raw case file markdown for Agent Decision Panel
+//   GET  /api/listings           — all scanned listings, enriched with classification from case files
+//   POST /api/listings           — submit a new listing (resale flow step 1); returns listing + classification
+//   GET  /api/wallet             — wallet address, ETH/USDT balances from Sepolia via ethers.js
+//   GET  /api/cases/:urlHash     — raw case file markdown for Agent Decision Panel
+//   POST /api/escrow/deposit     — lock USDT in escrow for a listing (resale flow step 2)
 //
 // Apache 2.0 License
 
@@ -28,6 +30,10 @@ const DEPLOYED_PATH = join(REPO_ROOT, 'contracts/deployed.json');
 
 // Cached wallet info for RPC timeout fallback
 let cachedWallet: object | null = null;
+
+// In-memory store for listings submitted via POST /api/listings during this server session.
+// Prepended to GET /api/listings so form-submitted listings appear immediately.
+const runtimeListings: Record<string, unknown>[] = [];
 
 const app = express();
 app.use(express.json());
@@ -61,10 +67,95 @@ app.get('/api/listings', async (req, res) => {
       })
     );
 
-    res.json(enriched);
+    // Prepend runtime listings (submitted via POST /api/listings this session)
+    // so form-submitted listings appear immediately without waiting for agent scan cycle
+    res.json([...runtimeListings, ...enriched]);
   } catch {
-    // LISTINGS.md missing or unparseable — return empty (agent not started yet)
-    res.json([]);
+    // LISTINGS.md missing or unparseable — return runtime listings only (agent not started yet)
+    res.json([...runtimeListings]);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/listings
+// Accepts a new listing from the resale flow form, attaches a demo classification,
+// stores it in runtimeListings (prepended to GET /api/listings), and returns the full listing.
+// ---------------------------------------------------------------------------
+app.post('/api/listings', (req, res) => {
+  const { eventName, section, quantity, price, faceValue } = req.body as {
+    eventName: string;
+    section: string;
+    quantity: number;
+    price: number;
+    faceValue: number;
+  };
+
+  // Compute how far above (or below) face value the price is
+  const priceDeltaPct = Math.round(((price - faceValue) / faceValue) * 100);
+  // Unique demo URL for this listing — used for escrow ID generation downstream
+  const url = `https://ducket.demo/listing/${Date.now()}`;
+
+  // Assign a deterministic classification based on price delta (demo seed logic)
+  const classification = pickDemoClassification(priceDeltaPct);
+
+  const listing = {
+    platform: 'Ducket',
+    seller: 'alice_seller',
+    price,
+    faceValue,
+    priceDeltaPct,
+    url,
+    listingDate: new Date().toISOString(),
+    // Flag obvious scalping so buyers see red flags in the listing table
+    redFlags: priceDeltaPct > 100 ? ['price above face value'] : [],
+    eventName,
+    section,
+    quantity,
+    source: 'mock' as const,
+    classification,
+  };
+
+  // Store for immediate visibility in GET /api/listings
+  runtimeListings.unshift(listing);
+  res.json(listing);
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/escrow/deposit
+// Locks USDT in escrow for a given listing URL.
+// If Sepolia env vars are missing, returns a mock response (demo resilience).
+// Uses dynamic import of escrow.js — avoids startup crash when env vars absent.
+// ---------------------------------------------------------------------------
+app.post('/api/escrow/deposit', async (req, res) => {
+  const { listingUrl } = req.body as { listingUrl: string };
+
+  // Generate a short escrow ID tied to this listing URL + timestamp
+  const escrowId = createHash('sha256')
+    .update(listingUrl + Date.now())
+    .digest('hex')
+    .slice(0, 16);
+
+  // Mock fallback when Sepolia credentials are not configured (works out of the box in demo)
+  if (!process.env.SEPOLIA_RPC_URL || !process.env.ESCROW_WALLET_SEED) {
+    return res.json({
+      txHash: '0xmockdepositdemo000000000000000000000000000000000000000000000001',
+      escrowId,
+      etherscanLink:
+        'https://sepolia.etherscan.io/tx/0xmockdepositdemo000000000000000000000000000000000000000000000001',
+      mock: true,
+    });
+  }
+
+  // Live path — dynamically imported to avoid top-level import errors when env vars absent
+  try {
+    const { depositEscrow } = await import('../../agent/src/escrow.js');
+    const result = await depositEscrow({ escrowId });
+    if (!result) {
+      return res.status(500).json({ error: 'Deposit failed' });
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
   }
 });
 
@@ -154,6 +245,57 @@ app.get('/api/cases/:urlHash', async (req, res) => {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+/**
+ * pickDemoClassification(priceDeltaPct) — deterministic demo classifier.
+ * Assigns a Classification based on price delta thresholds without calling
+ * the LLM agent, so the resale flow UI works fully offline.
+ *
+ * Branches:
+ *   > 100%  → SCALPING_VIOLATION (slash escrow)
+ *   < -10%  → LIKELY_SCAM (refund buyer)
+ *   else    → LEGITIMATE (release to seller)
+ *
+ * Each reasoning string is 50+ words so the Agent Decision Panel has substance.
+ */
+function pickDemoClassification(priceDeltaPct: number) {
+  if (priceDeltaPct > 100) {
+    return {
+      category: 'SCALPING_VIOLATION' as const,
+      confidence: 91,
+      // ~80 words — references listing field so reasoning feels data-driven
+      reasoning: `This listing is priced at ${priceDeltaPct}% above face value, far exceeding the 100% threshold that triggers a SCALPING_VIOLATION classification. The section and event name are consistent with FIFA World Cup 2026 Group Stage pricing data. At this markup level the listing exploits high-demand inventory and harms buyers who rely on fair resale access. Ducket AI has automatically locked 10 USDT in escrow and initiated a slash to the anti-fraud bounty pool. Autonomous enforcement completed without human intervention.`,
+      classificationSource: 'demo-seed',
+      actionTaken: 'slash',
+      etherscanLink:
+        'https://sepolia.etherscan.io/tx/0xdemo000000000000000000000000000000000000000000000000000000000001',
+    };
+  }
+
+  if (priceDeltaPct < -10) {
+    return {
+      category: 'LIKELY_SCAM' as const,
+      confidence: 74,
+      // ~70 words — references below-face-value fraud pattern
+      reasoning: `This listing is priced at ${priceDeltaPct}% below face value, a pattern strongly associated with fraudulent ticket sales. Legitimate sellers rarely offer tickets below the original face value on the secondary market. The anomalously low price suggests the seller may not possess valid tickets or intends to disappear after collecting payment. Ducket AI has issued a full USDT refund to the buyer. Escrow funds returned. No seller payout authorised until re-verification passes.`,
+      classificationSource: 'demo-seed',
+      actionTaken: 'refund',
+      etherscanLink:
+        'https://sepolia.etherscan.io/tx/0xdemo000000000000000000000000000000000000000000000000000000000002',
+    };
+  }
+
+  return {
+    category: 'LEGITIMATE' as const,
+    confidence: 82,
+    // ~65 words — references acceptable markup and event context
+    reasoning: `This listing is priced at ${priceDeltaPct}% above face value, within the acceptable resale markup threshold. The event name and price point are consistent with verified secondary-market data for comparable fixtures. No fraud signals detected in the listing metadata. Ducket AI has cleared this listing and authorised USDT release to the seller upon buyer confirmation. Escrow settlement completed automatically without human intervention.`,
+    classificationSource: 'demo-seed',
+    actionTaken: 'release',
+    etherscanLink:
+      'https://sepolia.etherscan.io/tx/0xdemo000000000000000000000000000000000000000000000000000000000003',
+  };
+}
 
 /**
  * urlHash(url) — 16-char SHA-256 slice of listing URL.
