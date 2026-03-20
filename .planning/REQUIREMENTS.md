@@ -22,8 +22,8 @@ Requirements for the P2P resale pivot. Each maps to roadmap phases.
 
 ### Resale Flow
 
-- [ ] **RESALE-01**: Seller can list a ticket (event, section, quantity, price, face value) via form
-- [ ] **RESALE-02**: Buyer can lock USDT in escrow via WDK deposit for a specific listing
+- [x] **RESALE-01**: Seller can list a ticket (event, section, quantity, price, face value) via form
+- [x] **RESALE-02**: Buyer can lock USDT in escrow via WDK deposit for a specific listing
 - [ ] **RESALE-03**: AI verification step shows full Classification.reasoning in prominent Agent Decision Panel
 - [ ] **RESALE-04**: Escrow settlement displays release/refund/slash outcome with on-chain tx link
 
@@ -62,8 +62,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BRAND-02 | Phase 10 | Complete |
 | BRAND-03 | Phase 10 | Complete |
 | BRAND-04 | Phase 10 | Complete |
-| RESALE-01 | Phase 11 | Pending |
-| RESALE-02 | Phase 11 | Pending |
+| RESALE-01 | Phase 11 | Complete |
+| RESALE-02 | Phase 11 | Complete |
 | RESALE-03 | Phase 11 | Pending |
 | RESALE-04 | Phase 11 | Pending |
 | DEMO-01 | Phase 12 | Pending |
