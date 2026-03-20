@@ -68,7 +68,7 @@ Plans:
   2. Buyer lock button calls the WDK deposit path for the selected listing — UI shows the wallet address and a live Etherscan link for the escrow transaction
   3. AI verification step displays the full Classification.reasoning text in a prominent Agent Decision Panel — text is readable, 50+ words, references specific listing fields
   4. Settlement outcome (release, refund, or slash) is displayed with the on-chain transaction link and labeled outcome — result matches the listing's classification category
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 11-01-PLAN.md — Add POST /api/listings + POST /api/escrow/deposit endpoints, create useResaleFlow hook and EtherscanLink component
 - [ ] 11-02-PLAN.md — Build ListingForm, BuyerLockStep, VerifyStep, SettleStep, ResaleFlowPanel components and wire into App.tsx as first tab
@@ -107,7 +107,7 @@ Plans:
 | 8. Demo Integration + Submission | v1.0 | 1/2 | Complete* | 2026-03-19 |
 | 9. Reframe Narrative | 1/1 | Complete   | 2026-03-19 | - |
 | 10. Dashboard Rebrand | 2/2 | Complete    | 2026-03-19 | - |
-| 11. Resale Flow UI | v2.0 | 0/2 | Not started | - |
+| 11. Resale Flow UI | 1/2 | In Progress|  | - |
 | 12. Seed Data + AI Visibility | v2.0 | 0/TBD | Not started | - |
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |
 
