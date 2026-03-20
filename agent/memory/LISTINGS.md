@@ -3,6 +3,81 @@
 Event: FIFA World Cup 2026
 Started: 2026-03-19T15:06:11.544Z
 
+## Seed Data
+
+```json
+[
+  {
+    "platform": "Ducket Seed",
+    "seller": "seed_scalper_01",
+    "price": 450,
+    "faceValue": 200,
+    "priceDeltaPct": 125,
+    "url": "https://ducket.seed/listing/scalping-001",
+    "listingDate": "2026-03-20T00:00:00.000Z",
+    "redFlags": ["price 2x face value", "significant markup over face value"],
+    "eventName": "FIFA World Cup 2026 — USA vs England",
+    "section": "Category 1",
+    "quantity": 2,
+    "source": "seed",
+    "matchRound": "Group Stage",
+    "venue": "MetLife Stadium, NJ",
+    "matchDate": "2026-06-15T18:00:00"
+  },
+  {
+    "platform": "Ducket Seed",
+    "seller": "seed_bargain_bob",
+    "price": 78,
+    "faceValue": 120,
+    "priceDeltaPct": -35,
+    "url": "https://ducket.seed/listing/scam-001",
+    "listingDate": "2026-03-20T00:00:00.000Z",
+    "redFlags": ["price below face value (possible scam)", "new account — 12 days old"],
+    "eventName": "FIFA World Cup 2026 — USA vs England",
+    "section": "Category 2",
+    "quantity": 1,
+    "source": "seed",
+    "matchRound": "Group Stage",
+    "venue": "MetLife Stadium, NJ",
+    "matchDate": "2026-06-15T18:00:00"
+  },
+  {
+    "platform": "Ducket Seed",
+    "seller": "seed_newuser_99",
+    "price": 236,
+    "faceValue": 200,
+    "priceDeltaPct": 18,
+    "url": "https://ducket.seed/listing/counterfeit-001",
+    "listingDate": "2026-03-20T00:00:00.000Z",
+    "redFlags": ["new seller", "no proof of purchase", "account age: 3 days"],
+    "eventName": "FIFA World Cup 2026 — USA vs England",
+    "section": "Category 1",
+    "quantity": 2,
+    "source": "seed",
+    "matchRound": "Group Stage",
+    "venue": "MetLife Stadium, NJ",
+    "matchDate": "2026-06-15T18:00:00"
+  },
+  {
+    "platform": "Ducket Seed",
+    "seller": "seed_verified_alice",
+    "price": 283,
+    "faceValue": 200,
+    "priceDeltaPct": 42,
+    "url": "https://ducket.seed/listing/legitimate-001",
+    "listingDate": "2026-03-20T00:00:00.000Z",
+    "redFlags": [],
+    "eventName": "FIFA World Cup 2026 — USA vs England",
+    "section": "Category 1",
+    "quantity": 2,
+    "source": "seed",
+    "matchRound": "Group Stage",
+    "venue": "MetLife Stadium, NJ",
+    "matchDate": "2026-06-15T18:00:00"
+  }
+]
+```
+
 ## Scan: 2026-03-19T15:08:00.371Z
 
 ```json

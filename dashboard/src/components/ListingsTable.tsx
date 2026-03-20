@@ -14,9 +14,19 @@ interface ListingsTableProps {
   listings: Listing[];
 }
 
+// Seed listing URLs — used to default-expand the first seed row on load so
+// judges immediately see AgentDecisionPanel with AI reasoning on page open.
+const SEED_URLS = [
+  'https://ducket.seed/listing/scalping-001',
+  'https://ducket.seed/listing/scam-001',
+  'https://ducket.seed/listing/counterfeit-001',
+  'https://ducket.seed/listing/legitimate-001',
+];
+
 export function ListingsTable({ listings }: ListingsTableProps) {
   // Track which listing row is expanded (by URL — unique per listing)
-  const [expandedUrl, setExpandedUrl] = useState<string | null>(null);
+  // Default to first seed listing so AgentDecisionPanel is visible on first load.
+  const [expandedUrl, setExpandedUrl] = useState<string | null>(SEED_URLS[0]);
 
   function toggleRow(url: string) {
     setExpandedUrl((prev) => (prev === url ? null : url));
