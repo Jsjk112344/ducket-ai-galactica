@@ -4,6 +4,7 @@
 // Apache 2.0 License
 
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { useListings } from './hooks/useListings';
 import { useWallet } from './hooks/useWallet';
 import { useResaleFlow } from './hooks/useResaleFlow';
@@ -23,91 +24,99 @@ const TABS: { id: Tab; label: string }[] = [
 
 export function App() {
   const [activeTab, setActiveTab] = useState<Tab>('resale');
-  const { listings, lastUpdated, loading: listingsLoading } = useListings();
+  const { listings, loading: listingsLoading } = useListings();
   const { wallet, loading: walletLoading } = useWallet();
   // Resale flow state lifted to App level — survives tab switches
   const resaleFlow = useResaleFlow();
 
   return (
-    <div className="min-h-screen bg-bg-primary">
-      {/* Hero header with gradient + logo */}
-      <div className="ducket-hero-gradient border-b border-brand-primary/30">
-        <div className="max-w-7xl mx-auto px-6 py-5">
-          <div className="flex items-center gap-4">
-            <img
-              src="/images/logomark.png"
-              alt="Ducket"
-              className="h-10 w-auto"
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Ducket</h1>
-              <p className="text-brand-accent/80 text-sm font-medium">
-                Safe P2P ticket resale — buyer protected by escrow
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        {/* Tab bar */}
-        <div className="flex gap-1 mb-1">
+    <div className="min-h-screen bg-m3-surface">
+      {/* Fixed top nav */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-m3-surface/90 backdrop-blur-md border-b border-m3-outline/20 h-14 flex items-center px-6">
+        <img src="/images/logomark.png" className="h-7 w-auto mr-3" alt="Ducket" />
+        <span className="font-heading font-bold text-m3-primary text-lg">DUCKET AI</span>
+        <span className="ml-2 text-xs bg-m3-surface-container text-m3-outline px-2 py-0.5 rounded-full border border-m3-outline/30 font-mono">v2.0</span>
+        <div className="flex-1" />
+        {/* Nav links — styled as tabs in the nav */}
+        <div className="flex gap-1">
           {TABS.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-2.5 rounded-t-lg text-sm font-medium transition-colors border-t border-x ${
+              className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-brand-primary border-brand-primary/60 text-brand-accent shadow-[0_-2px_10px_hsl(263_50%_30%/0.3)]'
-                  : 'bg-bg-card/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-bg-card'
+                  ? 'bg-m3-primary-container text-m3-primary'
+                  : 'text-m3-on-surface-variant hover:text-m3-on-surface hover:bg-m3-surface-container'
               }`}
             >
               {tab.label}
               {tab.id === 'listings' && !listingsLoading && (
-                <span className="ml-2 text-xs opacity-70">({listings.length})</span>
+                <span className="ml-1.5 text-xs opacity-70">({listings.length})</span>
               )}
             </button>
           ))}
         </div>
+      </nav>
 
-        {/* Last updated timestamp */}
-        <div className="text-xs text-muted-foreground mb-4 pl-1">
-          {listingsLoading
-            ? 'Loading...'
-            : lastUpdated
-            ? `Last updated: ${lastUpdated.toLocaleTimeString()} — auto-refreshes every 10s`
-            : 'No data yet'}
+      <div className="pt-14">
+        {/* Hero */}
+        <div className="ducket-hero-gradient px-6 py-8 border-b border-m3-outline/10">
+          <div className="max-w-7xl mx-auto flex items-end justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <img src="/images/Logo_2.png" className="h-9 w-auto" alt="Ducket" />
+                <span className="text-xs bg-m3-surface-container border border-m3-outline/30 text-m3-outline px-2.5 py-1 rounded-full font-mono">
+                  Protocol v2.0
+                </span>
+              </div>
+              <h1 className="text-4xl font-black text-m3-on-surface tracking-tighter">Celestial Ledger</h1>
+              <p className="text-m3-secondary text-sm mt-1">Safe P2P ticket resale — buyer protected by escrow</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 bg-m3-tertiary rounded-full animate-pulse" />
+              <span className="text-xs text-m3-outline">Node Active</span>
+            </div>
+          </div>
         </div>
 
-        {/* Tab content area */}
-        <div className="ducket-card rounded-b-lg rounded-tr-lg p-5">
-          {activeTab === 'resale' && (
-            <ResaleFlowPanel
-              step={resaleFlow.step}
-              listing={resaleFlow.listing}
-              lockResult={resaleFlow.lockResult}
-              wallet={wallet}
-              submitListing={resaleFlow.submitListing}
-              lockFunds={resaleFlow.lockFunds}
-              advance={resaleFlow.advance}
-            />
-          )}
-          {activeTab === 'listings' && <ListingsTable listings={listings} />}
-          {activeTab === 'escrow' && <EscrowStatus listings={listings} wallet={wallet} />}
-          {activeTab === 'wallet' && <WalletInspector wallet={wallet} loading={walletLoading} />}
+        {/* Main content */}
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          {/* Tab content area */}
+          <div className="bg-m3-surface-container rounded-xl p-5 border border-m3-outline/10">
+            {activeTab === 'resale' && (
+              <ResaleFlowPanel
+                step={resaleFlow.step}
+                listing={resaleFlow.listing}
+                lockResult={resaleFlow.lockResult}
+                wallet={wallet}
+                submitListing={resaleFlow.submitListing}
+                lockFunds={resaleFlow.lockFunds}
+                advance={resaleFlow.advance}
+              />
+            )}
+            {activeTab === 'listings' && <ListingsTable listings={listings} />}
+            {activeTab === 'escrow' && <EscrowStatus listings={listings} wallet={wallet} />}
+            {activeTab === 'wallet' && <WalletInspector wallet={wallet} loading={walletLoading} />}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-center gap-3 opacity-60">
+            <img src="/images/logomark.png" alt="" className="h-5 w-auto opacity-50" />
+            <p className="text-m3-outline text-xs">Powered by WDK + Claude AI</p>
+          </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="flex items-center justify-center gap-3 opacity-60">
-          <img src="/images/logomark.png" alt="" className="h-5 w-auto opacity-50" />
-          <p className="text-muted-foreground text-xs">
-            Powered by WDK + Claude AI
-          </p>
-        </div>
-      </div>
+      {/* FAB — New Listing */}
+      <button
+        onClick={() => setActiveTab('resale')}
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-m3-secondary text-black shadow-lg shadow-m3-secondary/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
+        title="New Listing"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
     </div>
   );
 }
