@@ -112,10 +112,22 @@ Plans:
 | 9. Reframe Narrative | 1/1 | Complete   | 2026-03-19 | - |
 | 10. Dashboard Rebrand | 2/2 | Complete    | 2026-03-19 | - |
 | 11. Resale Flow UI | 2/2 | Complete   | 2026-03-20 | - |
-| 12. Seed Data + AI Visibility | 1/1 | Complete   | 2026-03-20 | - |
+| 12. Seed Data + AI Visibility | 1/1 | Complete    | 2026-03-20 | - |
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |
 
 _*08-02 (E2E demo validation) deferred — see MILESTONES.md for known gaps_
+
+### Phase 14: Dashboard UI/UX overhaul — Celestial Ledger design system
+
+**Goal:** Apply the Celestial Ledger M3 dark theme design system to all dashboard components — fixed nav, hero, stat cards with border-l-4, Active Order Book table with chevron rows, glass panels, M3 semantic badge colors, hover micro-interactions, JetBrains Mono for code, and FAB button
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-09, UI-10
+**Depends on:** Phase 12
+**Plans:** 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Install JetBrains Mono font, copy Logo_2.png, extend index.css with M3 dark token system
+- [ ] 14-02-PLAN.md — Upgrade App.tsx (fixed nav, hero, FAB), EscrowStatus (stat cards), ListingsTable (Active Order Book)
+- [ ] 14-03-PLAN.md — Upgrade all detail components to M3 tokens (Badge, ConfidenceBar, AgentDecisionPanel, TrustBadges, WalletInspector, ResaleFlowPanel, resale steps)
 
 ---
 _Full v1.0 details archived to: `.planning/milestones/v1.0-ROADMAP.md`_
