@@ -17,11 +17,11 @@ export function VerifyStep({ classification, onAdvance }: VerifyStepProps) {
     <div className="space-y-4">
       {/* Header row with AI avatar badge */}
       <div className="flex items-center gap-3">
-        <span className="w-8 h-8 rounded-full bg-brand-primary flex items-center justify-center text-white font-bold text-sm">
+        <span className="w-8 h-8 rounded-full bg-m3-primary-container flex items-center justify-center text-m3-primary font-bold text-sm">
           AI
         </span>
-        <h2 className="text-lg font-heading font-semibold text-white">Agent Decision Panel</h2>
-        <span className="text-xs text-muted-foreground ml-auto">Powered by Claude AI + rules engine</span>
+        <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Agent Decision Panel</h2>
+        <span className="text-xs text-m3-outline ml-auto">Powered by Claude AI + rules engine</span>
       </div>
 
       {/* Full classification detail from the agent */}

@@ -20,7 +20,6 @@ export function ListingForm({ onSubmit }: ListingFormProps) {
     section: 'Category 2',
     quantity: 2,
     price: 350,
-    faceValue: 120,
   });
   const [submitting, setSubmitting] = useState(false);
 
@@ -34,7 +33,7 @@ export function ListingForm({ onSubmit }: ListingFormProps) {
   return (
     <Card>
       <CardContent className="p-4">
-        <h2 className="text-lg font-heading font-semibold text-white mb-4">List a Ticket</h2>
+        <h2 className="text-lg font-heading font-semibold text-m3-on-surface mb-4">List a Ticket</h2>
         <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
           {/* Event Name — full row */}
           <div className="col-span-2">
@@ -71,8 +70,8 @@ export function ListingForm({ onSubmit }: ListingFormProps) {
             />
           </div>
 
-          {/* Ask Price */}
-          <div>
+          {/* Ask Price — full row */}
+          <div className="col-span-2">
             <Label htmlFor="price">Ask Price (USD)</Label>
             <Input
               id="price"
@@ -80,19 +79,6 @@ export function ListingForm({ onSubmit }: ListingFormProps) {
               min={1}
               value={form.price}
               onChange={(e) => setForm({ ...form, price: +e.target.value })}
-              required
-            />
-          </div>
-
-          {/* Face Value */}
-          <div>
-            <Label htmlFor="faceValue">Face Value (USD)</Label>
-            <Input
-              id="faceValue"
-              type="number"
-              min={1}
-              value={form.faceValue}
-              onChange={(e) => setForm({ ...form, faceValue: +e.target.value })}
               required
             />
           </div>

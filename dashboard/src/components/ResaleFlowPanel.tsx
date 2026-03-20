@@ -40,7 +40,7 @@ export function ResaleFlowPanel({
 }: ResaleFlowPanelProps) {
   return (
     <div className="space-y-6">
-      {/* Step indicator strip — active=purple, completed=green, upcoming=muted */}
+      {/* Step indicator strip — active=M3 primary, completed=M3 tertiary, upcoming=muted */}
       <div className="flex gap-2">
         {STEPS.map((s) => (
           <div
@@ -48,10 +48,10 @@ export function ResaleFlowPanel({
             className={cn(
               'flex-1 py-2 rounded text-center text-sm font-medium',
               step === s.id
-                ? 'bg-brand-primary text-white'
+                ? 'bg-m3-primary-container text-m3-primary'
                 : step > s.id
-                ? 'bg-success/20 text-success'
-                : 'bg-bg-card text-muted-foreground'
+                ? 'bg-m3-tertiary/20 text-m3-tertiary'
+                : 'bg-m3-surface-container text-m3-outline'
             )}
           >
             {s.id}. {s.label}

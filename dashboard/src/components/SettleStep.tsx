@@ -7,12 +7,12 @@ import { Classification } from '../types';
 import { Card, CardContent } from './ui/card';
 import { EtherscanLink } from './EtherscanLink';
 
-// Maps action key to display config — colors match Ducket design tokens
+// Maps action key to display config — M3 Celestial Ledger color tokens
 const OUTCOME_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
   release: {
     label: 'RELEASED to seller',
-    color: 'text-success',
-    bg: 'bg-success/10 border-success/30',
+    color: 'text-m3-tertiary',
+    bg: 'bg-m3-tertiary/10 border-m3-tertiary/30',
   },
   refund: {
     label: 'REFUNDED to buyer',
@@ -21,13 +21,13 @@ const OUTCOME_CONFIG: Record<string, { label: string; color: string; bg: string 
   },
   slash: {
     label: 'SLASHED to bounty pool',
-    color: 'text-warn-red',
-    bg: 'bg-warn-red/10 border-warn-red/30',
+    color: 'text-m3-error',
+    bg: 'bg-m3-error/10 border-m3-error/30',
   },
   escrow_deposit: {
     label: 'PENDING settlement',
-    color: 'text-muted-foreground',
-    bg: 'bg-bg-card border-border',
+    color: 'text-m3-outline',
+    bg: 'bg-m3-surface-container border-m3-outline/30',
   },
 };
 
@@ -50,18 +50,18 @@ export function SettleStep({ classification }: SettleStepProps) {
   return (
     <Card>
       <CardContent className="p-6 space-y-4">
-        <h2 className="text-lg font-heading font-semibold text-white">Settlement Outcome</h2>
+        <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Settlement Outcome</h2>
 
         {/* Color-coded outcome card */}
         <div className={`border rounded-lg p-4 ${config.bg}`}>
           <p className={`text-xl font-bold ${config.color}`}>{config.label}</p>
-          <p className="text-muted-foreground text-sm mt-1">Category: {classification.category}</p>
+          <p className="text-m3-outline text-sm mt-1">Category: {classification.category}</p>
         </div>
 
         {/* On-chain transaction link — shown when Etherscan hash is available */}
         {classification.etherscanLink && (
           <div>
-            <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">On-Chain Transaction</p>
+            <p className="text-xs text-m3-outline uppercase tracking-wide mb-1">On-Chain Transaction</p>
             <EtherscanLink href={classification.etherscanLink} />
           </div>
         )}

@@ -30,12 +30,12 @@ export function BuyerLockStep({ listing, wallet, onLock, lockResult, onAdvance }
   return (
     <Card>
       <CardContent className="p-4 space-y-4">
-        <h2 className="text-lg font-heading font-semibold text-white">Buyer: Lock Funds in Escrow</h2>
+        <h2 className="text-lg font-heading font-semibold text-m3-on-surface">Buyer: Lock Funds in Escrow</h2>
 
         {/* WDK Wallet address */}
         <div>
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">WDK Wallet (non-custodial)</p>
-          <p className="font-mono text-sm text-foreground">{wallet?.address ?? 'Loading...'}</p>
+          <p className="text-xs text-m3-outline uppercase tracking-wide">WDK Wallet (non-custodial)</p>
+          <p className="font-mono text-sm text-m3-on-surface">{wallet?.address ?? 'Loading...'}</p>
         </div>
 
         {/* Lock button — shown before deposit completes */}
@@ -48,7 +48,7 @@ export function BuyerLockStep({ listing, wallet, onLock, lockResult, onAdvance }
         {/* Post-lock confirmation — shown after deposit */}
         {lockResult && (
           <div className="space-y-2">
-            <p className="text-success text-sm font-medium">Escrow locked. Deposit confirmed.</p>
+            <p className="text-m3-tertiary text-sm font-medium">Escrow locked. Deposit confirmed.</p>
             <EtherscanLink href={lockResult.etherscanLink} />
             <Button onClick={onAdvance} className="w-full mt-2">
               Proceed to AI Verification
