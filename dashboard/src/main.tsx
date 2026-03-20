@@ -1,6 +1,7 @@
 // Ducket AI Galactica — React Entry Point
 import '@fontsource-variable/inter';
 import '@fontsource-variable/outfit';
+import '@fontsource-variable/jetbrains-mono';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
