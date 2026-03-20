@@ -21,20 +21,20 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
     etherscanLink,
   } = classification;
 
-  // Color action taken based on outcome — release is good (green), deposit is bad (red)
+  // Color action taken based on outcome — release is good (teal), deposit is bad (red)
   const actionColor =
     actionTaken === 'release'
-      ? 'text-success'
+      ? 'text-m3-tertiary'
       : actionTaken === 'escrow_deposit'
-      ? 'text-warn-red'
-      : 'text-foreground';
+      ? 'text-m3-error'
+      : 'text-m3-on-surface';
 
   return (
-    <div className="bg-bg-card/50 border border-brand-primary/40 rounded-lg p-4 space-y-3">
+    <div className="backdrop-blur-md bg-m3-surface-container/60 border border-m3-outline/20 rounded-xl p-5 space-y-3">
       <div className="grid grid-cols-2 gap-x-4 gap-y-3">
         {/* Category */}
         <div>
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">Category</span>
+          <span className="text-xs text-m3-outline uppercase tracking-wide">Category</span>
           <div className="mt-1">
             <Badge category={category} />
           </div>
@@ -42,7 +42,7 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
 
         {/* Confidence */}
         <div>
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">Confidence</span>
+          <span className="text-xs text-m3-outline uppercase tracking-wide">Confidence</span>
           <div className="mt-1">
             <ConfidenceBar value={confidence} />
           </div>
@@ -50,20 +50,20 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
 
         {/* Reasoning */}
         <div className="col-span-2">
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">Reasoning</span>
-          <p className="mt-1 text-foreground text-sm">{reasoning}</p>
+          <span className="text-xs text-m3-outline uppercase tracking-wide">Reasoning</span>
+          <p className="mt-1 text-m3-on-surface text-sm">{reasoning}</p>
         </div>
 
         {/* Classification Source */}
         <div>
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">Classification Source</span>
-          <p className="mt-1 text-muted-foreground text-sm">{classificationSource}</p>
+          <span className="text-xs text-m3-outline uppercase tracking-wide">Classification Source</span>
+          <p className="mt-1 text-m3-on-surface-variant text-sm">{classificationSource}</p>
         </div>
 
         {/* Action Taken (conditional) */}
         {actionTaken && (
           <div>
-            <span className="text-xs text-muted-foreground uppercase tracking-wide">Action Taken</span>
+            <span className="text-xs text-m3-outline uppercase tracking-wide">Action Taken</span>
             <p className={`mt-1 text-sm font-semibold ${actionColor}`}>
               {actionTaken.replace(/_/g, ' ')}
             </p>
@@ -73,14 +73,14 @@ export function AgentDecisionPanel({ classification }: AgentDecisionPanelProps) 
 
       {/* Etherscan link (conditional) */}
       {etherscanLink && (
-        <div className="pt-1 border-t border-brand-primary/20">
-          <span className="text-xs text-muted-foreground uppercase tracking-wide">On-Chain Evidence</span>
+        <div className="pt-1 border-t border-m3-outline/20">
+          <span className="text-xs text-m3-outline uppercase tracking-wide">On-Chain Evidence</span>
           <div className="mt-1">
             <a
               href={etherscanLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-brand-accent underline font-mono text-xs break-all"
+              className="text-m3-secondary underline font-mono text-xs break-all"
             >
               {etherscanLink}
             </a>
