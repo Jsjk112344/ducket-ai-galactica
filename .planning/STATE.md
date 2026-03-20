@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Safe P2P Ticket Resale
 status: executing
-stopped_at: Completed Phase 14 Plan 02 (14-02-PLAN.md)
-last_updated: "2026-03-20T06:00:21.413Z"
+stopped_at: Completed Phase 14 Plan 03 (14-03-PLAN.md)
+last_updated: "2026-03-20T06:11:32.839Z"
 last_activity: 2026-03-20 — Phase 12 Plan 01 complete (seed data + visual verification)
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 20
 ---
 
@@ -64,6 +64,8 @@ Phase 10 decisions (Plan 01):
 - [Phase 14]: All M3 tokens prefixed m3- to avoid collision with shadcn @theme inline bridge tokens
 - [Phase 14]: bgClass must be literal string per StatCard — Tailwind v4 purges dynamically-constructed class names via .replace()
 - [Phase 14]: FAB button navigates to Resale Flow tab — additive navigation, not demo bypass
+- [Phase 14-dashboard-ui-ux-overhaul-celestial-ledger-design-system]: TrustBadges labels updated to Escrow Secured/AI Verified/Instant Settle/Non-custodial for clearer resale value proposition
+- [Phase 14-dashboard-ui-ux-overhaul-celestial-ledger-design-system]: Glass panel pattern: backdrop-blur-md bg-m3-surface-container/60 for AgentDecisionPanel depth effect
 
 ### Roadmap Evolution
 
@@ -82,6 +84,6 @@ Phase 10 decisions (Plan 01):
 
 ## Session Continuity
 
-Last session: 2026-03-20T06:00:13.511Z
-Stopped at: Completed Phase 14 Plan 02 (14-02-PLAN.md)
+Last session: 2026-03-20T06:10:55.794Z
+Stopped at: Completed Phase 14 Plan 03 (14-03-PLAN.md)
 Resume file: None
