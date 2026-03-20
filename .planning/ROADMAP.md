@@ -122,12 +122,13 @@ _*08-02 (E2E demo validation) deferred — see MILESTONES.md for known gaps_
 **Goal:** Apply the Celestial Ledger M3 dark theme design system to all dashboard components — fixed nav, hero, stat cards with border-l-4, Active Order Book table with chevron rows, glass panels, M3 semantic badge colors, hover micro-interactions, JetBrains Mono for code, and FAB button
 **Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-09, UI-10
 **Depends on:** Phase 12
-**Plans:** 3/3 plans complete
+**Plans:** 4/4 plans complete
 
 Plans:
-- [ ] 14-01-PLAN.md — Install JetBrains Mono font, copy Logo_2.png, extend index.css with M3 dark token system
-- [ ] 14-02-PLAN.md — Upgrade App.tsx (fixed nav, hero, FAB), EscrowStatus (stat cards), ListingsTable (Active Order Book)
-- [ ] 14-03-PLAN.md — Upgrade all detail components to M3 tokens (Badge, ConfidenceBar, AgentDecisionPanel, TrustBadges, WalletInspector, ResaleFlowPanel, resale steps)
+- [x] 14-01-PLAN.md — Install JetBrains Mono font, copy Logo_2.png, extend index.css with M3 dark token system
+- [x] 14-02-PLAN.md — Upgrade App.tsx (fixed nav, hero, FAB), EscrowStatus (stat cards), ListingsTable (Active Order Book)
+- [x] 14-03-PLAN.md — Upgrade all detail components to M3 tokens (Badge, ConfidenceBar, AgentDecisionPanel, TrustBadges, WalletInspector, ResaleFlowPanel, resale steps)
+- [ ] 14-04-PLAN.md — Gap closure: register UI-* requirements in REQUIREMENTS.md, replace Card wrappers with M3 surface divs
 
 ---
 _Full v1.0 details archived to: `.planning/milestones/v1.0-ROADMAP.md`_
