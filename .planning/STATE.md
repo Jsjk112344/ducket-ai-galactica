@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Safe P2P Ticket Resale
 status: executing
-stopped_at: Completed 11-01-PLAN.md
-last_updated: "2026-03-20T02:13:41.918Z"
+stopped_at: Completed 11-02-PLAN.md (checkpoint pending human verify)
+last_updated: "2026-03-20T02:17:30.681Z"
 last_activity: 2026-03-20 — Phase 10 Plan 01 complete
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -55,6 +55,8 @@ Phase 10 decisions (Plan 01):
 - [Phase 10-02]: Post-checkpoint user review drove hero gradient header + Ducket logomark assets — committed atomically as second feat commit
 - [Phase 11]: Dynamic import used for escrow.js to prevent startup crash when SEPOLIA_RPC_URL absent
 - [Phase 11]: lockFunds does NOT auto-advance step — user must review Etherscan link before clicking Proceed
+- [Phase 11]: useResaleFlow called at App level so step/listing/lockResult survive tab switches
+- [Phase 11-02]: SettleStep OUTCOME_CONFIG uses string.includes() matching for release/refund/slash action strings
 
 ### Blockers/Concerns
 
@@ -63,6 +65,6 @@ Phase 10 decisions (Plan 01):
 
 ## Session Continuity
 
-Last session: 2026-03-20T02:13:38.051Z
-Stopped at: Completed 11-01-PLAN.md
+Last session: 2026-03-20T02:17:26.718Z
+Stopped at: Completed 11-02-PLAN.md (checkpoint pending human verify)
 Resume file: None
