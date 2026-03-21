@@ -3,7 +3,8 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1-8 (shipped 2026-03-19)
-- 🚧 **v2.0 Safe P2P Ticket Resale** — Phases 9-13 (in progress)
+- ✅ **v2.0 Safe P2P Ticket Resale** — Phases 9-14 (shipped 2026-03-22)
+- 🚧 **v2.1 OpenClaw Integration** — Phases 15-16 (in progress)
 
 ## Phases
 
@@ -21,83 +22,59 @@
 
 </details>
 
-### 🚧 v2.0 Safe P2P Ticket Resale (In Progress)
+<details>
+<summary>✅ v2.0 Safe P2P Ticket Resale (Phases 9-14) — SHIPPED 2026-03-22</summary>
 
-**Milestone Goal:** Pivot the working fraud detection agent into a buyer-facing safe P2P ticket resale platform — seller lists, buyer locks USDT, AI verifies, escrow settles. Reframe narrative, rebrand dashboard, wire resale flow UI, make Claude reasoning visible on seed data, record demo video.
+- [x] Phase 9: Reframe Narrative (1/1 plans) — completed 2026-03-19
+- [x] Phase 10: Dashboard Rebrand (2/2 plans) — completed 2026-03-19
+- [x] Phase 11: Resale Flow UI (2/2 plans) — completed 2026-03-20
+- [x] Phase 12: Seed Data + AI Visibility (1/1 plans) — completed 2026-03-20
+- [ ] Phase 13: Demo Polish + Video (0/TBD plans) — not started
+- [x] Phase 14: Dashboard UI/UX Overhaul (4/4 plans) — completed 2026-03-22
 
-- [x] **Phase 9: Reframe Narrative** — Update README, CLAUDE.md, and demo script for P2P resale framing (completed 2026-03-19)
-- [x] **Phase 10: Dashboard Rebrand** — Apply Ducket purple/yellow theme, Outfit headings, shadcn components (completed 2026-03-19)
-- [x] **Phase 11: Resale Flow UI** — 4-step wizard: seller lists, buyer locks USDT, AI verifies, escrow settles (completed 2026-03-20)
-- [x] **Phase 12: Seed Data + AI Visibility** — Pre-classified FIFA listings with 50+ word Claude reasoning visible in UI (completed 2026-03-20)
-- [ ] **Phase 13: Demo Polish + Video** — End-to-end rehearsals and demo video recording
+</details>
+
+### 🚧 v2.1 OpenClaw Integration (In Progress)
+
+**Milestone Goal:** Integrate OpenClaw as the agent reasoning/orchestration framework behind the classification pipeline -- satisfying the hackathon track "Must Have" for an agent framework. All changes additive (new files only). Existing code untouched. node-cron kept as fallback.
+
+- [ ] **Phase 15: OpenClaw Workspace + Skills** — SOUL.md, 3 SKILL.md files, 3 CLI wrapper scripts
+- [ ] **Phase 16: Pipeline Wiring + Verification** — End-to-end pipeline, demo startup, regression check
 
 ## Phase Details
 
-### Phase 9: Reframe Narrative
-**Goal**: All project text describes a safe P2P resale platform, not a fraud monitoring tool — judges read buyer/seller personas everywhere they look
-**Depends on**: Phase 8 (v1.0 complete)
-**Requirements**: NARR-01, NARR-02, NARR-03
+### Phase 15: OpenClaw Workspace + Skills
+**Goal**: OpenClaw has a complete workspace defining the Ducket agent identity and three executable skills that wrap existing scan, classify, and escrow modules -- all as new additive files
+**Depends on**: Phase 14
+**Requirements**: CLAW-01, CLAW-02, CLAW-03
 **Success Criteria** (what must be TRUE):
-  1. README uses "seller lists / buyer locks USDT / AI verifies / escrow settles" language throughout and contains no "monitoring tool" or "scan and report" framing
-  2. CLAUDE.md decision rules reference P2P resale context and buyer/seller agent role
-  3. Demo script walks a named buyer/seller scenario (Alice sells, Bob buys) mapped to actual dashboard screens with no step that says "fraud monitoring"
-**Plans:** 1/1 plans complete
-Plans:
-- [ ] 09-01-PLAN.md — Rewrite README, CLAUDE.md, and create demo script with P2P resale framing
+  1. A SOUL.md file exists in the OpenClaw workspace directory defining the Ducket agent's identity, mission (safe P2P ticket resale), and the three-step pipeline (scan, classify, escrow)
+  2. Three SKILL.md files exist (ducket-scan, ducket-classify, ducket-escrow) with valid YAML frontmatter and natural-language instructions that describe when and how to invoke each skill
+  3. Three CLI wrapper scripts (cli-scan.js, cli-classify.js, cli-escrow.js) exist and can be executed standalone via `node cli-scan.js` -- each calls the corresponding existing module and exits with a status code
+  4. No existing files (scan-loop.js, classify.js, escrow.js, or any dashboard code) are modified -- all changes are new files only
+**Plans**: 1 plan
 
-### Phase 10: Dashboard Rebrand
-**Goal**: Dashboard visually communicates the Ducket brand — judges see a polished product, not a hackathon scaffold, when they open localhost:5173
-**Depends on**: Phase 9
-**Requirements**: BRAND-01, BRAND-02, BRAND-03, BRAND-04
-**Success Criteria** (what must be TRUE):
-  1. Dashboard header and cards use Ducket primary purple (#3D2870) and accent yellow (#F5C842) with dark mode purple background — no default Tailwind slate/gray palette visible in primary UI areas
-  2. All headings render in Outfit Variable font and body text renders in Inter — fonts load from self-hosted @fontsource packages with no Google Fonts CDN calls
-  3. At least Button, Card, Badge, Input, Label, and Separator render as shadcn components — no shadcn CLI init artifact (tailwind.config.js) present in the repo
-  4. Trust badges ("Price cap protected", "Verified on-chain", "Non-custodial") are visible in the UI without scrolling on the main resale view
-**Plans:** 2/2 plans complete
 Plans:
-- [ ] 10-01-PLAN.md — Install deps, update CSS theme tokens, swap fonts to @fontsource-variable, create cn() utility, copy 6 shadcn components
-- [ ] 10-02-PLAN.md — Apply Ducket rebrand to all dashboard components, create TrustBadges, wire shadcn Card into EscrowStatus
+- [ ] 15-01-PLAN.md — Create OpenClaw workspace (SOUL.md), 3 SKILL.md files, and 3 CLI wrapper scripts
 
-### Phase 11: Resale Flow UI
-**Goal**: A judge can walk all four steps of a P2P ticket transaction — list, lock, verify, settle — without leaving the dashboard
-**Depends on**: Phase 10
-**Requirements**: RESALE-01, RESALE-02, RESALE-03, RESALE-04
+### Phase 16: Pipeline Wiring + Verification
+**Goal**: OpenClaw can orchestrate the full scan-classify-escrow pipeline end-to-end, the demo startup includes the OpenClaw daemon, and all existing agent tests still pass
+**Depends on**: Phase 15
+**Requirements**: CLAW-04, CLAW-05, CLAW-06
 **Success Criteria** (what must be TRUE):
-  1. Seller can fill in event, section, quantity, price, and face value in a form and submit it — listing appears in the resale flow after submission
-  2. Buyer lock button calls the WDK deposit path for the selected listing — UI shows the wallet address and a live Etherscan link for the escrow transaction
-  3. AI verification step displays the full Classification.reasoning text in a prominent Agent Decision Panel — text is readable, 50+ words, references specific listing fields
-  4. Settlement outcome (release, refund, or slash) is displayed with the on-chain transaction link and labeled outcome — result matches the listing's classification category
-**Plans:** 2/2 plans complete
-Plans:
-- [ ] 11-01-PLAN.md — Add POST /api/listings + POST /api/escrow/deposit endpoints, create useResaleFlow hook and EtherscanLink component
-- [ ] 11-02-PLAN.md — Build ListingForm, BuyerLockStep, VerifyStep, SettleStep, ResaleFlowPanel components and wire into App.tsx as first tab
+  1. Running the OpenClaw agent loop triggers the full scan -> classify -> enforce pipeline end-to-end without manual intervention -- listings are scanned, classified, and escrow actions taken automatically
+  2. `npm run demo` starts the OpenClaw daemon alongside the dashboard server -- a single command brings up the complete system
+  3. All existing agent tests pass after integration -- classification quality is preserved with no regressions in scan, classify, or escrow modules
+  4. node-cron scan loop remains functional as a fallback -- reverting to pre-OpenClaw demo startup takes a one-line script change
+**Plans**: TBD
 
-### Phase 12: Seed Data + AI Visibility
-**Goal**: Judges can see Claude's reasoning on realistic FIFA World Cup 2026 listings without triggering a live agent run — AgentDecisionPanel never shows empty state
-**Depends on**: Phase 11
-**Requirements**: DEMO-01
-**Success Criteria** (what must be TRUE):
-  1. At least one seed listing exists for each of the 4 classification categories (scalping violation, likely scam, counterfeit risk, legitimate) — each has a Classification object pre-attached
-  2. Every seed listing's reasoning string is 50+ words and references specific fields from that listing (price markup percentage, account age, cross-platform pattern, or face value delta)
-  3. Loading the resale flow tab immediately shows populated listings with expanded Agent Decision Panels — no "no listings" empty state visible on first load
-**Plans:** 1/1 plans complete
 Plans:
-- [ ] 12-01-PLAN.md — Create 4 seed listings with case files, default-expand first row, validation script
-
-### Phase 13: Demo Polish + Video
-**Goal**: A recorded demo video exists that covers all four judging segments in under 5 minutes — submission is ready to publish
-**Depends on**: Phase 12
-**Requirements**: DEMO-02, DEMO-03
-**Success Criteria** (what must be TRUE):
-  1. Demo video is recorded, under 5 minutes, and covers all four required segments: agent logic, wallet flow, payment lifecycle, and full end-to-end loop
-  2. Three end-to-end rehearsals are completed before the recording session — each rehearsal covers seller list through escrow settlement without a critical failure
-  3. Repo is public, no .env or secrets committed, all third-party services disclosed in README — runnable by a judge with `npm install && npm run demo`
-**Plans:** 1 plan
-Plans:
-- [ ] 12-01-PLAN.md — Create 4 seed listings with case files, default-expand first row, validation script
+- [ ] 16-01-PLAN.md — Wire OpenClaw pipeline, update demo startup script, run regression tests
 
 ## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 15 -> 16
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -109,26 +86,16 @@ Plans:
 | 6. Escrow Enforcement Wiring | v1.0 | 2/2 | Complete | 2026-03-19 |
 | 7. React Dashboard | v1.0 | 3/3 | Complete | 2026-03-19 |
 | 8. Demo Integration + Submission | v1.0 | 1/2 | Complete* | 2026-03-19 |
-| 9. Reframe Narrative | 1/1 | Complete   | 2026-03-19 | - |
-| 10. Dashboard Rebrand | 2/2 | Complete    | 2026-03-19 | - |
-| 11. Resale Flow UI | 2/2 | Complete   | 2026-03-20 | - |
-| 12. Seed Data + AI Visibility | 1/1 | Complete    | 2026-03-20 | - |
+| 9. Reframe Narrative | v2.0 | 1/1 | Complete | 2026-03-19 |
+| 10. Dashboard Rebrand | v2.0 | 2/2 | Complete | 2026-03-19 |
+| 11. Resale Flow UI | v2.0 | 2/2 | Complete | 2026-03-20 |
+| 12. Seed Data + AI Visibility | v2.0 | 1/1 | Complete | 2026-03-20 |
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |
+| 14. Dashboard UI/UX Overhaul | v2.0 | 4/4 | Complete | 2026-03-22 |
+| 15. OpenClaw Workspace + Skills | v2.1 | 0/1 | Not started | - |
+| 16. Pipeline Wiring + Verification | v2.1 | 0/TBD | Not started | - |
 
-_*08-02 (E2E demo validation) deferred — see MILESTONES.md for known gaps_
-
-### Phase 14: Dashboard UI/UX overhaul — Celestial Ledger design system
-
-**Goal:** Apply the Celestial Ledger M3 dark theme design system to all dashboard components — fixed nav, hero, stat cards with border-l-4, Active Order Book table with chevron rows, glass panels, M3 semantic badge colors, hover micro-interactions, JetBrains Mono for code, and FAB button
-**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-09, UI-10
-**Depends on:** Phase 12
-**Plans:** 4/4 plans complete
-
-Plans:
-- [x] 14-01-PLAN.md — Install JetBrains Mono font, copy Logo_2.png, extend index.css with M3 dark token system
-- [x] 14-02-PLAN.md — Upgrade App.tsx (fixed nav, hero, FAB), EscrowStatus (stat cards), ListingsTable (Active Order Book)
-- [x] 14-03-PLAN.md — Upgrade all detail components to M3 tokens (Badge, ConfidenceBar, AgentDecisionPanel, TrustBadges, WalletInspector, ResaleFlowPanel, resale steps)
-- [ ] 14-04-PLAN.md — Gap closure: register UI-* requirements in REQUIREMENTS.md, replace Card wrappers with M3 surface divs
+_*08-02 (E2E demo validation) deferred -- see MILESTONES.md for known gaps_
 
 ---
 _Full v1.0 details archived to: `.planning/milestones/v1.0-ROADMAP.md`_
