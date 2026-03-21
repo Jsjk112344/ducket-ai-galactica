@@ -66,10 +66,11 @@ Plans:
   2. `npm run demo` starts the OpenClaw daemon alongside the dashboard server -- a single command brings up the complete system
   3. All existing agent tests pass after integration -- classification quality is preserved with no regressions in scan, classify, or escrow modules
   4. node-cron scan loop remains functional as a fallback -- reverting to pre-OpenClaw demo startup takes a one-line script change
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Wire OpenClaw pipeline, update demo startup script, run regression tests
+- [ ] 16-01-PLAN.md — Fix pre-existing test failures to establish green baseline
+- [ ] 16-02-PLAN.md — Create OpenClaw pipeline orchestrator, update demo startup, verify regressions
 
 ## Progress
 
@@ -93,7 +94,7 @@ Phases execute in numeric order: 15 -> 16
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |
 | 14. Dashboard UI/UX Overhaul | v2.0 | 4/4 | Complete | 2026-03-22 |
 | 15. OpenClaw Workspace + Skills | 1/1 | Complete    | 2026-03-21 | - |
-| 16. Pipeline Wiring + Verification | v2.1 | 0/TBD | Not started | - |
+| 16. Pipeline Wiring + Verification | v2.1 | 0/2 | Not started | - |
 
 _*08-02 (E2E demo validation) deferred -- see MILESTONES.md for known gaps_
 
