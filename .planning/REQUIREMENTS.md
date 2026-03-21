@@ -52,9 +52,9 @@ Requirements for OpenClaw integration. Satisfies hackathon track "Must Have" for
 
 ### OpenClaw Integration
 
-- [ ] **CLAW-01**: OpenClaw workspace configured with SOUL.md defining Ducket agent identity and mission
-- [ ] **CLAW-02**: Three OpenClaw skills registered as SKILL.md files (scan, classify, escrow) with correct YAML frontmatter
-- [ ] **CLAW-03**: CLI wrapper scripts (cli-scan.js, cli-classify.js, cli-escrow.js) bridge OpenClaw exec tool to existing agent modules
+- [x] **CLAW-01**: OpenClaw workspace configured with SOUL.md defining Ducket agent identity and mission
+- [x] **CLAW-02**: Three OpenClaw skills registered as SKILL.md files (scan, classify, escrow) with correct YAML frontmatter
+- [x] **CLAW-03**: CLI wrapper scripts (cli-scan.js, cli-classify.js, cli-escrow.js) bridge OpenClaw exec tool to existing agent modules
 - [ ] **CLAW-04**: OpenClaw agent loop can trigger the full scan→classify→enforce pipeline end-to-end
 - [ ] **CLAW-05**: Demo startup script (`npm run demo`) includes OpenClaw daemon alongside dashboard
 - [ ] **CLAW-06**: Existing classification quality preserved — all agent tests still pass after integration
@@ -108,9 +108,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-08 | Phase 14 | Complete |
 | UI-09 | Phase 14 | Complete |
 | UI-10 | Phase 14 | Complete |
-| CLAW-01 | Phase 15 | Pending |
-| CLAW-02 | Phase 15 | Pending |
-| CLAW-03 | Phase 15 | Pending |
+| CLAW-01 | Phase 15 | Complete |
+| CLAW-02 | Phase 15 | Complete |
+| CLAW-03 | Phase 15 | Complete |
 | CLAW-04 | Phase 16 | Pending |
 | CLAW-05 | Phase 16 | Pending |
 | CLAW-06 | Phase 16 | Pending |
