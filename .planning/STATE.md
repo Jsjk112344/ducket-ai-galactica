@@ -4,7 +4,7 @@ milestone: v2.1
 milestone_name: OpenClaw Integration
 status: planning
 stopped_at: Completed 15-01-PLAN.md — OpenClaw workspace + skills
-last_updated: "2026-03-21T17:53:57.569Z"
+last_updated: "2026-03-21T17:59:24.294Z"
 last_activity: 2026-03-22 — Roadmap created for v2.1 OpenClaw Integration
 progress:
   total_phases: 2

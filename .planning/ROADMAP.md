@@ -92,7 +92,7 @@ Phases execute in numeric order: 15 -> 16
 | 12. Seed Data + AI Visibility | v2.0 | 1/1 | Complete | 2026-03-20 |
 | 13. Demo Polish + Video | v2.0 | 0/TBD | Not started | - |
 | 14. Dashboard UI/UX Overhaul | v2.0 | 4/4 | Complete | 2026-03-22 |
-| 15. OpenClaw Workspace + Skills | 1/1 | Complete   | 2026-03-21 | - |
+| 15. OpenClaw Workspace + Skills | 1/1 | Complete    | 2026-03-21 | - |
 | 16. Pipeline Wiring + Verification | v2.1 | 0/TBD | Not started | - |
 
 _*08-02 (E2E demo validation) deferred -- see MILESTONES.md for known gaps_
