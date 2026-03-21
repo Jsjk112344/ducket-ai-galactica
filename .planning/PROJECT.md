@@ -4,16 +4,15 @@
 
 An autonomous agent that scans secondary ticketing marketplaces (StubHub, Viagogo, Facebook Marketplace) for fraudulent or overpriced ticket listings, classifies each listing using a hybrid rules + Claude AI engine, and enforces outcomes on-chain via USDT escrow on Sepolia — all without human intervention. Built for the Tether Hackathon Galáctica: WDK Edition 1 (deadline: March 22, 2026) as an extension of Ducket's existing anti-fraud ticketing platform.
 
-## Current Milestone: v2.0 Safe P2P Ticket Resale
+## Current Milestone: v2.1 Submission & Demo
 
-**Goal:** Pivot from monitoring tool to safe P2P ticket resale platform — seller lists, buyer locks USDT, AI verifies, escrow settles.
+**Goal:** Ship hackathon submission — static Vercel demo site (read-only dashboard with bundled seed data), hosted pitch deck, and recorded demo video.
 
 **Target features:**
-- Reframe narrative (README, CLAUDE.md, demo script) for P2P resale
-- Dashboard rebrand with Ducket purple/yellow theme, Outfit headings, shadcn components
-- Resale flow UI (seller lists ticket, buyer locks USDT, AI verifies, escrow settles)
-- Claude AI reasoning visible on mock/seed data for demo
-- Demo polish + video recording
+- Static demo build for Vercel (bundled seed data JSON, no Express/agent backend needed)
+- Pitch deck hosted alongside demo on Vercel
+- Demo video recorded covering all 4 judging segments
+- Submission-ready README with Vercel demo link and video embed
 
 ## Core Value
 
@@ -36,11 +35,10 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 
 ### Active
 
-- [ ] Reframe narrative for P2P resale (README, CLAUDE.md, demo script)
-- [ ] Dashboard rebrand with Ducket brand tokens (purple/yellow, Outfit, shadcn)
-- [ ] Resale flow UI (seller lists, buyer locks USDT, AI verifies, escrow settles)
-- [ ] Claude AI reasoning visible on mock/seed data during demo
-- [ ] Demo polish and video recording
+- [ ] Static Vercel demo site with bundled seed data
+- [ ] Pitch deck hosted on Vercel
+- [ ] Demo video recorded (<=5 min, all 4 segments)
+- [ ] Submission-ready README with demo link and video
 
 ### Out of Scope
 
@@ -79,7 +77,7 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| OpenClaw as agent framework | Team already experienced with it, runs locally, open-source | ✓ Good — scan loop runs autonomously |
+| node-cron scan loop as agent runtime | Simple, no framework overhead, runs locally | ✓ Good — autonomous 5-min cron cycle |
 | WDK for all wallet ops | Hackathon mandatory requirement | ✓ Good — non-custodial, deposit works via WDK |
 | Separate chains (Polygon NFTs vs USDT escrow) | WDK dictates escrow chain; existing ticket NFTs stay on Polygon | ✓ Good — clean separation |
 | New standalone React app (not inside ducket-web) | Different product type, but borrow styling from ducket-web | ✓ Good — fast setup with Vite 8 |
@@ -95,4 +93,4 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 | Mock fallback for all scrapers | Anti-bot detection on non-residential IPs | ✓ Good — demo resilience, labeled as mock |
 
 ---
-*Last updated: 2026-03-20 after v2.0 milestone start*
+*Last updated: 2026-03-21 after v2.1 milestone start*

@@ -103,7 +103,12 @@ export async function writeCaseFile(listing, classificationResult, actionTaken) 
 | URL | ${listing.url ?? 'N/A'} |
 | Listing Date | ${listing.listingDate ?? 'unknown'} |
 | Data Source | ${listing.source ?? 'unknown'} |
-| Screenshot | _(not captured — scrapers collect structured data only)_ |
+| Seller Age | ${listing.sellerAge != null ? listing.sellerAge + ' days' : 'unknown'} |
+| Seller Transactions | ${listing.sellerTransactions ?? 'unknown'} |
+| Seller Verified | ${listing.sellerVerified != null ? (listing.sellerVerified ? 'Yes' : 'No') : 'unknown'} |
+| Transfer Method | ${listing.transferMethod ?? 'unspecified'} |
+| Event Demand | ${listing.eventDemand ?? 'unknown'} |
+| Description | ${(listing.listingDescription ?? 'none').slice(0, 100)} |
 
 ## Red Flags
 
@@ -118,7 +123,18 @@ ${redFlagsSection}
 | Classification Source | ${classificationResult.classificationSource} |
 
 **Reasoning:** ${classificationResult.reasoning}
+${classificationResult.signals ? `
+## Risk Signal Breakdown
 
+| Signal | Score | Detail |
+|--------|-------|--------|
+| Pricing Risk (30%) | ${classificationResult.signals.pricingRisk.score}/100 | ${classificationResult.signals.pricingRisk.detail} |
+| Seller Trust (25%) | ${classificationResult.signals.sellerRisk.score}/100 | ${classificationResult.signals.sellerRisk.detail} |
+| Listing Quality (20%) | ${classificationResult.signals.listingRisk.score}/100 | ${classificationResult.signals.listingRisk.detail} |
+| Temporal Pattern (15%) | ${classificationResult.signals.temporalRisk.score}/100 | ${classificationResult.signals.temporalRisk.detail} |
+| Platform Trust (10%) | ${classificationResult.signals.platformRisk.score}/100 | ${classificationResult.signals.platformRisk.detail} |
+| **Composite Risk** | **${classificationResult.signals.compositeRisk}/100** | |
+` : ''}
 ## Enforcement Action
 
 | Field | Value |

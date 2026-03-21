@@ -17,42 +17,85 @@ Safe P2P ticket resale powered by AI and USDT escrow. Seller lists a ticket, buy
 ## Architecture
 
 ```
-                     Ducket AI Galactica
-                ============================
-                 Safe P2P Ticket Resale
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         DUCKET AI GALACTICA                              │
+│                       Safe P2P Ticket Resale                             │
+│                                                                          │
+│  ┌──────────┐  1. list ticket   ┌──────────────────────────────────┐    │
+│  │  Seller  │ ────────────────> │         React Dashboard          │    │
+│  └──────────┘                   │     localhost:5173 (read-only)   │    │
+│                                 │                                  │    │
+│  ┌──────────┐  2. lock USDT    │  Resale Flow: List → Lock →      │    │
+│  │  Buyer   │ ────────────────> │  Verify → Settle                 │    │
+│  └──────────┘   (WDK wallet)   └──────────────┬───────────────────┘    │
+│                                                │                        │
+│                                                ▼                        │
+│                                 ┌──────────────────────────────────┐    │
+│                                 │     AI Verification Agent        │    │
+│                                 │                                  │    │
+│                                 │  Tier 1: Deterministic Rules     │    │
+│                                 │  • price > 100% above face → ❌  │    │
+│                                 │  • price < -10% face → ❌        │    │
+│                                 │  • confidence ≥ 85% → done       │    │
+│                                 │                                  │    │
+│                                 │  Tier 2: Claude AI (ambiguous)   │    │
+│                                 │  • structured JSON verdict       │    │
+│                                 │  • category + confidence + why   │    │
+│                                 └──────────┬───┬──────────────────┘    │
+│                                            │   │                        │
+│                          ┌─────────────────┘   └──────────────────┐     │
+│                          ▼                                        ▼     │
+│               ┌─────────────────────┐              ┌─────────────────┐  │
+│               │  ✅ LEGITIMATE       │              │  ❌ VIOLATION    │  │
+│               │  Release USDT       │              │  Slash/Refund   │  │
+│               │  to seller          │              │  to buyer/pool  │  │
+│               └─────────┬───────────┘              └────────┬────────┘  │
+│                         │                                   │           │
+│                         └──────────────┬────────────────────┘           │
+│                                        ▼                                │
+│                         ┌──────────────────────────────────┐            │
+│                         │      FraudEscrow.sol (Sepolia)   │            │
+│                         │  deposit / release / refund / slash │         │
+│                         │  SafeERC20 · ReentrancyGuard     │            │
+│                         └──────────────────────────────────┘            │
+│                                                                          │
+│            All wallet ops via WDK — non-custodial, keys never persisted │
+└──────────────────────────────────────────────────────────────────────────┘
 
-  +-----------+                          +-----------+
-  |  Seller   |--- lists ticket -------->|           |
-  +-----------+                          |  Resale   |
-                                         |  Platform |
-  +-----------+                          |           |
-  |  Buyer    |--- locks USDT ---------->|  (React   |
-  |           |   (WDK + Sepolia)        |  Dashboard|
-  +-----------+                          |  + API)   |
-                                         +-----------+
-                                               |
-                                               v
-                                    +----------+----------+
-                                    |   AI Verification   |
-                                    |   Agent (Claude)    |
-                                    +----------+----------+
-                                               |
-                          +--------------------+--------------------+
-                          |                                         |
-                          v                                         v
-               +----------+----------+                  +----------+----------+
-               |  Legitimate: Release|                  | Failed: Refund/Slash|
-               |  USDT to seller     |                  | USDT to buyer       |
-               +---------------------+                  +---------------------+
-                          |                                         |
-                          +--------------------+--------------------+
-                                               |
-                                               v
-                                    +----------+----------+
-                                    |  FraudEscrow.sol    |
-                                    |  (USDT on-chain)    |
-                                    +---------------------+
+Data sources (agent-sourced, not seller-reported):
+  StubHub ──┐
+  Viagogo ──┼── Patchright scrapers ──> price comparison + fraud signals
+  Facebook ─┘
+  FIFA 2026 face value database ──> baseline for markup calculations
 ```
+
+## How the AI Agent Decides
+
+The agent uses a **two-tier classification engine** — deterministic rules first, Claude AI for ambiguous cases:
+
+| Tier | When | Speed | Cost |
+|------|------|-------|------|
+| **Rules** | Confidence ≥ 85% (obvious scalping, scam bait) | Instant | Free |
+| **Claude** | Confidence < 85% (borderline pricing, mixed signals) | ~2s | API call |
+
+**Classification categories and escrow outcomes:**
+
+| Category | Trigger | Escrow Action |
+|----------|---------|---------------|
+| SCALPING_VIOLATION | Price > 100% above face value | Slash to bounty pool |
+| LIKELY_SCAM | Price < 10% below face value (bait pricing) | Refund to buyer |
+| COUNTERFEIT_RISK | Red flags (new seller, no proof of ticket) | Refund to buyer |
+| LEGITIMATE | Fair price, no red flags | Release to seller |
+
+Face values are **agent-sourced** from an independent FIFA 2026 database — the seller never sets their own baseline.
+
+## What the Demo Shows
+
+`npm run demo` runs both cycles automatically:
+
+**Cycle 1 — Legitimate listing:** Seller lists FIFA World Cup tickets at a fair price → buyer locks USDT → agent approves (rules: 25% markup, within bounds) → escrow released to seller.
+
+**Cycle 2 — Scalper caught:** Same event, 608% markup → buyer locks USDT → agent rejects (rules: SCALPING_VIOLATION, 95% confidence) → escrow slashed. Same pipeline, opposite outcome — the agent decided, the contract enforced.
 
 ## Quick Start
 
@@ -99,22 +142,24 @@ ducket-ai-galactica/
 
 [VIDEO LINK — to be added before submission]
 
+## Tech Stack
+
+| Technology | Usage |
+|-----------|-------|
+| @tetherto/wdk + wdk-wallet-evm | Non-custodial USDT wallet — escrow deposits, approvals, settlements |
+| @anthropic-ai/sdk (Claude) | Tier 2 AI classification — structured verdicts with reasoning |
+| ethers v6 | ABI encoding, contract reads, Sepolia provider |
+| Patchright | Anti-bot scraping (StubHub, Viagogo, Facebook Marketplace) |
+| React 19 + Vite 8 | Dashboard UI with resale flow wizard |
+| Tailwind CSS v4 | Dashboard styling |
+| Hardhat 3 | FraudEscrow.sol compilation and testing |
+| node-cron | Autonomous 5-minute scan loop |
+| Ethereum Sepolia | Testnet — all transactions are real on-chain |
+
 ## Third-Party Disclosures
 
-| Service | Provider | Purpose |
-|---------|----------|---------|
-| Claude API | Anthropic | AI ticket verification |
-| WDK | Tether | Non-custodial USDT wallet |
-| Patchright | playwright fork | Anti-bot scraping |
-| ethers.js | ethers | Blockchain interaction |
-| node-cron | node-cron | Verification scheduling |
-| Vite | Vite | Dashboard build tool |
-| React | Meta | Dashboard UI |
-| Tailwind CSS | Tailwind Labs | Dashboard styling |
-| Sepolia Testnet | Ethereum Foundation | Test blockchain |
-
 All third-party services are used in accordance with their respective terms of service.
-No mainnet funds are used — Sepolia testnet only.
+No mainnet funds are used — Sepolia testnet only. See tech stack above for full list.
 
 ## Environment Variables
 

@@ -20,6 +20,9 @@ build/
 wallet.json
 keystore/
 
+# Submission answers (not for public repo)
+docs/SUBMISSION.md
+
 # OS
 .DS_Store
 Thumbs.db

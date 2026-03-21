@@ -1,34 +1,34 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Safe P2P Ticket Resale
-status: executing
-stopped_at: Completed Phase 14 Plan 04 (14-04-PLAN.md)
-last_updated: "2026-03-20T14:00:20.358Z"
-last_activity: 2026-03-20 — Phase 12 Plan 01 complete (seed data + visual verification)
+milestone: v2.1
+milestone_name: Submission & Demo
+status: defining_requirements
+stopped_at: null
+last_updated: "2026-03-21"
+last_activity: 2026-03-21 — Milestone v2.1 started
 progress:
-  total_phases: 6
-  completed_phases: 5
-  total_plans: 10
-  completed_plans: 10
-  percent: 20
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-20)
+See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket legitimacy, smart contract releases or refunds automatically.
-**Current focus:** Phase 9 — Reframe Narrative
+**Current focus:** Defining requirements for v2.1 Submission & Demo
 
 ## Current Position
 
-Phase: 12 of 13 (Seed Data + AI Visibility)
-Plan: 1 of 1 in current phase (Plan 01 complete)
-Status: In progress — Phase 12 complete, ready for Phase 13
-Last activity: 2026-03-20 — Phase 12 Plan 01 complete (seed data + visual verification)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-21 — Milestone v2.1 started
 
 Progress: [██░░░░░░░░] 20% (v2.0 milestone)
 

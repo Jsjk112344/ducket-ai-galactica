@@ -65,12 +65,9 @@ export function App() {
             <div>
               <div className="flex items-center gap-3 mb-1">
                 <img src="/images/Logo_2.png" className="h-9 w-auto" alt="Ducket" />
-                <span className="text-xs bg-m3-surface-container border border-m3-outline/30 text-m3-outline px-2.5 py-1 rounded-full font-mono">
-                  Protocol v2.0
-                </span>
               </div>
-              <h1 className="text-4xl font-black text-m3-on-surface tracking-tighter">Celestial Ledger</h1>
-              <p className="text-m3-secondary text-sm mt-1">Safe P2P ticket resale — buyer protected by escrow</p>
+              <h1 className="text-4xl font-black text-m3-on-surface tracking-tighter">DUCKET AI</h1>
+              <p className="text-m3-secondary text-sm mt-1">Safe P2P event ticket resale — trustless, AI-verified, on-chain</p>
             </div>
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-m3-tertiary rounded-full animate-pulse" />
@@ -89,9 +86,11 @@ export function App() {
                 listing={resaleFlow.listing}
                 lockResult={resaleFlow.lockResult}
                 wallet={wallet}
+                isBlocked={resaleFlow.isBlocked}
                 submitListing={resaleFlow.submitListing}
                 lockFunds={resaleFlow.lockFunds}
                 advance={resaleFlow.advance}
+                reset={resaleFlow.reset}
               />
             )}
             {activeTab === 'listings' && <ListingsTable listings={listings} />}
@@ -104,7 +103,7 @@ export function App() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-center gap-3 opacity-60">
             <img src="/images/logomark.png" alt="" className="h-5 w-auto opacity-50" />
-            <p className="text-m3-outline text-xs">Powered by WDK + Claude AI</p>
+            <p className="text-m3-outline text-xs">Trustless P2P resale — Powered by WDK + Claude AI</p>
           </div>
         </div>
       </div>

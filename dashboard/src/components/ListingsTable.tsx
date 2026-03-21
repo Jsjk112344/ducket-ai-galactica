@@ -3,7 +3,7 @@
 // Columns: (chevron), Platform, Seller, Price, Face Value, Delta%, Classification, Confidence, Status
 // Apache 2.0 License
 
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import { ChevronDown, Filter } from 'lucide-react';
 import { Listing } from '../types';
 import { Badge } from './Badge';
@@ -15,19 +15,13 @@ interface ListingsTableProps {
   listings: Listing[];
 }
 
-// Seed listing URLs — used to default-expand the first seed row on load so
-// judges immediately see AgentDecisionPanel with AI reasoning on page open.
-const SEED_URLS = [
-  'https://ducket.seed/listing/scalping-001',
-  'https://ducket.seed/listing/scam-001',
-  'https://ducket.seed/listing/counterfeit-001',
-  'https://ducket.seed/listing/legitimate-001',
-];
+// Default-expand the first verified legitimate listing so judges immediately see
+// the signal breakdown proving a real listing passed all checks.
+const DEFAULT_EXPAND_URL = 'https://ducket.seed/listing/legit-verified-001';
 
 export function ListingsTable({ listings }: ListingsTableProps) {
   // Track which listing row is expanded (by URL — unique per listing)
-  // Default to first seed listing so AgentDecisionPanel is visible on first load.
-  const [expandedUrl, setExpandedUrl] = useState<string | null>(SEED_URLS[0]);
+  const [expandedUrl, setExpandedUrl] = useState<string | null>(DEFAULT_EXPAND_URL);
 
   function toggleRow(url: string) {
     setExpandedUrl((prev) => (prev === url ? null : url));
@@ -82,9 +76,8 @@ export function ListingsTable({ listings }: ListingsTableProps) {
           </thead>
           <tbody>
             {listings.map((listing, idx) => (
-              <>
+              <Fragment key={listing.url}>
                 <tr
-                  key={listing.url}
                   onClick={() => toggleRow(listing.url)}
                   className={`hover:bg-m3-surface-container/50 cursor-pointer border-t border-m3-outline/10 transition-colors ${
                     idx % 2 === 1 ? 'bg-m3-surface-container-low/30' : ''
@@ -115,14 +108,14 @@ export function ListingsTable({ listings }: ListingsTableProps) {
                   </td>
 
                   {/* Price */}
-                  <td className="px-4 py-3 text-m3-on-surface">${listing.price.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-m3-on-surface">${(listing.price ?? 0).toLocaleString()}</td>
 
                   {/* Face Value */}
-                  <td className="px-4 py-3 text-m3-on-surface-variant">${listing.faceValue.toLocaleString()}</td>
+                  <td className="px-4 py-3 text-m3-on-surface-variant">${(listing.faceValue ?? 0).toLocaleString()}</td>
 
                   {/* Delta% */}
-                  <td className={`px-4 py-3 ${deltaColor(listing.priceDeltaPct)}`}>
-                    {listing.priceDeltaPct}%
+                  <td className={`px-4 py-3 ${deltaColor(listing.priceDeltaPct ?? 0)}`}>
+                    {listing.priceDeltaPct ?? 0}%
                   </td>
 
                   {/* Classification Badge */}
@@ -143,13 +136,13 @@ export function ListingsTable({ listings }: ListingsTableProps) {
 
                 {/* Expandable Agent Decision Panel row */}
                 {expandedUrl === listing.url && listing.classification && (
-                  <tr key={`${listing.url}-detail`} className="border-t border-m3-outline/10">
+                  <tr className="border-t border-m3-outline/10">
                     <td colSpan={9} className="px-4 py-3 bg-m3-surface-container/60 backdrop-blur-sm border-t border-m3-outline/10">
                       <AgentDecisionPanel classification={listing.classification} />
                     </td>
                   </tr>
                 )}
-              </>
+              </Fragment>
             ))}
           </tbody>
         </table>

@@ -385,35 +385,44 @@
   <!-- ===== SLIDE 2: Agent Intelligence ===== -->
   <div class="slide" data-slide="2" style="padding: 56px 64px; padding-top: 80px; justify-content: flex-start;">
     <h2><span class="accent-underline">How the Agent Decides</span></h2>
-    <p style="margin-bottom: 18px; max-width: 700px;">Hybrid two-tier classification: deterministic rules catch obvious fraud instantly (zero cost), Claude handles ambiguous cases with structured reasoning. Every verdict is explainable — the dashboard shows exactly why.</p>
+    <p style="margin-bottom: 18px; max-width: 700px;">Multi-signal risk scoring — not just price. Five independent signals are weighted and combined. Ambiguous cases (composite 25-70) are escalated to Claude for deep analysis. Every signal is visible in the dashboard.</p>
 
     <div class="split">
       <div>
-        <!-- Rules tier -->
+        <!-- Signal scoring -->
         <div class="stat-card" style="margin-bottom: 12px;">
-          <div class="label">Tier 1 — Deterministic Rules</div>
-          <p class="small" style="color: var(--m3-on-surface-variant); margin-bottom: 8px;">Instant classification. No API call needed. High-confidence matches (>=85%) skip Claude entirely.</p>
+          <div class="label">5-Signal Risk Engine</div>
+          <p class="small" style="color: var(--m3-on-surface-variant); margin-bottom: 8px;">Each signal scored 0-100, weighted, combined into a composite risk score. Price alone does NOT determine fraud.</p>
           <table>
             <tr>
-              <td class="mono small red" style="padding: 6px 8px;">priceDelta > 100%</td>
-              <td class="small" style="padding: 6px 8px;">→ SCALPING (confidence scales with markup)</td>
+              <td class="mono small gold" style="padding: 5px 8px; width: 55%;">Pricing Risk <span class="muted">(30%)</span></td>
+              <td class="small" style="padding: 5px 8px;">Market-adjusted — demand tier shifts thresholds</td>
             </tr>
             <tr>
-              <td class="mono small orange" style="padding: 6px 8px;">priceDelta &lt; -10%</td>
-              <td class="small" style="padding: 6px 8px;">→ LIKELY SCAM (below-face = bait)</td>
+              <td class="mono small orange" style="padding: 5px 8px;">Seller Trust <span class="muted">(25%)</span></td>
+              <td class="small" style="padding: 5px 8px;">Account age, transaction history, verification</td>
             </tr>
             <tr>
-              <td class="mono small yellow" style="padding: 6px 8px;">"new seller" / "no proof"</td>
-              <td class="small" style="padding: 6px 8px;">→ COUNTERFEIT RISK</td>
+              <td class="mono small yellow" style="padding: 5px 8px;">Listing Quality <span class="muted">(20%)</span></td>
+              <td class="small" style="padding: 5px 8px;">Description depth, transfer method, section data</td>
+            </tr>
+            <tr>
+              <td class="mono small purple" style="padding: 5px 8px;">Temporal Pattern <span class="muted">(15%)</span></td>
+              <td class="small" style="padding: 5px 8px;">New account + high value, last-minute listings</td>
+            </tr>
+            <tr>
+              <td class="mono small teal" style="padding: 5px 8px;">Platform Trust <span class="muted">(10%)</span></td>
+              <td class="small" style="padding: 5px 8px;">StubHub &gt; Viagogo &gt; Facebook Marketplace</td>
             </tr>
           </table>
         </div>
         <!-- Claude tier -->
         <div class="stat-card stat-card-teal">
-          <div class="label">Tier 2 — Claude API (ambiguous cases)</div>
-          <p class="small" style="color: var(--m3-on-surface-variant); margin-bottom: 6px;">Structured JSON output — guaranteed valid schema. System prompt includes official FIFA 2026 face value database (agent-sourced, not seller-reported).</p>
+          <div class="label">Ambiguous Zone → Claude API</div>
+          <p class="small" style="color: var(--m3-on-surface-variant); margin-bottom: 6px;">Composite risk 25-70 triggers Claude with the full signal breakdown. Claude weighs signal interactions — e.g., 200% markup + sold-out event + verified seller = legitimate.</p>
           <ul>
-            <li class="small">Returns category + confidence (0-100) + reasoning text</li>
+            <li class="small">Claude sees all 5 signals, not just price</li>
+            <li class="small">Structured JSON output — guaranteed valid schema</li>
             <li class="small">Claude fails → graceful fallback to rules-only result</li>
           </ul>
         </div>
@@ -421,30 +430,29 @@
       <div>
         <p class="xs muted" style="text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px;">Four enforcement outcomes</p>
 
-        <!-- Mirror Badge.tsx exactly -->
         <div class="stat-card stat-card-red" style="margin-bottom: 10px; padding: 12px 16px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
             <span class="badge badge-scalping">SCALPING VIOLATION</span>
           </div>
-          <p class="small" style="color: var(--m3-on-surface-variant);">Markup >100% of face value. Escrow <span class="bold red">slashed to bounty pool</span>.</p>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Excessive markup beyond demand-adjusted threshold. Escrow <span class="bold red">slashed to bounty pool</span>.</p>
         </div>
         <div class="stat-card stat-card-orange" style="margin-bottom: 10px; padding: 12px 16px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
             <span class="badge badge-scam">LIKELY SCAM</span>
           </div>
-          <p class="small" style="color: var(--m3-on-surface-variant);">Below face value — classic fraud bait. Buyer gets <span class="bold orange">full refund</span>.</p>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Suspicious signals aggregate — bait pricing, new account, DM-only. Buyer gets <span class="bold orange">full refund</span>.</p>
         </div>
         <div class="stat-card stat-card-yellow" style="margin-bottom: 10px; padding: 12px 16px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
             <span class="badge badge-counterfeit">COUNTERFEIT RISK</span>
           </div>
-          <p class="small" style="color: var(--m3-on-surface-variant);">Unverified seller, no proof. Buyer gets <span class="bold yellow">full refund</span>.</p>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Fair price but unverified seller — right price, wrong provenance. Buyer gets <span class="bold yellow">full refund</span>.</p>
         </div>
         <div class="stat-card stat-card-teal" style="padding: 12px 16px;">
           <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
             <span class="badge badge-legit">LEGITIMATE</span>
           </div>
-          <p class="small" style="color: var(--m3-on-surface-variant);">Fair price, verified provenance. USDT <span class="bold teal">released to seller</span>.</p>
+          <p class="small" style="color: var(--m3-on-surface-variant);">Signals align — fair market price, trusted seller, verified transfer. USDT <span class="bold teal">released to seller</span>.</p>
         </div>
       </div>
     </div>
@@ -595,8 +603,8 @@
           <p class="xs muted">Escrow outcomes</p>
         </div>
         <div class="stat-card stat-card-teal" style="text-align: center; padding: 14px;">
-          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-tertiary);">85%</div>
-          <p class="xs muted">Confidence gate</p>
+          <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-tertiary);">5</div>
+          <p class="xs muted">Risk signals</p>
         </div>
         <div class="stat-card stat-card-red" style="text-align: center; padding: 14px;">
           <div style="font-family: 'Outfit', sans-serif; font-size: 2rem; font-weight: 800; color: var(--m3-error);">0</div>

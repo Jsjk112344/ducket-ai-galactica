@@ -16,13 +16,11 @@ Structure: Slides first (~2 min), then live demo (~3 min). Slides set the contex
 
 ## SLIDE 2: Agent Intelligence (~40s)
 
-> "Let me show you how the agent thinks.
+> "The agent scores five risk signals: pricing adjusted for event demand, seller trust, listing quality, temporal patterns, and platform trust. Each scored zero to a hundred, weighted, combined into a composite.
 >
-> We built a two-tier classification engine. Tier one is deterministic rules — if a ticket is priced more than 100% above face value, that's scalping. Below negative 10% of face value, that's a scam bait pattern. These fire instantly at zero cost.
+> Clear-cut cases resolve instantly. Ambiguous ones escalate to Claude with the full signal breakdown. Two examples: 200% markup on a sold-out Final from a verified seller — legitimate. 5% markup from a new account on Facebook with no transfer proof — counterfeit risk. Price alone can't tell you that.
 >
-> For ambiguous cases — where confidence is below 85% — we escalate to Claude. The AI gets our FIFA 2026 face value database, which the agent sourced independently — not from the seller. Claude returns a structured JSON verdict with category, confidence, and a reasoning explanation.
->
-> Every classification maps to one of four escrow outcomes: scalping gets slashed to a bounty pool, scams and counterfeits get refunded to the buyer, and legitimate listings release funds to the seller. Every verdict is explainable — you can read exactly why the agent made its decision in the dashboard."
+> Each verdict maps to an escrow outcome: slash, refund, or release. The dashboard shows the full signal breakdown so you can see exactly why."
 
 ---
 
@@ -54,41 +52,49 @@ Structure: Slides first (~2 min), then live demo (~3 min). Slides set the contex
 
 **Switch to browser — localhost:5173**
 
-### Show the Dashboard (~30s)
-> "This is the Ducket dashboard. You can see the stat cards showing escrow totals, and the Active Order Book with classified listings. Each row has a classification badge — scalping in red, legitimate in teal."
+### Scenario 1: Legitimate Resale (~90s)
 
-### Expand a Listing Row (~30s)
-> "Expanding this row shows the Agent Decision Panel — the explainable reasoning. Category, confidence score, and a full paragraph of why the agent flagged this. This one's a scalping violation at 86% because the price is 320% above face value."
+> "Resale tab. I'll show two scenarios — a legitimate listing and a fraud attempt.
+>
+> Bob is logged in as the seller — you can see his wallet address in the nav. On the left he fills in the listing form. On the right is a live preview of how buyers will see his listing on the Ducket resale marketplace. It updates as he types. Notice the 'Pending AI Verification' badge — the listing hasn't been screened yet.
+>
+> I'll use the 'Legit Resale' preset — $245 per ticket, Category 1, two tickets. Submit.
+>
+> Now the AI agent kicks in — scanning each signal in real time. Pricing, seller trust, listing quality, temporal patterns, platform trust. Composite score comes in... legitimate. The agent pre-verified this listing before any buyer saw it.
+>
+> Click through to Alice's marketplace view. She's logged in with her own wallet. She can see Bob's listing with the full ticket details, the AI verification badge, and the confidence score. She clicks 'Buy for $490 USDT.'
+>
+> Settlement — both perspectives side by side. Bob sees 'Payment Received,' Alice sees 'Ticket Secured.' $490 USDT released to Bob. Zero humans, zero fees."
 
-### Walk the Resale Flow (~60s)
-> "Now the full resale flow. Resale tab.
->
-> Step one — submit a listing. Event, section, price. No face value field — the agent looks that up independently.
->
-> Step two — lock USDT in escrow. WDK approves and deposits into FraudEscrow. Etherscan link confirms the on-chain transaction.
->
-> Step three — AI verification. Agent classifies and shows the reasoning.
->
-> Step four — settlement. The contract releases, refunds, or slashes based on the classification. Done."
+### Scenario 2: Fraud Blocked (~60s)
 
-### Show Wallet Tab (~20s)
-> "Wallet tab: WDK wallet address, ETH and USDT balances from Sepolia, 'client-side only, WDK non-custodial.'"
+> "Now the fraud scenario. Click 'Try Another Listing.'
+>
+> Same form, but I'll hit the 'Scalper' preset — $800 per ticket for Category 2 tickets. That's a 567% markup on a $120 face value ticket. Submit.
+>
+> Watch the agent — pricing risk spikes, composite risk is high. Scalping violation. The agent flagged it before any buyer could commit money.
+>
+> On Alice's marketplace view, the listing shows a red 'Flagged' badge. And the buy button is greyed out — 'Purchase Blocked.' Alice literally cannot lock USDT for a listing the agent rejected. That's the gatekeeper in action."
 
-### Case Files (if time allows) (~20s)
-> "Every classification generates a timestamped case file — listing details, red flags, reasoning, Etherscan link. 78 case files so far. Full audit trail."
+### Show Listings Tab (~20s)
+> "Listings tab — the Active Order Book shows all scanned listings. Expand a row to see the full signal breakdown. Five risk bars, composite score, reasoning. Every verdict is explainable."
+
+### Show Wallet Tab (~10s)
+> "Wallet tab — WDK wallet, non-custodial, Sepolia balances."
 
 ---
 
 ## SLIDE 5: Close (~20s)
 
-> "Ducket: autonomous AI agent for safe P2P ticket resale. Three platforms scraped, four escrow outcomes, 85% confidence gate, zero humans in the loop, zero platform fees. npm install, npm run demo. Apache 2.0. Thank you."
+> "Ticket resale shouldn't require trust. Ducket makes it trustless — an AI agent that verifies before money moves, a smart contract that enforces the outcome, and a non-custodial wallet that keeps funds out of everyone's hands except the rightful owner. No mediators, no fees, no disputes. Just safe P2P resale. Thank you."
 
 ---
 
 ## Tips
 
-- **Don't rush the agent slide.** That's criteria #1. The two-tier system and four enforcement categories are your strongest points.
-- **Show the Agent Decision Panel** during demo — the reasoning text is what separates this from a simple if/else.
+- **Run both scenarios.** The contrast between legit and fraud is the strongest demo moment. The blocked buy button is the punchline.
+- **Point out the live preview** on Bob's listing page — it shows judges this is a real marketplace, not a data table.
+- **Point out both perspectives** on the settlement page — Bob and Alice side by side. Judges need to see the full lifecycle.
 - **Say "non-custodial" and "WDK" explicitly** — judges are listening for it.
 - **If something fails during demo** — scrapers fall back to mock data, RPC timeouts return cached balances. Say "the system is designed to be resilient" and keep going.
-- **Punchline is "zero humans in the loop."** Land it on the close.
+- **Punchline is "Purchase Blocked."** That proves the agent is a real gatekeeper, not just a label generator.

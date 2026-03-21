@@ -3,13 +3,14 @@
 // Rendered above ListingsTable on the Listings tab (BRAND-04).
 // Apache 2.0 License
 
-import { Shield, CheckCircle, Lock, Zap } from 'lucide-react';
+import { Shield, CheckCircle, Lock, Zap, Unlink } from 'lucide-react';
 
 const TRUST_BADGES = [
-  { label: 'Escrow Secured', Icon: Shield },
+  { label: 'Trustless Escrow', Icon: Unlink },
   { label: 'AI Verified', Icon: CheckCircle },
   { label: 'Instant Settle', Icon: Zap },
   { label: 'Non-custodial', Icon: Lock },
+  { label: 'On-chain Enforced', Icon: Shield },
 ] as const;
 
 export function TrustBadges() {
