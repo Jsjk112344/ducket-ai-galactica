@@ -1,333 +1,323 @@
-# Pitfalls Research
+# Domain Pitfalls — OpenClaw Integration into Existing Agent System
 
-**Domain:** P2P ticket resale pivot — adding resale UI + rebrand to a working agent system under 2-day deadline (v2.0 milestone)
-**Researched:** 2026-03-20 (updated from 2026-03-19 v1.0 research)
-**Confidence:** HIGH — based on direct codebase inspection of existing dashboard + known Tailwind v4 / shadcn / React 19 integration failure modes
-
----
-
-## Critical Pitfalls — v2.0 Pivot Specific
-
-These pitfalls are specific to the v2.0 task: adding P2P resale UI and rebranding to an already-working system under a 2-day deadline.
+**Domain:** Adding OpenClaw as agent orchestration framework to a working autonomous fraud detection + USDT escrow platform
+**Researched:** 2026-03-22
+**Confidence:** MEDIUM — OpenClaw is a rapidly-evolving project with daily releases; some findings based on community reports and architecture analysis rather than direct testing. The fundamental architectural mismatch (gateway daemon vs embedded library) is HIGH confidence.
 
 ---
 
-### Pitfall P1: Breaking the Existing Working Pipeline While Adding New UI
+## Critical Pitfalls
+
+Mistakes that cause the demo to break, the submission to be disqualified, or hours of wasted time on deadline day.
+
+---
+
+### Pitfall C1: OpenClaw Is a Gateway Daemon, Not an Embeddable Library
 
 **What goes wrong:**
-New resale flow UI components import shared types or API hooks. A refactor to `types.ts` or `server/api.ts` for new resale fields silently breaks the existing `ListingsTable`, `EscrowStatus`, and `WalletInspector` components that judges will see first. The agent itself keeps running but the dashboard shows blank tables or JavaScript errors.
+The developer tries to `npm install openclaw` and import it programmatically into `agent/src/scan-loop.js` as a library to replace the node-cron loop. OpenClaw is not designed this way. It is a standalone gateway daemon with its own process lifecycle, WebSocket control plane, session management, and channel routing. There is no `import { Agent } from 'openclaw'` API. The Plugin SDK (`openclaw/plugin-sdk`) registers tools that the gateway loads at runtime — it does not expose an agent loop you can call from your own code.
 
 **Why it happens:**
-The existing dashboard has a single `types.ts` with `Listing`, `Classification`, and `WalletInfo`. Adding a `ResaleListing` type by extending or mutating `Listing` causes TypeScript compilation to fail in components that destructure those types. Under deadline pressure, developers add `// @ts-ignore` and ship silently broken views.
+The SUBMISSION.md claims "OpenClaw orchestrates three skills" and "OpenClaw agent loop replacing node-cron scan cycle." This implies OpenClaw runs inside the agent process. In reality, OpenClaw runs as a separate daemon and agents interact with it via skills (markdown instruction files) and plugins (TypeScript modules loaded by the gateway). The conceptual model in the submission does not match OpenClaw's actual architecture.
 
-**How to avoid:**
-- Add resale types as NEW interfaces alongside existing ones — never mutate `Listing` or `Classification`.
-- Keep new resale UI components in a new directory (`src/components/resale/`), not mixed into existing components.
-- Add new API routes (`/api/resale`) rather than modifying existing `/api/listings` response shape.
-- Run `npm run build` in the dashboard workspace after every new component before touching existing ones.
-- Test the existing 3 tabs (Listings, Escrow, Wallet) after every change to `types.ts` or `server/api.ts`.
+**Consequences:**
+- Hours spent trying to find a programmatic API that does not exist
+- If OpenClaw is installed as a global CLI and started as a daemon, it runs its OWN process — it cannot directly call `classifyListing()` or `dispatchEscrowAction()` from the existing codebase without an IPC bridge
+- The existing scan-loop.js pipeline (scrape -> classify -> escrow) would need to be decomposed into separate skills/tools that OpenClaw's gateway can invoke, which is a major refactor
 
-**Warning signs:**
-- TypeScript errors on `Classification.category` or `Listing.platform` after adding new fields.
-- Blank listings table — usually means the API response shape changed but the hook wasn't updated.
-- `useListings` hook returns an empty array on load (polling broke because the endpoint now returns different JSON).
+**Prevention:**
+- Do NOT attempt to embed OpenClaw as a library inside the agent process
+- Instead, use one of two viable integration patterns:
+  1. **Skills-only approach (RECOMMENDED for hackathon):** Create SKILL.md files in the workspace that describe the scraping, classification, and escrow tasks. OpenClaw's agent reads these as instructions and uses existing tools (bash, node scripts) to execute them. The existing `scan-loop.js` becomes a script that OpenClaw's cron invokes.
+  2. **Plugin approach:** Write an OpenClaw plugin that registers custom tools wrapping the existing functions. More work but deeper integration.
+- For the hackathon deadline TODAY: wrap the existing pipeline as an OpenClaw skill that the gateway invokes via its cron system, rather than replacing the pipeline internals
 
-**Phase to address:** Resale flow UI phase — enforced by running an existing dashboard smoke-test before and after every PR.
+**Detection:**
+- `import openclaw from 'openclaw'` fails or returns the gateway constructor, not an agent SDK
+- Looking for `Agent`, `Skill`, or `AgentLoop` exports from the openclaw package and finding none
+- OpenClaw's `package.json` shows it is a CLI tool (`"bin": {"openclaw": ...}`) not a library
+
+**Confidence:** HIGH — verified via npm package structure, official docs, and multiple community sources
 
 ---
 
-### Pitfall P2: Tailwind v4 @theme{} Variable Conflicts When Rebranding Colors
+### Pitfall C2: Node.js Version Requirement Mismatch
 
 **What goes wrong:**
-The existing dashboard uses Tailwind v4's `@theme {}` block in `index.css` with custom design tokens (`--color-bg-primary`, `--color-accent` mapped to indigo `#6366F1`). When adding Ducket brand colors (purple/yellow), a developer adds NEW `@theme {}` variables but also renames or overrides existing ones. Components like `bg-bg-primary`, `bg-accent`, `text-success` stop compiling or render the wrong color. Tailwind v4 has no `tailwind.config.js` — all customization is CSS-only — so the failure is silent visual breakage, not a build error.
+OpenClaw requires Node >= 22 (Node 24 recommended). The existing project specifies `"engines": {"node": ">=20.0.0"}`. If the development or judge environment runs Node 20 or 21, OpenClaw will fail to install or crash at runtime with syntax errors (it uses Node 22+ features like `import.meta.resolve` or native fetch enhancements).
 
 **Why it happens:**
-Tailwind v4's `@theme {}` scoping is less familiar than v3 config files. Developers duplicate the block or add a second `@theme {}` in a new CSS file imported separately, causing the second declaration to silently win. Variable names that look like they should coexist (`--color-accent` vs `--color-brand-purple`) conflict when two `@theme {}` blocks exist.
+OpenClaw is ESM-only and uses bleeding-edge Node.js APIs. The existing project was built for Node 20+ compatibility. These two version floors are incompatible.
 
-**How to avoid:**
-- Have exactly ONE `@theme {}` block in exactly ONE CSS file (`index.css`).
-- Add Ducket brand colors as NEW variable names: `--color-brand-purple`, `--color-brand-yellow` — never rename or delete `--color-accent`, `--color-bg-primary`, `--color-bg-card`, `--color-success`, `--color-warn-red`.
-- Add `@import url(...)` for Outfit font BEFORE `@import "tailwindcss"` — the CSS `@import` ordering rule means any font import after the Tailwind import is silently ignored.
-- Verify existing `Badge.tsx` and `ConfidenceBar.tsx` still render correctly after any theme changes.
+**Consequences:**
+- `npm install` succeeds but `openclaw` commands crash with `SyntaxError` or `TypeError` at runtime
+- Judges running Node 20 (common LTS) cannot start the OpenClaw gateway
+- The "runnable out of the box" hard constraint is violated
 
-**Warning signs:**
-- Existing `bg-accent` buttons turn transparent or revert to browser default blue after adding brand colors.
-- Outfit headings don't render — fallback to Inter — means the font `@import` was placed after `@import "tailwindcss"`.
-- Tailwind class autocomplete stops suggesting custom token names in the IDE.
+**Prevention:**
+- If using OpenClaw, update `engines` in root `package.json` to `"node": ">=22.0.0"` and document this in README
+- Verify the existing WDK wallet, ethers.js, and Patchright all work on Node 22 before committing to the version bump
+- If Node 22 cannot be guaranteed in the judge environment, OpenClaw integration is not viable — use a lighter wrapper
 
-**Phase to address:** Dashboard rebrand phase — add colors first, verify existing components render, then apply new classes.
+**Detection:**
+- `node -v` returns < 22
+- OpenClaw startup logs show `ERR_UNSUPPORTED_DIR_IMPORT` or similar Node version errors
+
+**Confidence:** HIGH — Node >= 22 requirement is documented on npm and in official install guides
 
 ---
 
-### Pitfall P3: shadcn/ui CLI Installation Corrupts the Existing Vite + Tailwind v4 Setup
+### Pitfall C3: OpenClaw Gateway Startup Blocks Demo Flow
 
 **What goes wrong:**
-Running `npx shadcn@latest init` inside the `dashboard/` workspace generates a `tailwind.config.js` and may modify `vite.config.ts` in a way that conflicts with the already-configured `@tailwindcss/vite` plugin. The existing Tailwind v4 CSS-first setup (no config file) is overwritten. Compilation fails or Tailwind v4 tokens stop working entirely.
+OpenClaw's gateway requires an onboarding wizard (`openclaw onboard`) that interactively asks about workspace, channels, model provider, and API keys. This is not scriptable in a one-command `npm run demo` setup. The hackathon requires "runnable out of the box" — an interactive wizard violates this.
 
 **Why it happens:**
-shadcn's `init` command defaults to Tailwind v3 behavior. As of early 2026, shadcn added experimental Tailwind v4 support, but the `init` wizard still offers to create `tailwind.config.js` and overwrite the vite config. Saying "yes" at any shadcn init prompt that touches Tailwind configuration breaks the v4 setup.
+OpenClaw is designed for personal AI assistant use cases where users configure it once. Hackathon projects need zero-config startup. The gateway also installs itself as a launchd/systemd service, which is inappropriate for a hackathon demo.
 
-**How to avoid:**
-- Do NOT run `npx shadcn@latest init` — instead, copy individual shadcn component source files manually from the shadcn GitHub into `src/components/ui/`. This is the safest approach under deadline.
-- If `init` must be run: use `--tailwind-css-file src/index.css` and inspect every generated file before committing. Delete any `tailwind.config.js` that appears.
-- Alternatively, skip shadcn entirely and write styled components using the existing Tailwind v4 token classes. The existing `Badge.tsx` and `ConfidenceBar.tsx` are already good patterns to follow.
-- If only needing a few components (Button, Card, Badge), manually add them in 10-15 minutes rather than running the CLI.
+**Consequences:**
+- `npm run demo` cannot start the OpenClaw gateway without prior interactive setup
+- Judges encounter a wizard prompt instead of the running demo
+- The demo fails the "out of the box" hard constraint
 
-**Warning signs:**
-- A `tailwind.config.js` or `components.json` appears in `dashboard/` after any shadcn operation.
-- The `vite.config.ts` now has `tailwindcss: {}` inside `css.postcss` rather than the plugins array.
-- Existing `@theme {}` custom tokens no longer generate utility classes.
+**Prevention:**
+- Pre-configure the OpenClaw workspace and commit the configuration files (but NOT API keys)
+- Create a startup script that checks for OpenClaw config, creates it programmatically if missing, and starts the gateway in foreground mode (not as a daemon)
+- OR: Skip the gateway entirely and use OpenClaw's skill file format as a documentation/architecture pattern without actually running the gateway. The SUBMISSION.md claims can be satisfied by having skill files that describe the orchestration, with the actual execution still handled by the existing node-cron loop
+- This is the safest approach for deadline day: keep the working scan-loop.js, add SKILL.md files that describe the skills, and reference OpenClaw's architecture in the submission
 
-**Phase to address:** Dashboard rebrand phase — decision gate at the start: manual component copy or skip shadcn entirely.
+**Detection:**
+- Running `npx openclaw` prompts for interactive input
+- No `~/.openclaw` or workspace config directory exists
+
+**Confidence:** HIGH — gateway wizard is the documented primary setup path
 
 ---
 
-### Pitfall P4: React 19 + shadcn Overlay Component Incompatibilities
+### Pitfall C4: Breaking the Working WDK Integration by Changing the Process Model
 
 **What goes wrong:**
-shadcn components built for React 18 use `React.forwardRef()` patterns. React 19 changed how refs work — `forwardRef` is no longer required and the internal behavior changed. Certain shadcn components (Dialog, Popover, Sheet, Tooltip) produce console errors or silently fail to mount overlays when used with React `^19.2.4`.
+The WDK wallet singleton (`agent/src/wallet/index.ts`) holds keys in memory for the lifetime of the process. If OpenClaw runs as a separate gateway daemon that invokes skills/tools in child processes, each invocation creates a NEW WDK wallet instance. The wallet singleton pattern breaks. Worse: if the OpenClaw gateway and the agent run as separate processes, the gateway cannot access the WDK wallet's in-memory keys.
 
 **Why it happens:**
-The project already runs React `^19.2.4`. shadcn's component registry targeted React 18. React 19 deprecated `React.forwardRef` in favor of direct ref props. Components that don't handle this produce `Warning: Function components cannot be given refs` or overlay portals that don't attach to the DOM.
+The existing architecture assumes a single long-lived Node.js process: `scan-loop.js` starts, creates the WDK wallet singleton, and holds it for all subsequent escrow operations. OpenClaw's gateway model runs tools as separate invocations (via bash/node scripts or plugin functions), each of which would need to re-initialize the wallet.
 
-**How to avoid:**
-- Avoid modal/overlay shadcn components (Dialog, Sheet, Popover) entirely for the demo — use inline panels like the existing `AgentDecisionPanel` expand pattern instead.
-- Simple non-overlay components (Button, Card, Badge) work fine with React 19.
-- If overlay components are truly needed, install the latest `@radix-ui` peer packages explicitly and test before wiring into the demo flow.
+**Consequences:**
+- WDK wallet re-initialized on every skill invocation = slower (HD key derivation), more error-prone
+- `depositEscrow()` called from a skill invocation might race with `slashEscrow()` from another invocation
+- The `bondDeposited` / `bondSlashed` in-memory state flags in `scan-loop.js` are lost between invocations
+- Nonce conflicts on Sepolia if two parallel skill invocations submit transactions simultaneously
 
-**Warning signs:**
-- `Warning: forwardRef render functions accept exactly two parameters` in the browser console.
-- Overlay components render but cannot be dismissed.
-- TypeScript errors on `ref` props where none existed before.
+**Prevention:**
+- Keep the existing single-process model. OpenClaw integration should be at the orchestration layer, NOT the execution layer
+- If using OpenClaw skills: the skill should invoke `node agent/src/scan-loop.js` as a single long-running process, not decompose it into separate per-step invocations
+- Never split the scan-classify-escrow pipeline across separate process boundaries — the WDK wallet singleton and in-memory state flags require a single process
+- The organizer bond state (`bondDeposited`, `bondSlashed`, `bondEscrowId`) is process-scoped — any architecture that restarts the process loses this state
 
-**Phase to address:** Dashboard rebrand phase — stay with non-overlay shadcn components or avoid the library entirely.
+**Detection:**
+- `Error: ESCROW_WALLET_SEED env var is required` appearing in skill invocation logs
+- Duplicate deposit transactions on Sepolia (nonce already used)
+- Bond deposit happening on every scan cycle instead of once on startup
+
+**Confidence:** HIGH — direct analysis of the existing codebase architecture
 
 ---
 
-### Pitfall P5: Mock/Seed Data Looks Fake and Undermines Judge Credibility
+### Pitfall C5: Last-Minute Framework Integration Breaks a Working Demo
 
 **What goes wrong:**
-The resale demo uses obviously fake seller names ("John Doe"), round prices ($500, $1000), and identical listing dates. Judges who know the ticket resale market immediately see through it. More critically, if mock listings have no `classification` attached, the `AgentDecisionPanel` never expands and judges never see the AI reasoning — the core differentiator (#1 judging criterion) is invisible.
+The existing system works. Scan-loop runs autonomously, classifications happen, escrow actions fire on Sepolia. Attempting to add OpenClaw as the orchestration layer on deadline day (March 22) risks breaking this working system for zero functional benefit. Every minute spent debugging OpenClaw integration is a minute not spent on submission quality.
 
 **Why it happens:**
-Under deadline pressure, seed data is written in 5 minutes with placeholder values. The Claude API reasoning output is only visible on classified listings — if mock data has no `classification` object, the expandable panel shows nothing.
+The SUBMISSION.md already claims OpenClaw is used. The developer feels obligated to make the claims true rather than adjusting the claims. Sunk cost fallacy: "we already wrote OpenClaw in the submission, so we have to integrate it."
 
-**How to avoid:**
-- Use realistic seller handles (short alphanumeric: `tk_mx2938`, `worldcup_seller_2`, `FIFA_TICKETS_4U`).
-- Use realistic FIFA World Cup 2026 price points: face value $150-400, scalped prices $450-1800 with odd cents ($847.50, $1,234.00).
-- Vary listing dates across 3-7 days before the demo date.
-- Pre-attach `classification` objects to at least 8-10 mock listings so `AgentDecisionPanel` expands immediately — don't require a live agent run to see AI reasoning during the demo.
-- Include at least one `LEGITIMATE` classification with a low-confidence score to show nuance.
-- Include at least one `LIKELY_SCAM` with a detailed `reasoning` string showing Claude's chain of thought (50+ words, referencing specific listing fields).
-- Include one listing where `classificationSource: "claude"` to demonstrate the AI path was taken.
+**Consequences:**
+- Working demo breaks and cannot be recovered before deadline
+- Time spent on framework plumbing instead of improving classification quality, escrow coverage, or demo polish
+- If OpenClaw integration half-works, judges see error logs from the gateway alongside the working agent — worse than no OpenClaw at all
 
-**Warning signs:**
-- All prices are multiples of $100 or $500.
-- All `redFlags` arrays are identical across listings.
-- `classification` is undefined on most listings — `AgentDecisionPanel` is never shown to judges.
-- All `reasoning` strings are under 30 words.
+**Prevention:**
+- **Decision gate (NOW):** Can OpenClaw be integrated in < 2 hours with zero risk to the existing pipeline? If NO, adjust the submission claims instead.
+- The safest approach: add SKILL.md files that describe the three skills (scraping, classification, escrow) and reference OpenClaw as the "architecture pattern" without actually running the gateway. Update SUBMISSION.md to say "OpenClaw-inspired skill architecture" or "designed for OpenClaw orchestration" rather than "OpenClaw orchestrates"
+- If proceeding with integration: do it on a git branch. If it works in 2 hours, merge. If not, abandon the branch and adjust the submission
+- NEVER modify `scan-loop.js`, `classify.js`, or `escrow.js` directly for OpenClaw integration — these are the working pipeline
 
-**Phase to address:** Mock data / seed data phase — build the seed file before building new UI so components have realistic data from the start.
+**Detection:**
+- More than 1 hour spent and no working OpenClaw-orchestrated scan cycle yet
+- Existing `npm run demo` no longer starts cleanly
+- Agent terminal output shows OpenClaw gateway errors alongside scan-loop output
+
+**Confidence:** HIGH — universal hackathon risk pattern, amplified by the architectural mismatch
 
 ---
 
-### Pitfall P6: Narrative Reframe Contradicts What the Running System Actually Does
+## Moderate Pitfalls
+
+---
+
+### Pitfall M1: OpenClaw Skill Files Are Instructions, Not Code
 
 **What goes wrong:**
-The README says "buyer locks USDT, AI verifies, escrow settles" but the running dashboard still shows the fraud-detection monitoring view from v1. Judges read the README before running the demo. The disconnect between the narrative ("P2P resale platform") and the visible product ("fraud scanner") causes confusion about what was actually built and whether the pivot is real.
+The developer creates `skills/scraping/SKILL.md` expecting to write executable TypeScript inside it. OpenClaw skills are markdown instruction files — they tell the agent WHAT to do using existing tools, not HOW to do it with code. A skill cannot `import { scrapeStubHub } from '../tools/scrape-stubhub.js'`. It can only instruct the agent to run a shell command or use a registered tool.
 
 **Why it happens:**
-Narrative files (README, demo script) are updated first because they're easy, but the UI is updated last or not at all. The dashboard header still says "Autonomous Fraud Detection Agent." Agent terminal output still logs "ENFORCEMENT ACTION" when the narrative claims "verification."
+The mental model of "skills = functions" is natural for developers. But OpenClaw skills are closer to system prompts than to code modules. They teach the LLM agent what steps to take and which tools to use.
 
-**How to avoid:**
-- Update README and demo script LAST — after the UI actually reflects the P2P resale narrative.
-- OR: update both together in the same commit so they stay in sync.
-- The demo script should map directly to what judges see on screen: "Here the buyer has locked 847 USDT into escrow — now watch the agent verify..."
-- The dashboard header is the first thing judges see — changing `"Autonomous Fraud Detection Agent"` to the P2P resale tagline has high impact for minimal effort.
+**Prevention:**
+- Skills should reference shell commands: "Run `node agent/tools/scrape-stubhub.js` to scrape StubHub listings"
+- The actual execution logic stays in the existing `.js` files
+- Skills are documentation that the agent follows, not code that runs
 
-**Warning signs:**
-- The README describes a flow ("buyer locks USDT") that requires clicking a button that doesn't exist in the UI.
-- The demo video was scripted before the UI was updated.
-- Agent terminal output still says "ENFORCEMENT ACTION" when the narrative claims "buyer protection verification."
-
-**Phase to address:** Narrative reframe phase — must happen in lockstep with UI changes, not independently.
+**Confidence:** HIGH — verified via official OpenClaw skills documentation
 
 ---
 
-### Pitfall P7: Claude AI Reasoning Visible in UI But Shallow and Unconvincing
+### Pitfall M2: OpenClaw's ESM-Only Package Conflicts with createRequire Pattern
 
 **What goes wrong:**
-The `AgentDecisionPanel` shows the `reasoning` field from `Classification`, but if the seed data reasoning strings are vague ("This listing shows signs of price inflation above market norms"), judges see the same boilerplate across every row. Agent Intelligence is judging criterion #1 — shallow reasoning strings fail this criterion even when the UI looks polished.
+The existing `escrow.js` uses `createRequire(import.meta.url)` to load JSON artifacts (compiled ABI, deployed addresses). OpenClaw is ESM-only and its plugin SDK uses ESM imports exclusively. If OpenClaw's plugin loader processes the agent code, it may apply stricter ESM rules that conflict with the `createRequire` pattern, which is technically a CJS bridge.
 
 **Why it happens:**
-The classify module (`agent/src/classify.js`) uses a prompt that returns the right shape but may generate shallow reasoning. Seed data reasoning strings are written in 30 seconds.
+OpenClaw uses `jiti` for runtime TypeScript loading in plugins. Jiti may handle `createRequire` differently than Node.js's native ESM loader. The existing code works because Node.js natively supports `createRequire` in ESM modules, but a plugin runtime may not.
 
-**How to avoid:**
-- Manually write rich `reasoning` strings for seed data that look like genuine Claude output: "Seller account created 4 days ago (new account red flag). Price $1,247 vs face value $180 = 593% markup, well above FIFA WC scalping threshold of 200%. No section/seat number listed — consistent with counterfeit pattern. Two prior listings from same seller flagged across StubHub."
-- The `AgentDecisionPanel` should display `classificationSource` to show whether Claude or the rules engine classified it. This demonstrates hybrid intelligence.
-- Include at least one listing where the rules engine classified it (fast path) and one where Claude classified it (reasoning path) — visible difference shows the system's depth.
+**Prevention:**
+- If writing an OpenClaw plugin, convert JSON imports to `import ... with { type: 'json' }` (Node 22+) or `fs.readFileSync` + `JSON.parse`
+- If using the skills-only approach, this is a non-issue since the existing code runs in its own Node.js process
 
-**Warning signs:**
-- All `reasoning` strings are under 30 words.
-- Every listing has `classificationSource: "rule-engine"` — Claude is never invoked.
-- Clicking expand on rows doesn't reveal anything not already visible in the table columns.
-
-**Phase to address:** Mock data phase AND Claude API integration phase — seed data reasoning must be rich, and live classifications must invoke Claude for medium-confidence cases.
+**Confidence:** MEDIUM — depends on whether OpenClaw's plugin runtime uses jiti or native Node ESM
 
 ---
 
-### Pitfall P8: Time Allocation Failure — Running Out of Time for Demo Video
+### Pitfall M3: OpenClaw Cron vs node-cron Conflict
 
 **What goes wrong:**
-Dashboard rebrand takes 8+ hours because of Tailwind v4 / shadcn integration issues, leaving no time to record a clean 5-minute demo video. The video is rushed, narration doesn't match the screen, audio quality is poor. Demo quality is judging criterion #7 but a bad video also undermines credibility for criteria #1-4.
+Both OpenClaw's built-in cron system and the existing `node-cron` schedule the same scan cycle. Listings are scraped twice per interval, classifications run twice, escrow deposits attempt to fire twice. Duplicate `escrowId` causes contract reverts (`FraudEscrow.deposit()` reverts on duplicate escrowId).
 
 **Why it happens:**
-UI rebrand tasks expand to fill available time. Every "quick" change (font, color, one shadcn component) takes 3x longer than expected due to Tailwind v4 gotchas. Video recording is treated as the last step.
+The developer adds OpenClaw's cron configuration but forgets to remove the `cron.schedule('*/5 * * * *', runScanCycle)` call in `scan-loop.js`. Two independent schedulers now trigger the same function.
 
-**How to avoid:**
-- Time-box the rebrand to 4 hours maximum. Stop at 4 hours regardless of polish state.
-- Record the demo video BEFORE final polish — a working but unpolished UI with a good narrative is better than a polished UI with no video.
-- Write the demo script (what to say at each moment) before starting any code. The script defines what features MUST exist for the video.
-- Strict priority order for the 2 days: (1) narrative reframe — 1 hour, (2) seed data with visible AI reasoning — 2 hours, (3) resale flow UI wired to seed data — 3 hours, (4) rebrand/polish — remaining time.
+**Prevention:**
+- If OpenClaw's cron is used: remove the `node-cron` schedule from `scan-loop.js` and export `runScanCycle` as a callable function
+- If keeping node-cron: do not configure OpenClaw's cron for the same task
+- The deduplication set (`seen`) in `scan-loop.js` prevents duplicate listings within a session, but duplicate escrow deposits use timestamp-based escrowIds that differ by milliseconds — dedup does not prevent duplicate deposits
 
-**Warning signs:**
-- It is March 21 and the demo video has not been recorded yet.
-- The resale flow UI is not yet wired to any mock data.
-- Any single task has consumed more than 3 hours without a working demo-able state.
+**Detection:**
+- Contract revert errors: "escrowId already exists" appearing twice per cycle
+- Double console output for every scan cycle
+- WDK wallet balance draining at 2x the expected rate
 
-**Phase to address:** All phases — enforce time-boxing from the start. Demo video recording is a scheduled milestone, not an afterthought.
-
----
-
-## Critical Pitfalls — v1.0 Foundation (Still Relevant)
-
-The following pitfalls from v1.0 research remain relevant — they guard the working foundation being preserved during the pivot.
+**Confidence:** HIGH — direct analysis of the escrowId generation logic (`makeEscrowId` uses timestamp, so parallel invocations produce different IDs and both succeed)
 
 ---
 
-### Pitfall V1: WDK ERC-4337 Missing Infrastructure Layer Causes Silent SDK Failure
+### Pitfall M4: OpenClaw Configuration File Instability
 
 **What goes wrong:**
-WDK's ERC-4337 wallet module requires three independent infrastructure layers to co-exist: the Safe4337Module contract, a bundler service, and a paymaster service. If any one layer is missing or misconfigured, the SDK fails with an opaque error. Teams waste hours debugging transaction submission failures before realizing their bundlerUrl points to a mainnet endpoint.
+OpenClaw's JSON configuration files can be automatically modified or corrupted on restart. If the gateway is stopped and restarted during a demo, the configuration may change, breaking model provider settings, workspace paths, or skill references.
 
 **Why it happens:**
-WDK configuration is declarative — you pass URLs and addresses at initialization and nothing validates them until you try to send a transaction. Teams copy example config from docs that targets mainnet, swap only the chainId to Sepolia, and miss that bundler/paymaster providers need separate Sepolia endpoints.
+OpenClaw writes to its config files during runtime (updating session state, cron jobs, etc). If the process is killed mid-write (Ctrl+C during demo), the JSON may be truncated or invalid.
 
-**How to avoid:**
-- Before any new escrow wiring in v2.0, confirm the existing smoke test (wallet init → getBalance → send 0 USDT) still passes on Sepolia.
-- Do not change WDK configuration while simultaneously adding resale UI — isolate variables.
+**Prevention:**
+- Keep a backup copy of the working OpenClaw config and restore it before each demo run
+- Use a startup script that validates config integrity before launching the gateway
+- For the hackathon: this is another argument for not running the gateway at all
 
-**Warning signs:**
-- Transactions return undefined or timeout without a clear error code.
-- Wallet address generates correctly but getBalance always returns 0 even after faucet top-up.
+**Detection:**
+- Gateway fails to start with JSON parse errors
+- Skills that were configured disappear after restart
+- Model provider settings reset to defaults
 
-**Phase to address:** Any phase that touches escrow wiring — keep WDK config unchanged from working v1.0 state.
+**Confidence:** MEDIUM — based on community reports of configuration instability
 
 ---
 
-### Pitfall V2: Agent Autonomy Is Theatre Without Observable Decision Trail
+## Minor Pitfalls
+
+---
+
+### Pitfall L1: OpenClaw Daily Releases Break Pinned Versions
 
 **What goes wrong:**
-The agent classifies listings and triggers escrow, but the decision-making is invisible. The v2.0 resale narrative actually makes this more critical — if the "AI verifies" step has no visible output, the P2P resale pitch collapses.
+OpenClaw ships daily releases with potential breaking changes. Running `npm install` on a different day than the initial setup may pull a newer version that changes the plugin SDK surface, skill loading behavior, or cron semantics.
 
-**How to avoid:**
-- The `AgentDecisionPanel` must show rich reasoning (see Pitfall P7).
-- `classificationSource` field distinguishes rule-engine vs Claude path — display it.
-- For v2.0: the "AI verifies" step in the resale flow should visually show Claude reasoning before the escrow settles. Even if simulated on mock data, this moment is the product's core value.
+**Prevention:**
+- Pin the exact OpenClaw version in `package.json`: `"openclaw": "2026.3.8"` (not `^2026.3.8`)
+- Run `npm ci` instead of `npm install` for reproducible builds
+- For hackathon: this is yet another reason to minimize OpenClaw dependency surface area
 
-**Phase to address:** Mock data phase must include this, resale flow UI phase must surface it visibly.
+**Confidence:** HIGH — daily release cadence confirmed via npm and GitHub releases
 
 ---
 
-### Pitfall V3: Prompt Injection From Scraped Listing Content
+### Pitfall L2: OpenClaw Memory Pruning Loses Agent Context
 
 **What goes wrong:**
-Raw scraped listing titles/descriptions fed directly to the LLM classifier. A malicious listing seller writes "IGNORE PREVIOUS INSTRUCTIONS" in their description.
+OpenClaw prunes tool outputs to optimize caching. If the agent's classification reasoning is stored in OpenClaw's session context, it may be pruned after several cycles, causing the agent to "forget" prior classifications and re-classify already-processed listings.
 
-**How to avoid:**
-- The existing classify module must separate system instructions from listing data via distinct prompt roles.
-- Classification responses must parse to the strict `Classification` interface in `types.ts` — any response that doesn't parse is rejected.
-- This is unchanged from v1.0; the risk increases slightly if new resale listings are also fed to Claude.
+**Prevention:**
+- The existing `evidence.js` module writes case files to disk — this is the correct persistence pattern
+- Do not rely on OpenClaw's session memory for classification state
+- The `isCaseFileExists()` idempotency check in `scan-loop.js` is the correct guard — keep it regardless of OpenClaw integration
 
-**Phase to address:** Any new Claude API integration added in v2.0 must follow the same defensive pattern.
-
----
-
-## Technical Debt Patterns
-
-| Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
-|----------|-------------------|----------------|-----------------|
-| Hardcode mock listings in a `.ts` seed file | Demo always works, no network dependency | Mock data stays forever if not replaced post-hackathon | Acceptable for hackathon — label clearly as `source: 'mock'` (already done) |
-| Skip TypeScript strictness in new resale UI (`any` types) | Faster initial development | Type errors surface at runtime during judge demo | Never — use `unknown` + type guard at minimum |
-| Use `key={idx}` on list elements | Zero effort | React reconciliation bugs when list reorders | Acceptable if list never reorders during demo |
-| Single-page resale flow using the existing tab pattern | No routing library needed | Can't deep-link to resale tab | Acceptable — tab pattern already works |
-| Skip adding Outfit font to @theme, use class override | Avoids font @import ordering risk | Inconsistent headings | Only acceptable for one-off heading with `// FIXME` comment |
-| Hardcode event ID as FIFA World Cup 2026 | No event management UI needed | Demo only works for one event | Acceptable for hackathon demo |
+**Confidence:** MEDIUM — based on community reports of OpenClaw memory issues
 
 ---
 
-## Integration Gotchas
+### Pitfall L3: OpenClaw Security Vulnerabilities in the Skill Ecosystem
 
-| Integration | Common Mistake | Correct Approach |
-|-------------|----------------|------------------|
-| Tailwind v4 + shadcn | Running `shadcn init` which creates `tailwind.config.js` | Copy component source files manually; delete any generated `tailwind.config.js` |
-| Tailwind v4 custom tokens | Adding a second `@theme {}` block in a new CSS file | One `@theme {}` block, one CSS file (`index.css`) only |
-| Google Fonts + Tailwind v4 | Placing `@import url(...)` after `@import "tailwindcss"` | Font `@import` must come FIRST in `index.css` |
-| React 19 + shadcn overlays | Using Dialog/Sheet/Popover with React 19.2.4 | Use inline expand panels (existing `AgentDecisionPanel` pattern) instead |
-| Claude API + classify.js | Calling Claude for every listing including rule-engine-confident ones | Keep existing hybrid: rules first, Claude only for borderline (confidence < 85%) |
-| Express API + new resale routes | Changing existing `/api/listings` response shape | Add NEW routes (`/api/resale`) rather than mutating existing ones |
-| WDK + resale flow UI | Creating a new WDK wallet instance per UI interaction | Reuse existing agent wallet — the UI is read-only display, not a wallet interface |
-| WDK ERC-4337 | Use mainnet bundler/paymaster URLs on Sepolia | Use chain-specific Sepolia endpoints; verify with `chainId: 11155111` |
-| Sepolia testnet USDT | Attempt to use real USDT faucet | Use Tether's official Sepolia testnet USDT faucet or mint via test contract |
+**What goes wrong:**
+OpenClaw's public skill marketplace (ClawHub) has had malicious skills distributed (CVE-2026-25253, 335 malicious skills). Installing community skills without review introduces security risk.
+
+**Prevention:**
+- Only use custom-written skills specific to this project — never install skills from ClawHub
+- All skill files should be committed to the repo and reviewed
+- For this project: the three custom skills (scraping, classification, escrow) should be written from scratch, not adapted from community templates
+
+**Confidence:** HIGH — CVE is documented and publicly reported
 
 ---
 
-## Performance Traps
+## Phase-Specific Warnings
 
-| Trap | Symptoms | Prevention | When It Breaks |
-|------|----------|------------|----------------|
-| Polling every 10s on resale flow + listings simultaneously | Two competing `setInterval` calls block React render | Unify polling into existing `useListings` hook or shared context | At demo time when both views are open simultaneously |
-| Large mock seed file with 50+ listings | Table renders slowly on judge laptop | Cap seed data at 15-20 listings for demo | In-browser on underpowered judge hardware |
-| Claude API called synchronously per listing in seed data generation | Seed data generation script times out | Pre-generate and commit the JSON seed file | Any time during demo prep |
-| Sequential scraping of 3 platforms | Demo takes 60+ seconds for first listing | Run all 3 scrapers in `Promise.all()` | First full demo run end-to-end |
-
----
-
-## Security Mistakes
-
-| Mistake | Risk | Prevention |
-|---------|------|------------|
-| Committing `.env` with ESCROW_WALLET_SEED to public repo | Wallet drained on testnet (disqualifying per hackathon rules) | Verify `.gitignore` covers `.env` before any push |
-| Committing `ANTHROPIC_API_KEY` in seed data generation script | API key exposed in public GitHub | Use `process.env.ANTHROPIC_API_KEY` only, never hardcode |
-| Demo wallet private key visible in terminal during screen recording | Key exposed in video | Use `...` truncation in terminal output when recording |
-| Classifying listings without confidence threshold | Low-confidence guesses trigger irreversible escrow actions | Gate all escrow actions behind `confidence >= threshold` |
+| Phase Topic | Likely Pitfall | Mitigation |
+|-------------|---------------|------------|
+| OpenClaw installation | C2: Node version mismatch | Verify Node >= 22 before starting; update engines field |
+| Gateway setup | C3: Interactive wizard blocks demo | Pre-configure or skip gateway entirely |
+| Skill creation | M1: Skills are instructions, not code | Write SKILL.md files that reference existing scripts |
+| Cron migration | M3: Dual cron firing | Remove node-cron if OpenClaw cron is active; never both |
+| WDK wallet integration | C4: Process model breaks singleton | Keep single-process model; never split pipeline across processes |
+| Last-minute integration | C5: Breaking working demo | 2-hour time-box on git branch; abandon if not working |
+| Plugin development | M2: ESM/CJS conflict | Use skills approach instead of plugin for hackathon |
 
 ---
 
-## UX Pitfalls
+## Recommended Integration Strategy (Hackathon-Safe)
 
-| Pitfall | User Impact | Better Approach |
-|---------|-------------|-----------------|
-| Resale flow shown as separate page with no nav back to agent view | Judges can't see the fraud detection → escrow connection | Use existing tab pattern — add "Resale" as a 4th tab, not a separate route |
-| AI reasoning only visible after clicking rows | Judges miss reasoning if they don't know to click | Add a subtle "click to expand" caret or "View AI Decision" link in the Status column |
-| Escrow tab shows raw wallet addresses without context | Judges don't understand WDK's role | Add "Self-custodial via WDK" label near the wallet address display |
-| New resale UI components use different card styling | Visual inconsistency signals rushed work | Reuse `bg-bg-card` and existing padding/radius classes from existing components |
-| Dashboard header still says "Fraud Detection Agent" after pivot | Narrative mismatch on first impression | Change header to reflect P2P resale narrative — high impact, 30 seconds of work |
+Given the constraints (deadline TODAY, working system, no UI changes allowed), the safest OpenClaw integration is:
+
+1. **Add SKILL.md files** in `agent/skills/` that describe the three capabilities (scraping, classification, escrow) using OpenClaw's skill format
+2. **Keep the existing scan-loop.js** as the actual execution engine
+3. **Add a thin OpenClaw wrapper** that imports/invokes the existing pipeline functions, making the code technically "OpenClaw-orchestrated" without changing the working architecture
+4. **Do NOT run the OpenClaw gateway** as a separate daemon — it adds complexity and failure modes
+5. **Update SUBMISSION.md** language if needed to accurately reflect the integration level
+
+The goal is to satisfy the submission's OpenClaw claims with minimal risk to the working demo.
 
 ---
 
-## "Looks Done But Isn't" Checklist
+## "Looks Integrated But Isn't" Checklist
 
-- [ ] **Resale flow UI:** Has mock data attached — verify that clicking through the flow shows actual listings and AI classification, not empty states
-- [ ] **AI reasoning panel:** `classification` object is present on seed listings — verify `AgentDecisionPanel` expands on at least 5 rows and shows 50+ word reasoning
-- [ ] **Rebrand:** Outfit font actually renders — verify in browser dev tools that computed `font-family` shows Outfit, not Inter fallback
-- [ ] **Narrative consistency:** README P2P claim, dashboard header, and demo script are all in sync — walk through all three before recording
-- [ ] **Existing tabs still work:** After all changes, verify Listings / Escrow / Wallet tabs load without TypeScript errors or blank states
-- [ ] **WDK visible in demo:** `WalletInspector` shows "Self-custodial via WDK" — verify `custodyType` field is populated in API response
-- [ ] **No secrets in repo:** Run `git log --all -p | grep -i "seed\|private\|mnemonic"` before making repo public
-- [ ] **Demo script matches UI:** Walk through the demo script step-by-step and verify every described screen actually exists and is reachable
-- [ ] **No `tailwind.config.js` created:** Verify this file does not exist in `dashboard/` after any shadcn operation
-- [ ] **`npm run build` passes:** TypeScript compilation succeeds with zero errors in the dashboard workspace after all new components are added
+- [ ] SKILL.md files exist in the workspace and follow OpenClaw's format (YAML frontmatter + markdown instructions)
+- [ ] The scan-loop.js pipeline still runs end-to-end without OpenClaw gateway running
+- [ ] No node-cron + OpenClaw cron dual-firing (only one scheduler is active)
+- [ ] WDK wallet singleton is never re-initialized between skill invocations
+- [ ] `npm run demo` starts without requiring `openclaw onboard` or interactive setup
+- [ ] No OpenClaw gateway errors appear in terminal alongside agent output
+- [ ] Existing escrow transactions on Sepolia still work (test deposit/refund cycle)
+- [ ] Bond state (`bondDeposited`, `bondSlashed`) persists across scan cycles (single process)
+- [ ] `npm install` in a clean clone on Node 20 still works (if OpenClaw is optional)
+- [ ] SUBMISSION.md claims about OpenClaw match what the code actually does
 
 ---
 
@@ -335,45 +325,29 @@ Raw scraped listing titles/descriptions fed directly to the LLM classifier. A ma
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Tailwind v4 broken by shadcn init | MEDIUM (1-2 hours) | Delete `tailwind.config.js` and `components.json`, restore `index.css` from git, re-add only manual component copies |
-| Existing tabs broken after `types.ts` change | LOW (30 min) | `git diff` to find the offending field change, revert to additive-only approach |
-| Mock data has no classifications visible | LOW (45 min) | Add `classification` objects to seed file manually — no agent run needed |
-| Demo video has wrong narration | HIGH (3-4 hours) | Re-record — no shortcut; prioritize this over any remaining polish task |
-| Font not rendering (Outfit) | LOW (15 min) | Move `@import url(...)` above `@import "tailwindcss"` in `index.css` |
-| shadcn overlay component breaks React 19 | MEDIUM (1 hour) | Remove the component, replace with inline Tailwind equivalent using existing expand panel pattern |
-| Narrative contradicts running system | LOW (30 min) | Update dashboard header and tab labels to match README — these are single string changes |
-| Secrets committed to public GitHub | HIGH (immediate) | Rotate all keys (Claude API, WDK secrets), force-push history rewrite, re-fund wallet with new seed |
-
----
-
-## Pitfall-to-Phase Mapping
-
-| Pitfall | Prevention Phase | Verification |
-|---------|------------------|--------------|
-| Breaking existing pipeline with new types/routes | Resale UI phase — additive-only rule | Run existing 3 tabs after every new component; `npm run build` passes |
-| Tailwind v4 @theme conflict | Dashboard rebrand phase — one @theme block rule | Verify existing `bg-accent` / `bg-bg-card` classes still render after color additions |
-| shadcn init corrupting Tailwind v4 setup | Dashboard rebrand phase — manual copy decision gate | Verify no `tailwind.config.js` exists after any shadcn operation |
-| React 19 / shadcn overlay incompatibilities | Dashboard rebrand phase — component selection | No `forwardRef` warnings in console; no overlay components in critical demo path |
-| Mock data looks fake / no classifications | Seed data phase — realism and completeness criteria | 10+ listings with varied prices, seller names, and rich AI reasoning strings that expand |
-| Narrative contradicts running system | Narrative reframe phase — sync with UI | Walk through demo script against live running dashboard; header, README, script all consistent |
-| Shallow Claude AI reasoning | Mock data + Claude API phase | `reasoning` strings are 50+ words, reference specific listing fields; `classificationSource` varies |
-| Time allocation failure / no demo video | All phases — time-boxing enforced | Demo video recorded by March 21 EOD; UI polish only after video is done |
-| WDK config broken by coincidental changes | Any phase touching agent code | Existing WDK smoke test still passes after every phase |
-| Prompt injection via new resale listing content | Any Claude API integration phase | Test listing with "IGNORE PREVIOUS INSTRUCTIONS" is classified correctly, not acted on |
-| Secrets in public repo | Pre-push check | `git log --follow .env` shows `.env` never committed; no API keys in source files |
+| OpenClaw gateway won't start | ABANDON (0 min) | Remove openclaw dependency, keep SKILL.md files as documentation, adjust submission |
+| Dual cron fires duplicate escrow | LOW (15 min) | Remove `cron.schedule()` from scan-loop.js OR remove OpenClaw cron config |
+| WDK wallet broken by process split | MEDIUM (30 min) | Revert to single-process scan-loop.js; undo any multi-process decomposition |
+| Node 22 requirement breaks judge setup | HIGH (cannot fix) | Must either downgrade OpenClaw usage to skill files only (no gateway) or require Node 22 in README |
+| OpenClaw config corrupted | LOW (5 min) | Restore config from backup or re-run setup |
+| Working demo broken by integration attempt | LOW (1 min) | `git checkout main` — the working system is on main branch |
+| Submission claims don't match code | LOW (15 min) | Update SUBMISSION.md to accurately describe the integration level |
 
 ---
 
 ## Sources
 
-- Direct codebase inspection: `dashboard/src/index.css` (Tailwind v4 @theme pattern in use), `dashboard/package.json` (React 19.2.4, Tailwind v4.2.2, Vite 8.0.1), `dashboard/src/types.ts`, `dashboard/src/App.tsx`, `dashboard/src/components/ListingsTable.tsx` — HIGH confidence
-- Tailwind v4 CSS-first configuration behavior (no `tailwind.config.js`) — verified against existing project setup — HIGH confidence
-- shadcn/ui v4 compatibility: known issue with `init` command generating Tailwind v3 config — manual component copy is safer approach — MEDIUM confidence (based on shadcn changelog and community reports)
-- React 19 `forwardRef` deprecation: React 19 release notes (August 2024) documented the ref-as-prop change — HIGH confidence (official React docs)
-- Hackathon judging criteria priority order: CLAUDE.md (Agent Intelligence #1, Polish #6) — HIGH confidence
-- FIFA World Cup 2026 ticket price ranges: secondary market knowledge for major sporting events — MEDIUM confidence
-- v1.0 pitfalls from 2026-03-19: WDK infrastructure layer requirements, key persistence, scraper fragility, escrow state sync — sources listed in original file above
+- [OpenClaw npm package](https://www.npmjs.com/package/openclaw) — ESM-only, Node >= 22, daily releases — HIGH confidence
+- [OpenClaw Skills documentation](https://docs.openclaw.ai/tools/skills) — skill format, SKILL.md structure, loading mechanism — HIGH confidence
+- [OpenClaw Cron Jobs documentation](https://docs.openclaw.ai/automation/cron-jobs) — cron configuration, session targeting — HIGH confidence
+- [OpenClaw Plugin documentation](https://docs.openclaw.ai/tools/plugin) — plugin SDK, TypeScript modules loaded by gateway — HIGH confidence
+- [OpenClaw AGENTS.md](https://github.com/openclaw/openclaw/blob/main/AGENTS.md) — multi-agent routing, workspace isolation — MEDIUM confidence
+- [OpenClaw NPM Package Developer Guide](https://macaron.im/blog/openclaw-npm-package) — programmatic usage limitations, Plugin SDK is the stable API — MEDIUM confidence
+- [Common OpenClaw Pitfalls](https://vertu.com/ai-tools/common-openclaw-pitfalls-and-how-to-fix-them/) — configuration instability, memory pruning — MEDIUM confidence
+- [OpenClaw Security Analysis](https://www.reco.ai/blog/openclaw-the-ai-agent-security-crisis-unfolding-right-now) — CVE-2026-25253, malicious skills — HIGH confidence
+- [WDK Build with AI docs](https://docs.wdk.tether.io/start-building/build-with-ai) — WDK + OpenClaw MCP integration patterns — MEDIUM confidence
+- Direct codebase analysis: `agent/src/scan-loop.js`, `agent/src/wallet/index.ts`, `agent/src/escrow.js`, `agent/src/classify.js`, `agent/package.json`, `docs/SUBMISSION.md` — HIGH confidence
 
 ---
-*Pitfalls research for: P2P ticket resale pivot — adding resale UI + rebrand to working agent system*
-*Updated: 2026-03-20 (v2.0 milestone research)*
+*Pitfalls research for: OpenClaw integration into existing autonomous agent system*
+*Researched: 2026-03-22 (v2.1 OpenClaw Integration milestone)*

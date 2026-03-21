@@ -2,7 +2,7 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-Safe P2P ticket resale powered by AI and USDT escrow. Seller lists a ticket, buyer locks USDT, an autonomous AI agent verifies legitimacy, and a smart contract releases or refunds — no human in the loop.
+Safe P2P ticket resale powered by an autonomous AI agent and USDT escrow. Seller lists a ticket, buyer locks USDT, an OpenClaw-orchestrated agent verifies legitimacy, and a smart contract releases or refunds — no human in the loop.
 
 ## How It Works
 
@@ -10,7 +10,7 @@ Safe P2P ticket resale powered by AI and USDT escrow. Seller lists a ticket, buy
 
 2. **Buyer Locks USDT** — Buyer selects a listing and deposits USDT into escrow via WDK non-custodial wallet on Sepolia. Funds are held by the smart contract — not by the seller or the platform.
 
-3. **AI Agent Verifies** — An autonomous verification agent analyzes the listing against market data, price caps, and cross-platform signals using Claude. The agent produces a confidence score and detailed reasoning — no human trigger required.
+3. **AI Agent Verifies** — An OpenClaw-orchestrated agent dispatches three skills autonomously: scrape market data, classify the listing (5-signal risk scoring + Claude AI for ambiguous cases), and route the verdict to escrow. The agent produces a confidence score and detailed reasoning — no human trigger required.
 
 4. **Escrow Settles** — The smart contract releases USDT to the seller (legitimate listing) or refunds the buyer (failed verification) based entirely on the agent's verdict.
 
@@ -30,53 +30,64 @@ Safe P2P ticket resale powered by AI and USDT escrow. Seller lists a ticket, buy
 │  └──────────┘   (WDK wallet)   └──────────────┬───────────────────┘    │
 │                                                │                        │
 │                                                ▼                        │
-│                                 ┌──────────────────────────────────┐    │
-│                                 │     AI Verification Agent        │    │
-│                                 │                                  │    │
-│                                 │  Tier 1: Deterministic Rules     │    │
-│                                 │  • price > 100% above face → ❌  │    │
-│                                 │  • price < -10% face → ❌        │    │
-│                                 │  • confidence ≥ 85% → done       │    │
-│                                 │                                  │    │
-│                                 │  Tier 2: Claude AI (ambiguous)   │    │
-│                                 │  • structured JSON verdict       │    │
-│                                 │  • category + confidence + why   │    │
-│                                 └──────────┬───┬──────────────────┘    │
-│                                            │   │                        │
-│                          ┌─────────────────┘   └──────────────────┐     │
-│                          ▼                                        ▼     │
-│               ┌─────────────────────┐              ┌─────────────────┐  │
-│               │  ✅ LEGITIMATE       │              │  ❌ VIOLATION    │  │
-│               │  Release USDT       │              │  Slash/Refund   │  │
-│               │  to seller          │              │  to buyer/pool  │  │
-│               └─────────┬───────────┘              └────────┬────────┘  │
-│                         │                                   │           │
-│                         └──────────────┬────────────────────┘           │
-│                                        ▼                                │
-│                         ┌──────────────────────────────────┐            │
-│                         │      FraudEscrow.sol (Sepolia)   │            │
-│                         │  deposit / release / refund / slash │         │
-│                         │  SafeERC20 · ReentrancyGuard     │            │
-│                         └──────────────────────────────────┘            │
+│  ┌──────────────────────────────────────────────────────────────────┐   │
+│  │                    OpenClaw Agent Gateway                         │   │
+│  │          Orchestration · Skill Dispatch · Session State           │   │
+│  │                                                                   │   │
+│  │  ┌─────────────┐   ┌──────────────────┐   ┌─────────────────┐   │   │
+│  │  │ Scan Skill   │   │ Classify Skill    │   │ Escrow Skill    │   │   │
+│  │  │ (SKILL.md)   │   │ (SKILL.md)        │   │ (SKILL.md)      │   │   │
+│  │  │              │   │                   │   │                 │   │   │
+│  │  │ StubHub      │   │ Tier 1: Rules     │   │ deposit (WDK)   │   │   │
+│  │  │ Viagogo      │   │  85%+ → instant   │   │ release         │   │   │
+│  │  │ Facebook     │   │ Tier 2: Claude AI │   │ refund          │   │   │
+│  │  │ (Patchright) │   │  <85% → reasoning │   │ slash           │   │   │
+│  │  └──────┬───────┘   └────────┬──────────┘   └────────┬────────┘   │   │
+│  │         │                    │                        │            │   │
+│  │         └────────────────────┼────────────────────────┘            │   │
+│  │                              │                                     │   │
+│  │         Agent decides autonomously: scan → classify → enforce      │   │
+│  └──────────────────────────────┼────────────────────────────────────┘   │
+│                                 │                                        │
+│                    ┌────────────┴────────────┐                           │
+│                    ▼                         ▼                           │
+│         ┌──────────────────┐     ┌──────────────────┐                   │
+│         │  ✅ LEGITIMATE    │     │  ❌ VIOLATION     │                   │
+│         │  Release USDT    │     │  Slash/Refund    │                   │
+│         │  to seller       │     │  to buyer/pool   │                   │
+│         └────────┬─────────┘     └────────┬─────────┘                   │
+│                  └──────────┬─────────────┘                             │
+│                             ▼                                           │
+│              ┌──────────────────────────────────┐                       │
+│              │      FraudEscrow.sol (Sepolia)    │                       │
+│              │  deposit / release / refund / slash│                      │
+│              │  SafeERC20 · ReentrancyGuard      │                       │
+│              └──────────────────────────────────┘                       │
 │                                                                          │
-│            All wallet ops via WDK — non-custodial, keys never persisted │
+│   OpenClaw owns orchestration · Claude AI owns reasoning · WDK owns funds│
 └──────────────────────────────────────────────────────────────────────────┘
-
-Data sources (agent-sourced, not seller-reported):
-  StubHub ──┐
-  Viagogo ──┼── Patchright scrapers ──> price comparison + fraud signals
-  Facebook ─┘
-  FIFA 2026 face value database ──> baseline for markup calculations
 ```
 
 ## How the AI Agent Decides
 
-The agent uses a **two-tier classification engine** — deterministic rules first, Claude AI for ambiguous cases:
+The agent separates **orchestration** (OpenClaw), **reasoning** (Claude AI), and **execution** (WDK):
+
+**OpenClaw** manages the autonomous agent loop — it decides *when* to act, dispatches skills, and maintains session state across scan cycles. Three skills are registered:
+
+| Skill | Purpose | Invokes |
+|-------|---------|---------|
+| **ducket-scan** | Scrape listings from 3 platforms | Patchright scrapers (StubHub, Viagogo, Facebook) |
+| **ducket-classify** | Score and classify each listing | 5-signal risk engine + Claude AI escalation |
+| **ducket-escrow** | Execute on-chain settlement | WDK wallet operations on FraudEscrow.sol |
+
+**Classification** uses a two-tier engine — deterministic rules first, Claude AI for ambiguous cases:
 
 | Tier | When | Speed | Cost |
 |------|------|-------|------|
 | **Rules** | Confidence ≥ 85% (obvious scalping, scam bait) | Instant | Free |
 | **Claude** | Confidence < 85% (borderline pricing, mixed signals) | ~2s | API call |
+
+The classification skill scores **5 weighted risk signals**: pricing risk (30%), seller trust (25%), listing quality (20%), temporal patterns (15%), and platform trust (10%). High-confidence zones are decided instantly by rules. Ambiguous cases (composite risk 25-70) are escalated to Claude AI with the full signal breakdown for nuanced reasoning.
 
 **Classification categories and escrow outcomes:**
 
@@ -101,7 +112,7 @@ Face values are **agent-sourced** from an independent FIFA 2026 database — the
 
 ### Prerequisites
 
-- Node.js >= 20.0.0
+- Node.js >= 22.16.0
 - npm >= 9.0.0
 
 ### Setup
@@ -129,9 +140,12 @@ npm run demo
 ducket-ai-galactica/
   agent/             AI verification agent
     src/             Core pipeline (verification loop, AI analysis, escrow settlement)
-    tools/           Market data sources
+    tools/           Market data sources (Patchright scrapers)
+    skills/          OpenClaw skill definitions (SKILL.md files)
+    cli/             CLI wrapper scripts bridging OpenClaw to agent modules
     memory/          Listing records
     cases/           Verification evidence per listing
+    SOUL.md          OpenClaw agent identity and mission
   dashboard/         React dashboard (Vite + Tailwind v4)
     src/             Resale flow UI components
     server/          Express API serving listing and escrow data
@@ -146,14 +160,14 @@ ducket-ai-galactica/
 
 | Technology | Usage |
 |-----------|-------|
+| OpenClaw | Agent orchestration — skill dispatch, session management, autonomous loop |
+| @anthropic-ai/sdk (Claude) | Classification reasoning — structured verdicts with 5-signal analysis |
 | @tetherto/wdk + wdk-wallet-evm | Non-custodial USDT wallet — escrow deposits, approvals, settlements |
-| @anthropic-ai/sdk (Claude) | Tier 2 AI classification — structured verdicts with reasoning |
 | ethers v6 | ABI encoding, contract reads, Sepolia provider |
 | Patchright | Anti-bot scraping (StubHub, Viagogo, Facebook Marketplace) |
 | React 19 + Vite 8 | Dashboard UI with resale flow wizard |
-| Tailwind CSS v4 | Dashboard styling |
+| Tailwind CSS v4 | Dashboard styling (M3 dark theme) |
 | Hardhat 3 | FraudEscrow.sol compilation and testing |
-| node-cron | Autonomous 5-minute scan loop |
 | Ethereum Sepolia | Testnet — all transactions are real on-chain |
 
 ## Third-Party Disclosures

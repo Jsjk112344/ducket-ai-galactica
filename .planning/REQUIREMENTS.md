@@ -46,6 +46,19 @@ Requirements for the P2P resale pivot. Each maps to roadmap phases.
 - [x] **UI-09**: Chevron expand column with rotate-180 animation in listings table
 - [x] **UI-10**: All detail components migrated to M3 tokens (WalletInspector, ResaleFlowPanel, TrustBadges, resale steps, EtherscanLink)
 
+## v2.1 Requirements
+
+Requirements for OpenClaw integration. Satisfies hackathon track "Must Have" for agent reasoning framework.
+
+### OpenClaw Integration
+
+- [ ] **CLAW-01**: OpenClaw workspace configured with SOUL.md defining Ducket agent identity and mission
+- [ ] **CLAW-02**: Three OpenClaw skills registered as SKILL.md files (scan, classify, escrow) with correct YAML frontmatter
+- [ ] **CLAW-03**: CLI wrapper scripts (cli-scan.js, cli-classify.js, cli-escrow.js) bridge OpenClaw exec tool to existing agent modules
+- [ ] **CLAW-04**: OpenClaw agent loop can trigger the full scan→classify→enforce pipeline end-to-end
+- [ ] **CLAW-05**: Demo startup script (`npm run demo`) includes OpenClaw daemon alongside dashboard
+- [ ] **CLAW-06**: Existing classification quality preserved — all agent tests still pass after integration
+
 ## v1.0 Requirements (Validated)
 
 All v1.0 requirements shipped and validated. See PROJECT.md Validated section.
@@ -61,6 +74,9 @@ All v1.0 requirements shipped and validated. See PROJECT.md Validated section.
 | Mobile responsive | Web-first for hackathon judges |
 | `shadcn init` CLI | Breaks Tailwind v4 setup — manual copy only |
 | New smart contract | FraudEscrow.sol handles all P2P outcomes as-is |
+| OpenClaw session persistence | Nice-to-have, not required for hackathon demo |
+| OpenClaw heartbeat replacing node-cron | Keep node-cron as fallback for demo reliability |
+| Multi-agent OpenClaw setup | Single agent sufficient for track requirements |
 
 ## Traceability
 
@@ -92,12 +108,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-08 | Phase 14 | Complete |
 | UI-09 | Phase 14 | Complete |
 | UI-10 | Phase 14 | Complete |
+| CLAW-01 | Phase 15 | Pending |
+| CLAW-02 | Phase 15 | Pending |
+| CLAW-03 | Phase 15 | Pending |
+| CLAW-04 | Phase 16 | Pending |
+| CLAW-05 | Phase 16 | Pending |
+| CLAW-06 | Phase 16 | Pending |
 
 **Coverage:**
-- v2.0 requirements: 24 total
-- Mapped to phases: 24
-- Unmapped: 0 ✓
+- v2.0 requirements: 24 total (22 complete, 2 pending)
+- v2.1 requirements: 6 total (0 complete, 6 pending)
+- Mapped to phases: 30/30
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-20*
-*Last updated: 2026-03-20 after roadmap creation*
+*Last updated: 2026-03-22 after v2.1 roadmap created (Phases 15-16)*

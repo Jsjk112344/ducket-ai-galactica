@@ -4,15 +4,15 @@
 
 An autonomous agent that scans secondary ticketing marketplaces (StubHub, Viagogo, Facebook Marketplace) for fraudulent or overpriced ticket listings, classifies each listing using a hybrid rules + Claude AI engine, and enforces outcomes on-chain via USDT escrow on Sepolia — all without human intervention. Built for the Tether Hackathon Galáctica: WDK Edition 1 (deadline: March 22, 2026) as an extension of Ducket's existing anti-fraud ticketing platform.
 
-## Current Milestone: v2.1 Submission & Demo
+## Current Milestone: v2.1 OpenClaw Integration
 
-**Goal:** Ship hackathon submission — static Vercel demo site (read-only dashboard with bundled seed data), hosted pitch deck, and recorded demo video.
+**Goal:** Integrate OpenClaw as the agent reasoning/orchestration framework behind the classification pipeline — matching what SUBMISSION.md claims and satisfying the track's "Must Have" requirement for an agent framework.
 
 **Target features:**
-- Static demo build for Vercel (bundled seed data JSON, no Express/agent backend needed)
-- Pitch deck hosted alongside demo on Vercel
-- Demo video recorded covering all 4 judging segments
-- Submission-ready README with Vercel demo link and video embed
+- OpenClaw agent loop replacing node-cron scan cycle
+- OpenClaw skills wrapping existing scraping, classification, and escrow logic
+- Clear separation: OpenClaw (orchestration) → Claude AI (reasoning) → WDK (wallet execution)
+- Backend-only changes — no UI, slides, or workflow modifications
 
 ## Core Value
 
@@ -35,10 +35,10 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 
 ### Active
 
-- [ ] Static Vercel demo site with bundled seed data
-- [ ] Pitch deck hosted on Vercel
-- [ ] Demo video recorded (<=5 min, all 4 segments)
-- [ ] Submission-ready README with demo link and video
+- [ ] OpenClaw agent loop orchestrating scan cycle
+- [ ] OpenClaw skills for scraping, classification, and escrow
+- [ ] Clear agent logic (OpenClaw) / wallet execution (WDK) separation
+- [ ] Existing classification quality preserved or improved
 
 ### Out of Scope
 
@@ -93,4 +93,4 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 | Mock fallback for all scrapers | Anti-bot detection on non-residential IPs | ✓ Good — demo resilience, labeled as mock |
 
 ---
-*Last updated: 2026-03-21 after v2.1 milestone start*
+*Last updated: 2026-03-22 after v2.1 OpenClaw Integration milestone start*

@@ -1,468 +1,478 @@
-# Architecture Research
+# Architecture: OpenClaw Integration
 
-**Domain:** P2P Ticket Resale Platform — AI Fraud Detection + USDT Escrow
-**Researched:** 2026-03-20
-**Confidence:** HIGH (based on direct codebase inspection + official shadcn/ui docs)
-
----
-
-## Standard Architecture
-
-### System Overview
-
-```
-+---------------------------------------------------------------------+
-|                         DASHBOARD (React 19 / Vite 8)               |
-|  +---------------+  +--------------+  +---------------+  +---------+|
-|  |  ResaleFlow   |  | ListingsTable|  | EscrowStatus  |  | Wallet  ||
-|  |  (NEW tab)    |  |  (existing)  |  |  (existing)   |  |Inspector||
-|  +-------+-------+  +------+-------+  +-------+-------+  +----+----+|
-|          |                 |                  |               |     |
-|  +------------------------------------------------------------------------+
-|  |          Express API (server/api.ts) -- port 3001                  |   |
-|  |  /api/listings  /api/wallet  /api/cases/:hash                      |   |
-|  |  /api/resale/listings  /api/resale/submit  (NEW)                   |   |
-|  |  /api/resale/lock  /api/resale/verify  /api/resale/settle  (NEW)   |   |
-|  +------------------------------------------------------------------------+
-+---------------------------------------------------------------------+
-          |
-+---------+-----------------------------------------------------------+
-|         |              AGENT (Node.js ESM)                           |
-|  +------+--------+  +------------+  +------------+  +------------+ |
-|  |  scan-loop.js |  | classify.js|  |  escrow.js |  |evidence.js | |
-|  | (existing)    |  | (existing) |  | (existing) |  | (existing) | |
-|  +---------------+  +------------+  +------------+  +------------+ |
-|                                                                      |
-|         agent/memory/LISTINGS.md     <-- scraper file bus (read by API)   |
-|         agent/memory/RESALE_LISTINGS.json  <-- NEW P2P file bus      |
-|         agent/cases/*.md             <-- case files with AI reasoning|
-+---------------------------------------------------------------------+
-          |
-+---------+-----------------------------------------------------------+
-|         |              ON-CHAIN (Sepolia)                            |
-|  +------+------------------------------------------------------------+
-|  |  FraudEscrow.sol                                                  |
-|  |  deposit(escrowId, amount)   <-- WDK wallet (buyer locks USDT)   |
-|  |  release(escrowId, to)       <-- deployer key (AI: legitimate)   |
-|  |  refund(escrowId)            <-- deployer key (AI: fraud/scam)   |
-|  |  slash(escrowId, pool)       <-- deployer key (AI: scalping)     |
-|  +-------------------------------------------------------------------+
-+---------------------------------------------------------------------+
-```
-
-### Component Responsibilities
-
-| Component | Responsibility | Status |
-|-----------|----------------|--------|
-| `dashboard/src/App.tsx` | Tab routing, polling orchestration | MODIFY — add ResaleFlow tab |
-| `dashboard/src/components/ResaleFlow.tsx` | 4-step wizard: list, lock, verify, settle | NEW |
-| `dashboard/src/components/SellerListForm.tsx` | Step 1: seller submits ticket details | NEW |
-| `dashboard/src/components/BuyerLockForm.tsx` | Step 2: buyer locks USDT | NEW |
-| `dashboard/src/components/AIVerifyStatus.tsx` | Step 3: AI verification in progress + result | NEW |
-| `dashboard/src/components/SettleActions.tsx` | Step 4: settlement outcome display | NEW |
-| `dashboard/src/components/ListingsTable.tsx` | Show scanned external listings, AI reasoning | MODIFY — improve reasoning display |
-| `dashboard/src/components/AgentDecisionPanel.tsx` | AI classification detail (already exists) | REUSE — wire into ResaleFlow step 3 |
-| `dashboard/src/components/EscrowStatus.tsx` | Aggregate escrow stats | MODIFY — show P2P escrows too |
-| `dashboard/server/api.ts` | Express REST API, reads agent file bus | MODIFY — add /api/resale/* endpoints |
-| `dashboard/src/types.ts` | Shared TypeScript contracts | MODIFY — add ResaleListing, P2PEscrowState |
-| `dashboard/src/hooks/useResale.ts` | Polling hook for resale listings state | NEW |
-| `dashboard/src/index.css` | Tailwind v4 @theme tokens | MODIFY — add Ducket brand + shadcn vars |
-| `agent/src/classify.js` | Hybrid rules + Claude classifier | KEEP — API imports directly |
-| `agent/src/escrow.js` | WDK deposit + deployer release/refund/slash | KEEP — API imports directly |
-| `contracts/src/FraudEscrow.sol` | On-chain escrow lifecycle | NO CHANGE — covers P2P already |
+**Domain:** OpenClaw agent orchestration layer for existing fraud detection + USDT escrow platform
+**Researched:** 2026-03-22
+**Confidence:** MEDIUM (OpenClaw docs verified via multiple web sources; integration patterns inferred from architecture docs + existing codebase inspection)
 
 ---
 
-## Recommended Project Structure (New Files Only)
+## How OpenClaw Works (Summary for This Integration)
 
-```
-dashboard/
-+-- server/
-|   +-- api.ts                    # MODIFY: add /api/resale/* route group
-+-- src/
-|   +-- components/
-|   |   +-- ResaleFlow.tsx         # NEW: 4-step wizard orchestrator
-|   |   +-- SellerListForm.tsx     # NEW: step 1 form
-|   |   +-- BuyerLockForm.tsx      # NEW: step 2 USDT lock CTA
-|   |   +-- AIVerifyStatus.tsx     # NEW: step 3 AI status + AgentDecisionPanel
-|   |   +-- SettleActions.tsx      # NEW: step 4 outcome
-|   |   +-- ui/                    # NEW: shadcn components (card, button, etc.)
-|   +-- hooks/
-|   |   +-- useResale.ts           # NEW: polling hook for P2P listings
-|   +-- lib/
-|   |   +-- utils.ts               # NEW: cn() helper required by shadcn
-|   +-- types.ts                   # MODIFY: add ResaleListing, P2PEscrowState
+OpenClaw is a config-first, local-first AI agent framework. Its core model:
 
-agent/memory/
-+-- RESALE_LISTINGS.json           # NEW: file-bus store for P2P listings
+1. **Workspace files** define agent behavior: `SOUL.md` (identity/purpose), `AGENTS.md` (operating instructions), `TOOLS.md` (tool notes), `HEARTBEAT.md` (periodic checklist)
+2. **Skills** are modular SKILL.md files with YAML frontmatter that teach the agent how to accomplish tasks using tools (exec, memory, etc.)
+3. **The agent loop** reads workspace files + skills, searches memory for context, builds a system prompt, ships to configured LLM (Claude), and executes tool calls (primarily `exec` for shell commands)
+4. **Heartbeat** replaces cron: a configurable interval (default 30min, tunable) where the agent reads HEARTBEAT.md and performs checklist items
+5. **Memory** persists across sessions via `MEMORY.md` (permanent) + daily logs `memory/YYYY-MM-DD.md` (ephemeral)
+6. **Session state** is managed per session key, with context compaction when conversations get long
 
-scripts/
-+-- seed-cases.js                  # NEW: seed realistic case files for demo AI reasoning
-```
-
-### Structure Rationale
-
-- **ResaleFlow.tsx as orchestrator:** Manages `step` state (1-4) and `resaleListing` object. Child components are dumb — they receive step data and callbacks. Keeps demo flow linear.
-- **Separate RESALE_LISTINGS.json (not LISTINGS.md):** LISTINGS.md is append-only markdown written by the scraper. P2P listings need structured read/write by the API. JSON file in `agent/memory/` keeps the shared file-bus pattern consistent.
-- **No new contracts:** FraudEscrow.sol already handles the P2P lifecycle. `escrowId` is `keccak256(sellerAddress + ticketId + timestamp)`. The contract does not care about the semantic meaning of the depositor.
-- **No new agent loops:** classify.js exports `classifyListing()` as a pure function. The API can call it synchronously (no side effects, no file I/O). This avoids adding a new scan loop for P2P.
+**Critical insight:** OpenClaw skills do NOT execute code directly. A skill is a SKILL.md file that teaches the agent what commands to run via the `exec` tool. The agent reads the skill, decides what to do, and invokes `exec` to run shell commands (e.g., `node agent/src/scan-loop.js`). This is fundamentally different from a programmatic SDK.
 
 ---
 
-## P2P Resale Flow Mapping to Existing Escrow
+## Recommended Architecture
 
-### How seller listing -> buyer lock -> AI verify -> settle maps to FraudEscrow.sol
+### Integration Strategy: Wrapper, Not Rewrite
+
+OpenClaw wraps the existing agent pipeline via skills that invoke existing modules through the `exec` tool. The existing `classify.js`, `escrow.js`, `evidence.js`, and scraper tools remain unchanged. OpenClaw provides orchestration intelligence on top.
 
 ```
-Step 1: Seller submits listing
-  POST /api/resale/submit
-  --> Write to agent/memory/RESALE_LISTINGS.json
-  --> Generate escrowId = keccak256(seller + ticketId + timestamp)
-  --> Return { listingId, escrowId, status: 'LISTED' }
-
-Step 2: Buyer locks USDT
-  POST /api/resale/lock { listingId }
-  --> api.ts calls escrow.js depositForListing(escrowId, amount)
-      --> WDK wallet: USDT.approve(FraudEscrow, 10 USDT)
-      --> WDK wallet: FraudEscrow.deposit(escrowId, 10 USDT)
-  --> Update RESALE_LISTINGS.json status --> 'LOCKED'
-  --> Return { txHash, escrowId }
-
-Step 3: AI verification
-  POST /api/resale/verify { listingId }
-  --> api.ts calls classify.js classifyListing(listing) directly
-      --> Rules pass --> Claude API if confidence < 85
-      --> Returns { category, confidence, reasoning, classificationSource }
-  --> Write classification to listing record in RESALE_LISTINGS.json
-  --> Update status --> 'VERIFIED'
-  --> Return { classification }
-
-Step 4: Settlement
-  POST /api/resale/settle { listingId }
-  --> api.ts reads classification from listing record
-  --> LEGITIMATE                      --> escrow.js release(escrowId, sellerAddress)
-  --> LIKELY_SCAM / COUNTERFEIT_RISK  --> escrow.js refund(escrowId)
-  --> SCALPING_VIOLATION              --> escrow.js slash(escrowId, BOUNTY_POOL)
-  --> Update status --> 'RELEASED' | 'REFUNDED' | 'SLASHED'
-  --> Return { outcome, txHash, etherscanLink }
++------------------------------------------------------------------+
+|                    OPENCLAW GATEWAY (daemon)                      |
+|  +------------------+  +------------------+  +------------------+|
+|  |    SOUL.md       |  |   AGENTS.md      |  |  HEARTBEAT.md    ||
+|  | "I am Ducket AI  |  | "Operating rules |  | "Every 5 min:    ||
+|  |  fraud detection  |  |  for scanning,   |  |  run scan cycle, ||
+|  |  agent..."        |  |  classification, |  |  check results,  ||
+|  |                   |  |  and escrow"     |  |  update memory"  ||
+|  +------------------+  +------------------+  +------------------+|
+|                                                                   |
+|  +-------------------------------------------------------------+ |
+|  |                     SKILLS LAYER                             | |
+|  |  skills/                                                     | |
+|  |    scan-platforms/SKILL.md   — invokes scraper scripts       | |
+|  |    classify-listing/SKILL.md — invokes classify.js           | |
+|  |    escrow-enforce/SKILL.md  — invokes escrow.js              | |
+|  |    evidence-case/SKILL.md   — invokes evidence.js            | |
+|  +-------------------------------------------------------------+ |
+|           |                                                       |
+|           | exec tool (shell commands)                            |
+|           v                                                       |
++------------------------------------------------------------------+
+           |
++----------+-------------------------------------------------------+
+|          |          EXISTING AGENT (Node.js ESM)                  |
+|  +-------v-------+  +-------------+  +------------+  +----------+|
+|  | scan-loop.js  |  | classify.js |  | escrow.js  |  |evidence.js|
+|  | (scan cycle   |  | (5-signal   |  | (WDK+ethers|  |(case file ||
+|  |  function)    |  |  scoring)   |  |  lifecycle)|  | writer)   ||
+|  +---------------+  +------+------+  +------+-----+  +----------+|
+|                            |                |                     |
+|                     +------v------+  +------v------+              |
+|                     | Claude API  |  | WDK Wallet  |              |
+|                     | (reasoning) |  | (escrow tx) |              |
+|                     +-------------+  +-------------+              |
++-------------------------------------------------------------------+
+           |
++----------v--------------------------------------------------------+
+|           EXPRESS API (dashboard/server/api.ts) — port 3001       |
+|  GET /api/listings   POST /api/listings   GET /api/wallet         |
+|  GET /api/cases/:h   POST /api/escrow/deposit                     |
++-------------------------------------------------------------------+
+           |
++----------v--------------------------------------------------------+
+|           DASHBOARD (React 19 / Vite 8) — port 5173               |
++-------------------------------------------------------------------+
 ```
 
-### Key constraint: escrow.js deposit() uses WDK
+### Key Architectural Decision: Heartbeat vs. Direct Agent Loop
 
-The existing escrow.js does `approve()` and `deposit()` via WDK. For P2P, the "buyer" is conceptually the depositor. In the demo context (one wallet), this satisfies the WDK requirement — the WDK wallet locks USDT on behalf of the buyer. Make this explicit in UI copy: "Buyer locks USDT via WDK non-custodial wallet."
+**Option A (Recommended): Heartbeat replaces node-cron**
+- Configure OpenClaw heartbeat interval to 5 minutes (matches current cron)
+- HEARTBEAT.md checklist: "Run scan cycle, classify new listings, enforce escrow"
+- The agent reads HEARTBEAT.md, decides what to do, and invokes exec to run a scan script
+- Advantage: agent has autonomy to decide whether to scan, skip, or prioritize
+
+**Option B (Rejected): OpenClaw as pure orchestrator calling functions directly**
+- OpenClaw does not have a programmatic Node.js SDK for direct function invocation
+- Skills teach the agent to run commands, not import modules
+- Trying to make OpenClaw call `classifyListing()` directly would require building a CLI wrapper anyway
+
+**Option C (Rejected): Keep node-cron, add OpenClaw only for classification reasoning**
+- Defeats the purpose: hackathon judges want to see the agent framework doing orchestration
+- Splitting control between node-cron and OpenClaw creates confusing architecture
 
 ---
 
-## Surfacing Claude AI Reasoning in the UI
+## Component Boundaries
 
-### What already exists
+### New Files to Create
 
-`AgentDecisionPanel.tsx` already renders:
-- `category` — fraud classification badge
-- `confidence` — percentage bar
-- `reasoning` — text paragraph (from `classificationSource: 'claude-3-5-sonnet'`)
-- `classificationSource` — rules vs. Claude API
-- `actionTaken` — what escrow action was triggered
-- `etherscanLink` — on-chain evidence
+| File | Purpose | Location |
+|------|---------|----------|
+| `SOUL.md` | Agent identity: "I am Ducket AI, a fraud detection agent..." | `agent/openclaw/SOUL.md` |
+| `AGENTS.md` | Operating instructions: scan rules, classification thresholds, escrow logic | `agent/openclaw/AGENTS.md` |
+| `HEARTBEAT.md` | 5-minute checklist: scan, classify, enforce, log | `agent/openclaw/HEARTBEAT.md` |
+| `TOOLS.md` | Notes about available tools (node, scrapers, env vars) | `agent/openclaw/TOOLS.md` |
+| `skills/scan-platforms/SKILL.md` | Skill: how to invoke the three platform scrapers | `agent/openclaw/skills/scan-platforms/SKILL.md` |
+| `skills/classify-listing/SKILL.md` | Skill: how to invoke classify.js on a listing | `agent/openclaw/skills/classify-listing/SKILL.md` |
+| `skills/escrow-enforce/SKILL.md` | Skill: how to invoke escrow.js for deposit/release/refund/slash | `agent/openclaw/skills/escrow-enforce/SKILL.md` |
+| `skills/evidence-case/SKILL.md` | Skill: how to write/update case files via evidence.js | `agent/openclaw/skills/evidence-case/SKILL.md` |
+| `agent/src/cli-scan.js` | CLI entry point for single scan cycle (exec-friendly) | `agent/src/cli-scan.js` |
+| `agent/src/cli-classify.js` | CLI entry point: accepts listing JSON, outputs classification JSON | `agent/src/cli-classify.js` |
+| `agent/src/cli-escrow.js` | CLI entry point: accepts escrow command + params, executes | `agent/src/cli-escrow.js` |
+| `openclaw.json` | OpenClaw gateway config: model, workspace, heartbeat interval | project root |
 
-`classify.js` already emits `reasoning` strings in structured output from both the rules engine and Claude API. The `classificationSource` field is either `'rules'` or the model string from the Claude SDK response.
+### Existing Files to Modify
 
-### What needs to change for demo visibility
+| File | Change | Scope |
+|------|--------|-------|
+| `agent/src/scan-loop.js` | Extract `runScanCycle()` as importable + add CLI invocation guard | Small: add `if (import.meta.url === ...)` gate |
+| `agent/package.json` | Add `openclaw` to dependencies, add CLI scripts | Small: 3-4 lines |
+| Root `package.json` | Add openclaw dev dependency + workspace script | Small: 2-3 lines |
 
-Mock/seed data listings have no `classification` attached (the agent has not processed them in demo mode). Two approaches:
+### Files NOT Modified
 
-**Option A — Pre-seed case files (recommended for demo):** Write a seed script that generates realistic case `.md` files in `agent/cases/` for mock listings. The API's `lookupClassification()` parser already reads these. Zero new code path, 100% reliable during demo. Takes ~30 minutes.
-
-**Option B — Inline classification on API response:** Add a `classifyOnRead: true` query param to `GET /api/listings` that calls `classifyListing()` synchronously for listings without a case file. More code, adds latency, Claude API call during demo = risky.
-
-**Recommendation: Option A.** Seed data covers all four categories with distinct reasoning strings. AgentDecisionPanel renders immediately without any live API risk during the demo.
+| File | Why Unchanged |
+|------|---------------|
+| `agent/src/classify.js` | Already exports `classifyListing()` and `classifyByRules()` cleanly |
+| `agent/src/escrow.js` | Already exports all lifecycle functions; CLI wrapper calls these |
+| `agent/src/evidence.js` | Already exports `writeCaseFile()` and helpers |
+| `agent/src/wallet/index.ts` | WDK singleton pattern unchanged; escrow.js still lazy-imports it |
+| `dashboard/server/api.ts` | Express API unchanged; it already imports from agent/src/ directly |
+| All scraper tools | Already standalone scripts with clean exports |
 
 ---
 
-## shadcn/ui Integration with Tailwind v4
+## Data Flow: OpenClaw Agent Loop
 
-### Compatibility status (HIGH confidence)
+### Heartbeat Cycle (Every 5 Minutes)
 
-shadcn/ui fully supports Tailwind v4 as of early 2026. Components ship with `@theme inline` CSS variable wiring. React 19 is explicitly supported. Installation adds components as local files — not a package dependency — so there is no version lock risk.
+```
+1. OpenClaw daemon triggers heartbeat
+2. Agent reads HEARTBEAT.md checklist:
+   "- Run scan cycle for {EVENT_NAME}
+    - Classify any new listings
+    - Enforce escrow on fraud above threshold
+    - Log results to daily memory"
+3. Agent decides to execute scan (reads scan-platforms skill)
+4. Agent runs: exec("node agent/src/cli-scan.js")
+   - cli-scan.js calls runScanCycle() from scan-loop.js
+   - Returns JSON: { scanned: 12, new: 3, listings: [...] }
+5. Agent reads classify-listing skill
+6. For each new listing, agent runs:
+   exec("node agent/src/cli-classify.js '${JSON.stringify(listing)}'")
+   - cli-classify.js calls classifyListing() from classify.js
+   - Returns JSON: { category, confidence, reasoning, signals }
+7. Agent evaluates result against threshold (from AGENTS.md instructions)
+8. If fraud detected, agent reads escrow-enforce skill and runs:
+   exec("node agent/src/cli-escrow.js deposit --listing-url '${url}'")
+   exec("node agent/src/cli-escrow.js slash --escrow-id '${id}'")
+9. Agent writes summary to daily memory log
+```
 
-Source: https://ui.shadcn.com/docs/tailwind-v4
+### Key Data Flow Change: CLI Wrappers
 
-### Key integration requirement
+The critical new layer is CLI entry points that bridge OpenClaw's exec-based tool invocation with the existing module exports:
 
-shadcn/ui's `components.json` expects an `aliases.utils` path pointing to a `cn()` helper (`clsx` + `tailwind-merge`). This is the only new dependency required:
+```javascript
+// agent/src/cli-scan.js (NEW)
+// Imports runScanCycle() from scan-loop.js, runs it, outputs JSON to stdout
+import { runScanCycle } from './scan-loop.js';
+const result = await runScanCycle();
+console.log(JSON.stringify(result));
 
+// agent/src/cli-classify.js (NEW)
+// Reads listing JSON from argv[2] or stdin, classifies, outputs result JSON
+import { classifyListing } from './classify.js';
+const listing = JSON.parse(process.argv[2] || await readStdin());
+const result = await classifyListing(listing);
+console.log(JSON.stringify(result));
+
+// agent/src/cli-escrow.js (NEW)
+// Reads command + params from argv, dispatches to escrow.js functions
+import { depositEscrow, slashEscrow, refundEscrow, releaseEscrow } from './escrow.js';
+const [command, ...args] = process.argv.slice(2);
+// dispatch based on command...
+```
+
+### scan-loop.js Modification
+
+The existing `scan-loop.js` runs top-level await and starts node-cron on import. For OpenClaw integration, it needs a guard so the function can be imported without auto-starting the cron loop:
+
+```javascript
+// At the bottom of scan-loop.js, replace the current initialization block:
+
+// Export for CLI/OpenClaw invocation
+export { runScanCycle };
+
+// Only auto-start cron when run directly (not imported by CLI wrapper)
+if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
+  // ... existing initialization code (mkdir, writeFile, depositBond, cron.schedule)
+}
+```
+
+---
+
+## OpenClaw Workspace Configuration
+
+### openclaw.json (Project Root)
+
+```json
+{
+  "identity": {
+    "name": "Ducket",
+    "emoji": "🎫"
+  },
+  "agent": {
+    "workspace": "./agent/openclaw",
+    "model": "anthropic/claude-sonnet-4-5"
+  },
+  "heartbeat": {
+    "every": "5m",
+    "lightContext": true
+  },
+  "tools": {
+    "exec": {
+      "enabled": true,
+      "timeout": 60000
+    }
+  }
+}
+```
+
+### SOUL.md
+
+```markdown
+# Ducket AI Galactica
+
+I am an autonomous fraud detection agent for P2P ticket resale.
+
+## Mission
+Scan secondary ticket marketplaces (StubHub, Viagogo, Facebook Marketplace),
+classify listings using multi-signal risk analysis, and enforce outcomes via
+USDT escrow on Sepolia -- all without human intervention.
+
+## Decision Framework
+- Composite risk score < 30: LEGITIMATE
+- Composite risk score 30-65: ambiguous, use Claude API for deep analysis
+- Composite risk score > 65: fraud, assign category from strongest signal
+- Confidence >= 85% AND non-LEGITIMATE: trigger escrow enforcement
+
+## Core Values
+- Buyer protection is paramount
+- Every decision must be explainable (case files with signal breakdowns)
+- WDK wallet handles all on-chain operations (non-custodial)
+- Agent-sourced face values only -- never trust seller-reported prices
+```
+
+### HEARTBEAT.md
+
+```markdown
+# Heartbeat Checklist
+
+Every cycle:
+- [ ] Run scan cycle: `node agent/src/cli-scan.js`
+- [ ] Review new listings count from scan output
+- [ ] For each new listing, classify: `node agent/src/cli-classify.js '<listing-json>'`
+- [ ] If classification is fraud (confidence >= 85%), enforce escrow
+- [ ] Log cycle summary to daily memory
+- [ ] Note any scraper failures or unusual patterns
+```
+
+### SKILL.md Example (skills/scan-platforms/SKILL.md)
+
+```yaml
+---
+name: scan-platforms
+description: "Scan StubHub, Viagogo, and Facebook Marketplace for ticket listings"
+version: 1.0.0
+openclaw:
+  emoji: "🔍"
+  requires:
+    bins:
+      - node
+    env:
+      - EVENT_NAME
+---
+
+# Scan Platforms
+
+## When to Use
+Run this skill during every heartbeat cycle to discover new ticket listings.
+
+## How to Run
+Execute the scan CLI:
 ```bash
-npm install clsx tailwind-merge --save
+node agent/src/cli-scan.js
 ```
 
-shadcn CLI adds the `lib/utils.ts` helper automatically during `npx shadcn@latest init`.
+## Expected Output
+JSON object with:
+- `scanned`: total listings found across all platforms
+- `new`: net-new listings after deduplication
+- `listings`: array of listing objects
 
-### CSS variable conflict risk: NONE
-
-The existing `index.css` uses `@theme { --color-accent: #6366F1; ... }`. shadcn/ui uses its own namespace: `--primary`, `--secondary`, `--background`, `--foreground`, etc. These are separate namespaces — no collision. shadcn components reference `var(--primary)`, not `var(--color-accent)`.
-
-**Resolution:** Map Ducket brand tokens to shadcn variable names inside the `@theme` block. Existing components are unaffected because they reference `--color-*` names, not shadcn's names.
-
-### Which shadcn components to install
-
-Install only what is needed for the resale flow. Do not install the full registry.
-
-| Component | Used by | Why |
-|-----------|---------|-----|
-| `card` | ResaleFlow steps | Consistent step card layout |
-| `button` | All CTA actions | Replaces raw `<button>` classes |
-| `badge` | Status labels | Augments or replaces custom Badge.tsx |
-| `input` | SellerListForm, BuyerLockForm | Form fields |
-| `label` | Forms | Paired with input |
-| `separator` | Step dividers | Visual flow |
-| `progress` | AIVerifyStatus | Confidence bar |
-
-Do NOT install: `table`, `dialog`, `sheet`, `toast`, `dropdown-menu`. ListingsTable already has custom table CSS that works.
-
----
-
-## Brand Theming Approach
-
-### Recommended: augment existing @theme block (15-minute change)
-
-The Ducket brand uses:
-- Primary: purple (`#7C3AED` / violet-700)
-- Accent: yellow/gold (`#F59E0B` / amber-400)
-- Font headings: Outfit
-- Font body: Inter (already loaded)
-
-Change strategy:
-1. Update `--color-accent` in `index.css` from `#6366F1` (indigo) to `#7C3AED` (Ducket purple) — all existing components using `text-accent`, `bg-accent`, `border-accent` shift automatically.
-2. Add `--color-accent-yellow: #F59E0B` for highlight elements.
-3. Add Outfit font `@import` alongside Inter.
-4. Add `--font-family-display: 'Outfit', sans-serif` to `@theme`.
-5. Apply `font-display` to `<h1>` and section headings in App.tsx and ResaleFlow.tsx.
-6. Add shadcn CSS variable mappings (`--primary`, `--background`, etc.) inside `@theme`.
-
-This is additive — existing components are not broken.
-
----
-
-## Data Flow
-
-### P2P Resale Request Flow
-
-```
-User fills SellerListForm
-    |
-    v
-POST /api/resale/submit
-    |
-    v
-api.ts writes to agent/memory/RESALE_LISTINGS.json
-    |
-    v
-Returns { listingId, escrowId, status: 'LISTED' }
-    |
-    v
-UI advances to Step 2 (BuyerLockForm)
-
-User clicks "Lock USDT"
-    |
-    v
-POST /api/resale/lock { listingId }
-    |
-    v
-api.ts imports escrow.js depositForListing()
-    |
-    v
-WDK approve() --> WDK deposit() --> FraudEscrow.deposit(escrowId, 10 USDT)
-    |
-    v
-RESALE_LISTINGS.json status --> 'LOCKED'
-    |
-    v
-Returns { txHash, escrowId }
-    |
-    v
-UI advances to Step 3 (AIVerifyStatus)
-
-User clicks "Verify Listing"
-    |
-    v
-POST /api/resale/verify { listingId }
-    |
-    v
-api.ts imports classify.js classifyListing()
-    |
-    v
-Rules pass --> Claude API (if confidence < 85)
-    |
-    v
-Returns { category, confidence, reasoning, classificationSource }
-    |
-    v
-RESALE_LISTINGS.json status --> 'VERIFIED', classification attached
-    |
-    v
-UI renders AgentDecisionPanel inline
-
-User (or auto-advance) clicks "Settle"
-    |
-    v
-POST /api/resale/settle { listingId }
-    |
-    v
-api.ts reads classification --> calls escrow.js release / refund / slash
-    |
-    v
-Returns { outcome, txHash, etherscanLink }
-    |
-    v
-UI advances to Step 4 (SettleActions), shows outcome + Etherscan link
+## Error Handling
+If a platform scraper fails, the scan continues with remaining platforms.
+The output will indicate which platforms succeeded or failed.
 ```
 
-### State Management
+---
 
-No Redux/Zustand needed. `ResaleFlow.tsx` manages local `step` state (1-4) and a `resaleListing` object built up across steps. `useResale.ts` polls `GET /api/resale/listings` every 10 seconds for a listings overview panel — same polling pattern as `useListings.ts`.
+## Session State Management
+
+### What State Exists Today
+
+| State | Current Location | Lifecycle |
+|-------|-----------------|-----------|
+| Dedup set (`seen`) | In-memory Set in scan-loop.js | Process lifetime |
+| Bond status | `bondDeposited`, `bondSlashed` variables | Process lifetime |
+| Classified seeds cache | `_classifiedSeeds` in api.ts | Server lifetime |
+| Case files | `agent/cases/*.md` on disk | Persistent |
+| Listings log | `agent/memory/LISTINGS.md` | Reset each run |
+
+### How OpenClaw Manages This
+
+OpenClaw's memory system maps naturally to the existing state:
+
+| State | OpenClaw Approach |
+|-------|-------------------|
+| Dedup set | Daily memory log (`memory/YYYY-MM-DD.md`): agent notes which URLs were already scanned |
+| Bond status | `MEMORY.md`: "Bond deposited for FIFA World Cup 2026 at tx 0x..." — persists across sessions |
+| Scan results | Case files remain on disk; agent reads them via exec |
+| Cycle history | Daily memory logs capture each heartbeat's actions and results |
+
+**Key change:** The in-memory `seen` Set in scan-loop.js becomes unreliable across heartbeat invocations (each exec spawns a new process). The dedup must shift to:
+1. **Case file existence check** (already implemented via `isCaseFileExists()`) -- this is the primary dedup
+2. **LISTINGS.md append** still works for logging, but dedup relies on case files, not in-memory Set
+
+This is actually an improvement: case-file-based dedup persists across process restarts, while the current in-memory Set does not.
+
+### Bond Deposit Handling
+
+The organizer bond deposit currently runs once on scan-loop.js startup. Under OpenClaw:
+- Agent checks `MEMORY.md` on first heartbeat: "Has bond been deposited?"
+- If no, runs: `node agent/src/cli-escrow.js deposit-bond --event "FIFA World Cup 2026"`
+- Records result in `MEMORY.md`: "Bond deposited: tx 0x..."
+- On subsequent heartbeats, reads memory and skips bond deposit
 
 ---
 
-## New vs Modified Components — Explicit List
+## Express API Impact
 
-### New Files
+**The Express API (dashboard/server/api.ts) requires NO changes.**
 
-| File | Type | Description |
-|------|------|-------------|
-| `dashboard/src/components/ResaleFlow.tsx` | NEW | 4-step wizard orchestrator |
-| `dashboard/src/components/SellerListForm.tsx` | NEW | Step 1 UI (ticket details form) |
-| `dashboard/src/components/BuyerLockForm.tsx` | NEW | Step 2 UI (USDT lock CTA) |
-| `dashboard/src/components/AIVerifyStatus.tsx` | NEW | Step 3 UI (AI in progress + result) |
-| `dashboard/src/components/SettleActions.tsx` | NEW | Step 4 UI (outcome display) |
-| `dashboard/src/hooks/useResale.ts` | NEW | Polling hook for resale listings |
-| `dashboard/src/lib/utils.ts` | NEW | cn() helper required by shadcn |
-| `dashboard/src/components/ui/` | NEW | shadcn/ui components (card, button, etc.) |
-| `agent/memory/RESALE_LISTINGS.json` | NEW | File-bus store for P2P listings |
-| `scripts/seed-cases.js` | NEW | Seed realistic case files for demo AI reasoning |
+Why:
+- API already imports directly from `agent/src/classify.js` and `agent/src/escrow.js`
+- API does NOT depend on scan-loop.js or node-cron
+- OpenClaw runs as a separate daemon process alongside the Express server
+- Dashboard continues to poll `/api/listings` and `/api/wallet` as before
+- Case files written by OpenClaw-triggered scans are read by the same `lookupClassification()` function
 
-### Modified Files
-
-| File | Change |
-|------|--------|
-| `dashboard/src/App.tsx` | Add "Resale" tab + ResaleFlow component |
-| `dashboard/src/types.ts` | Add ResaleListing, P2PEscrowState interfaces |
-| `dashboard/server/api.ts` | Add /api/resale/* route group (submit, lock, verify, settle, listings) |
-| `dashboard/src/index.css` | Ducket purple accent, Outfit font, shadcn CSS var mappings |
-| `dashboard/src/components/ListingsTable.tsx` | Improve AI reasoning display if needed |
-
-### Unchanged Files
-
-| File | Reason |
-|------|--------|
-| `agent/src/classify.js` | Already exports classifyListing() as pure function |
-| `agent/src/escrow.js` | Already handles deposit/release/refund/slash |
-| `agent/src/scan-loop.js` | Scanning external platforms is separate from P2P resale |
-| `contracts/src/FraudEscrow.sol` | Contract already covers P2P lifecycle |
-| `contracts/deployed.json` | No redeployment required |
-| `agent/src/wallet/index.ts` | WDK wallet unchanged |
-
----
-
-## Suggested Build Order (2-Day Deadline)
-
-Dependencies drive the order: types -> API -> hooks -> UI -> brand.
-
-### Day 1 — Foundation + data layer
-
-| Order | Task | File(s) | Est. Time |
-|-------|------|---------|-----------|
-| 1 | Extend types | `dashboard/src/types.ts` | 20 min |
-| 2 | Add resale API routes | `dashboard/server/api.ts` | 90 min |
-| 3 | Write seed script + run it | `scripts/seed-cases.js` | 30 min |
-| 4 | Add useResale hook | `dashboard/src/hooks/useResale.ts` | 20 min |
-| 5 | Stub ResaleFlow + wire tab | `App.tsx`, `ResaleFlow.tsx` | 30 min |
-| 6 | Install shadcn + cn helper | npm install, shadcn init | 15 min |
-
-### Day 2 — UI + rebrand + polish
-
-| Order | Task | File(s) | Est. Time |
-|-------|------|---------|-----------|
-| 7 | Build 4-step components | SellerListForm, BuyerLockForm, AIVerifyStatus, SettleActions | 120 min |
-| 8 | Wire steps end-to-end | ResaleFlow.tsx step state machine | 45 min |
-| 9 | Brand rebrand | index.css — purple accent, Outfit font | 20 min |
-| 10 | Verify AI reasoning on seed data | AgentDecisionPanel renders from seed case files | 20 min |
-| 11 | Demo run-through | Full 5-min flow, fix blockers | 60 min |
-| 12 | README + narrative reframe | README.md, CLAUDE.md | 30 min |
-
-### Why this order
-
-- Types first so API and UI both compile against shared contracts from the start.
-- API before UI so components call real endpoints, not stubs.
-- Seed script early so AI reasoning display works from day 1, removing demo risk.
-- shadcn init before building step components so shadcn imports resolve.
-- Rebrand last — purely visual, no logic dependencies, zero risk to the core flow.
-
----
-
-## Integration Points
-
-### External Services
-
-| Service | Integration Pattern | Notes |
-|---------|---------------------|-------|
-| Sepolia RPC | ethers.JsonRpcProvider in api.ts (existing) | No change — escrow.js reused |
-| WDK (@tetherto/wdk-wallet-evm) | wallet/index.ts, escrow.js (existing) | No change — deposit path unchanged |
-| Claude API (@anthropic-ai/sdk) | classify.js (existing) | No change — api.ts imports classify.js directly |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| API -> agent/classify.js | Direct ESM import | classify.js is a pure function, no side effects, safe to import from API |
-| API -> agent/escrow.js | Direct ESM import | escrow.js requires .env vars — api.ts process shares the same env |
-| API -> agent/memory/ | fs read/write | JSON file bus pattern, consistent with existing LISTINGS.md approach |
-| React -> API | HTTP polling (10s interval) | Same pattern as useListings.ts — replicate for useResale.ts |
+The only change is operational: instead of running `node agent/src/scan-loop.js` as a separate process, OpenClaw's heartbeat triggers the scan cycle. But the Express server does not care who writes the case files.
 
 ---
 
 ## Anti-Patterns to Avoid
 
-### Anti-Pattern 1: Rebuilding the escrow contract for P2P
+### Anti-Pattern 1: Trying to Use OpenClaw as a Programmatic SDK
+**What:** Importing OpenClaw into scan-loop.js and calling agent functions
+**Why bad:** OpenClaw is a daemon + config system, not a library. It orchestrates via exec.
+**Instead:** Create CLI wrappers that OpenClaw can invoke via exec tool.
 
-**What people do:** Add seller/buyer address fields to the contract, add a `list()` function, redeploy.
-**Why it's wrong:** FraudEscrow.sol already handles all four outcomes. Adding UI fields to the contract for a demo is wasted time and introduces redeployment risk. `escrowId` is an opaque bytes32 — it can encode any semantic meaning the API assigns to it.
-**Do this instead:** Keep all P2P state in RESALE_LISTINGS.json. The contract is purely the payment rail.
+### Anti-Pattern 2: Duplicating Classification Logic in SOUL.md
+**What:** Writing risk scoring rules in SOUL.md and having the LLM re-implement classify.js
+**Why bad:** The existing 5-signal scoring engine is deterministic and tested. LLM re-implementation would be slower, more expensive, and less reliable.
+**Instead:** SOUL.md describes the decision framework conceptually. Actual scoring runs via `node agent/src/cli-classify.js`.
 
-### Anti-Pattern 2: Adding a separate Express server for resale
+### Anti-Pattern 3: Passing Large JSON Through exec Arguments
+**What:** `exec("node cli-classify.js '${JSON.stringify(hugeListingObject)}'")`
+**Why bad:** Shell argument length limits, escaping issues with special characters
+**Instead:** Write listing to a temp JSON file, pass the file path: `exec("node cli-classify.js --file /tmp/listing-abc.json")`
 
-**What people do:** Create `server/resale-api.ts` with its own `app.listen()`.
-**Why it's wrong:** Two servers = two ports = Vite proxy reconfiguration = demo complexity.
-**Do this instead:** Add `/api/resale/*` as a route group in the existing `server/api.ts`. It already runs on port 3001 with Vite proxy wired.
+### Anti-Pattern 4: Running OpenClaw Heartbeat Without lightContext
+**What:** Using full context on every 5-minute heartbeat
+**Why bad:** Each heartbeat consumes significant tokens loading the full workspace. At 5-minute intervals, this becomes a major token sink (documented in OpenClaw issue #11042).
+**Instead:** Enable `lightContext: true` in heartbeat config. Only HEARTBEAT.md loads, not the full workspace.
 
-### Anti-Pattern 3: Installing too many shadcn components
-
-**What people do:** `npx shadcn@latest add --all` for completeness.
-**Why it's wrong:** Adds 40+ files with potentially conflicting utility class patterns. Tailwind v4's JIT compiles everything it finds — large unused files bloat the build and may conflict with existing custom CSS.
-**Do this instead:** Install only the 7 components listed above. The rest of the UI uses existing custom components that already match the design.
-
-### Anti-Pattern 4: Calling Claude API at render time
-
-**What people do:** Call classifyListing() in a useEffect for each listing row to show AI reasoning.
-**Why it's wrong:** 20 listings = 20 concurrent Claude API calls = rate limit errors + slow UI + API cost.
-**Do this instead:** Classify once per listing (in the verify step or at seed time), persist to RESALE_LISTINGS.json or case files, read classification from storage.
+### Anti-Pattern 5: Abandoning node-cron Before OpenClaw Is Verified Working
+**What:** Removing scan-loop.js's cron capability before OpenClaw heartbeat is confirmed
+**Why bad:** If OpenClaw integration fails, there is no fallback
+**Instead:** Keep the `if (import.meta.url === ...)` guard so scan-loop.js can still run standalone with cron
 
 ---
 
-## Scaling Considerations
+## Build Order (Dependency-Aware)
 
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| Hackathon demo (1 user) | JSON file bus is sufficient; Express in-process is fine |
-| Post-hackathon (100 users) | Replace JSON file bus with SQLite; keep same API route shapes |
-| Production (10k+ users) | Job queue for AI classification; WebSocket for live status; dedicated WDK custody solution |
+### Phase 1: CLI Wrappers (No OpenClaw Yet)
+
+**Files created:**
+1. `agent/src/cli-scan.js` -- wraps `runScanCycle()`
+2. `agent/src/cli-classify.js` -- wraps `classifyListing()`
+3. `agent/src/cli-escrow.js` -- wraps escrow lifecycle functions
+
+**Files modified:**
+1. `agent/src/scan-loop.js` -- add `export { runScanCycle }` + import guard
+
+**Verification:** Run CLI wrappers directly to confirm they work:
+```bash
+node agent/src/cli-scan.js              # should output scan results as JSON
+echo '{"url":"...","price":100}' | node agent/src/cli-classify.js  # should output classification
+```
+
+**Rationale:** CLI wrappers are independently testable without OpenClaw. If OpenClaw integration fails, these still add value as standalone tools.
+
+### Phase 2: OpenClaw Workspace Setup
+
+**Files created:**
+1. `openclaw.json` -- gateway config at project root
+2. `agent/openclaw/SOUL.md` -- agent identity
+3. `agent/openclaw/AGENTS.md` -- operating instructions
+4. `agent/openclaw/TOOLS.md` -- tool notes
+5. `agent/openclaw/HEARTBEAT.md` -- 5-minute checklist
+
+**Verification:** `openclaw` daemon starts and reads workspace files without errors.
+
+### Phase 3: Skills
+
+**Files created:**
+1. `agent/openclaw/skills/scan-platforms/SKILL.md`
+2. `agent/openclaw/skills/classify-listing/SKILL.md`
+3. `agent/openclaw/skills/escrow-enforce/SKILL.md`
+4. `agent/openclaw/skills/evidence-case/SKILL.md`
+
+**Verification:** OpenClaw heartbeat triggers, reads skills, and invokes CLI wrappers successfully.
+
+### Phase 4: Memory + State Migration
+
+**Files modified:**
+1. `agent/openclaw/MEMORY.md` -- initial state (bond status, event name)
+
+**Verification:** Bond deposit happens once, recorded in MEMORY.md, not repeated on subsequent heartbeats.
+
+---
+
+## Confidence Assessment
+
+| Aspect | Confidence | Reasoning |
+|--------|-----------|-----------|
+| OpenClaw workspace structure (SOUL/AGENTS/HEARTBEAT/TOOLS.md) | HIGH | Consistent across 6+ independent sources |
+| Skills as SKILL.md with YAML frontmatter | HIGH | Official docs + multiple tutorials confirm |
+| Heartbeat replacing cron at configurable interval | HIGH | Official docs at docs.openclaw.ai/automation/cron-vs-heartbeat |
+| exec tool for shell command invocation | HIGH | Official docs + multiple sources |
+| lightContext for heartbeat token savings | MEDIUM | Referenced in GitHub discussion #11042, not verified in latest docs |
+| Exact openclaw.json schema fields | MEDIUM | Multiple sources show slightly different schemas; `heartbeat.every` format needs verification |
+| CLI wrapper pattern for bridging exec to modules | HIGH | Standard Node.js pattern; not OpenClaw-specific |
+| Express API requiring no changes | HIGH | Direct codebase inspection confirms no dependency on scan-loop's cron |
 
 ---
 
 ## Sources
 
-- shadcn/ui Tailwind v4 official docs: https://ui.shadcn.com/docs/tailwind-v4 (HIGH confidence)
-- Direct codebase inspection: `dashboard/server/api.ts`, `agent/src/escrow.js`, `agent/src/classify.js`, `contracts/src/FraudEscrow.sol`, `dashboard/src/types.ts`, `dashboard/src/index.css` (HIGH confidence)
-
----
-*Architecture research for: Ducket AI Galactica v2.0 P2P Resale pivot*
-*Researched: 2026-03-20*
+- [OpenClaw npm package](https://www.npmjs.com/package/openclaw)
+- [OpenClaw Official Docs](https://openclaw.im/docs)
+- [OpenClaw AGENTS.md Reference](https://docs.openclaw.ai/reference/AGENTS.default)
+- [OpenClaw Skills Documentation](https://docs.openclaw.ai/tools/skills)
+- [OpenClaw Cron vs Heartbeat](https://docs.openclaw.ai/automation/cron-vs-heartbeat)
+- [OpenClaw Heartbeat Docs (GitHub)](https://github.com/openclaw/openclaw/blob/main/docs/gateway/heartbeat.md)
+- [OpenClaw Memory Docs](https://docs.openclaw.ai/concepts/memory)
+- [OpenClaw Configuration](https://docs.openclaw.ai/gateway/configuration)
+- [OpenClaw Agent Loop Architecture (Substack)](https://practiceoverflow.substack.com/p/the-agent-loop-and-skills-how-openclaw)
+- [OpenClaw Design Patterns (Substack)](https://kenhuangus.substack.com/p/openclaw-design-patterns-part-1-of)
+- [OpenClaw Complete Tutorial (Towards AI)](https://pub.towardsai.net/openclaw-complete-guide-setup-tutorial-2026-14dd1ae6d1c2)
+- [OpenClaw Custom Skills Guide (LumaDock)](https://lumadock.com/tutorials/build-custom-openclaw-skills)
+- [OpenClaw Exec Tool](https://docs.openclaw.ai/tools/exec)
+- [Heartbeat Token Sink Discussion (GitHub #11042)](https://github.com/openclaw/openclaw/discussions/11042)
+- [OpenClaw Workspace Files Explained (Medium)](https://capodieci.medium.com/ai-agents-003-openclaw-workspace-files-explained-soul-md-agents-md-heartbeat-md-and-more-5bdfbee4827a)

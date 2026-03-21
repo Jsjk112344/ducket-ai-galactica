@@ -1,206 +1,251 @@
-# Feature Research
+# Feature Landscape: OpenClaw Integration for Ducket AI Galactica
 
-**Domain:** P2P ticket resale with AI fraud verification + USDT escrow (Ducket AI Galactica v2.0)
-**Researched:** 2026-03-20
-**Confidence:** HIGH (v1.0 capabilities confirmed by codebase; P2P resale flow patterns HIGH from competitor analysis)
-
----
-
-## Context: What Is Already Built (v1.0 — Not To Rebuild)
-
-These are existing dependencies. v2.0 builds on top of them, not replacing them.
-
-| Built Capability | What It Provides to v2.0 |
-|-----------------|--------------------------|
-| Autonomous scanner (StubHub, Viagogo, FB Marketplace) | Listing discovery with mock fallback for demo resilience |
-| Hybrid classifier (rules + Claude API) | `SCALPING_VIOLATION`, `LIKELY_SCAM`, `COUNTERFEIT_RISK`, `LEGITIMATE` + confidence + `reasoning` string |
-| WDK self-custodial USDT escrow | deposit, release, refund, slash on Sepolia via `/api/escrow/:action` |
-| React dashboard | Listings table, classification badges, escrow status, wallet inspector |
-| Express API | `/api/listings`, `/api/wallet`, `/api/scan`, `/api/escrow/:action` |
-| `Listing`, `Classification`, `WalletInfo` TypeScript contracts | Shared types across agent + dashboard |
-| Evidence case files | Timestamped JSON per classified listing with on-chain tx hash |
+**Domain:** Agent orchestration framework integration for existing autonomous fraud detection + USDT escrow platform
+**Researched:** 2026-03-22
+**Confidence:** MEDIUM (OpenClaw docs accessed via search summaries only; WebFetch denied)
+**Focus:** What OpenClaw adds beyond the existing node-cron scan loop
 
 ---
 
-## Feature Landscape
+## Context: What Is Already Built (v1.0/v2.0 -- Not To Rebuild)
 
-### Table Stakes (Judges Won't Take the Pivot Seriously Without These)
+These are existing dependencies. OpenClaw integration wraps them, never replaces them.
 
-These are the baseline features a judge expects from any P2P resale product. Missing them makes the "safe P2P resale" framing feel like a rebrand with no substance.
+| Built Capability | What It Provides to OpenClaw Integration |
+|-----------------|----------------------------------------|
+| `scan-loop.js` — node-cron 5-min heartbeat | Orchestration logic to be replaced by agent loop; scraper calls preserved |
+| `scrape-*.js` — 3 platform scrapers (StubHub, Viagogo, Facebook) | Functions wrapped as OpenClaw skills |
+| `classify.js` — hybrid rules + Claude classifier with 5 weighted signals | Classification function wrapped as OpenClaw skill |
+| `escrow.js` — WDK deposit, release, refund, slash on Sepolia | Escrow functions wrapped as OpenClaw skill |
+| `evidence.js` — timestamped case file writer | Evidence function wrapped as OpenClaw skill |
+| In-memory `seen` Set for deduplication | Replaced by OpenClaw session JSONL persistence |
+| `LISTINGS.md` append log | Replaced by session transcript |
+| React dashboard + Express API | Unchanged -- reads results written by agent |
 
-| Feature | Why Expected | Complexity | Dependency on v1.0 | Notes |
-|---------|--------------|------------|---------------------|-------|
-| Seller listing form | Core of any P2P flow — there must be a way for a seller to submit a ticket. Without it there is no "P2P", just a monitoring tool. | LOW | None (new UI component) | Fields: event name, section, quantity, asking price, face value. On submit, trigger classification pipeline. |
-| Buyer USDT lock step | Without a visible "buyer locks funds" moment there is no escrow story. Judges will ask "where does the money come from?" | LOW | Escrow deposit via WDK (already built) | UI button that calls `/api/escrow/deposit` with listing ID. WDK wallet executes the actual transfer on Sepolia. |
-| AI verification step (visible) | Judges expect to see the AI make a decision — not just a badge but a narrative. "The AI checked and said..." | LOW | `Classification.reasoning` already populated | Surface full `Classification.reasoning` string in a prominent per-listing panel, not buried in a tooltip. |
-| Escrow settlement outcome | The escrow lifecycle needs a visible end state. Release on legitimate, refund/slash on fraud. | LOW | release/refund/slash already built | UI calls `/api/escrow/release` or `/api/escrow/refund` based on classification result. Show Etherscan link. |
-| Ducket brand styling | Dashboard must look like a product, not a scaffold. Judges score polish and judges watch a video demo. | MEDIUM | None (new CSS/components) | Purple `#7C3AED`, yellow `#FACC15`, Outfit headings, shadcn component library. Replace plain Tailwind scaffold. |
-| Demo narrative framing | README and demo script must use "safe P2P resale" language, not "fraud monitoring tool". The story shapes how judges receive everything else. | LOW | None (writing, not code) | Update README intro, CLAUDE.md overview, demo script buyer/seller persona framing. |
+---
 
-### Differentiators (What Wins vs. What Just Qualifies)
+## Table Stakes
 
-Features that make Ducket stand out vs other hackathon submissions and vs TicketSwap/StubHub. These directly hit the top judging criteria.
+Features that OpenClaw MUST deliver to justify integration. If these don't work, the migration is net-negative because the existing cron pipeline already handles them.
 
-| Feature | Value Proposition | Complexity | Dependency on v1.0 | Notes |
-|---------|-------------------|------------|---------------------|-------|
-| Non-custodial USDT escrow (no middleman) | TicketSwap holds funds in a bank for up to 5 business days. Ducket holds on-chain in a WDK self-custodial wallet — neither party can be stiffed or exit-scammed. | LOW (already built) | WDK + escrow contract | Strongest differentiator. Emphasize "no platform custody" explicitly in UI and README. |
-| Full AI reasoning per listing | Competitors use black-box moderation. Ducket shows "flagged for 340% markup over face value; seller account 2 days old; FIFA scalping pattern detected across 3 platforms. Confidence: 94%." | LOW (render existing data) | `Classification.reasoning` | Turn into a full-width Agent Decision Panel component per listing. The existing reasoning string is rich enough — it just needs to be prominent. |
-| Cross-platform scan (3 marketplaces) | No single marketplace enforces rules across all resale channels. Ducket's agent watches StubHub, Viagogo, and Facebook Marketplace simultaneously. | NONE (already built) | Scanner | Demo narrative: "agent detected same FIFA ticket listed on both StubHub and Viagogo at 3x face value." |
-| Conditional escrow slash (fraud has a cost) | TicketSwap refunds buyers but does not penalize sellers financially. Ducket's contract slashes a legitimacy bond when fraud is confirmed. This is enforceable, not advisory. | LOW (already built) | Escrow slash | Frame as "fraud has a cost — bad actors lose their stake." Judges scoring Agentic Payment Design (#4) respond strongly to this. |
-| Autonomous pipeline (not a button that calls AI) | The scan → classify → escrow action loop runs without human trigger. The UI is evidence the agent already acted, not a control panel waiting for input. | NONE (already built) | Scan loop | Make the autonomy narrative explicit: show "Agent last ran: 30s ago" and a log of actions taken without prompting. |
-| Seed data with pre-classified FIFA listings | Demo resilience — if live scrapers hit anti-bot blocks during video recording, the narrative runs end-to-end on seed data. | LOW | Mock fallback already exists | Prepare 4 seed listings: 1 LEGITIMATE, 1 SCALPING_VIOLATION, 1 LIKELY_SCAM, 1 COUNTERFEIT_RISK — each with rich reasoning text. |
+| Feature | Why Expected | Complexity | Dependency on Existing | Notes |
+|---------|--------------|------------|----------------------|-------|
+| **Skill-based pipeline decomposition** | The whole point of adopting a framework -- wrapping scan, classify, escrow, evidence into discrete OpenClaw skills | Medium | Wraps `scrape-*.js`, `classify.js`, `escrow.js`, `evidence.js` as individual skills | Each skill is a `SKILL.md` file with YAML frontmatter + natural language instructions. The description field is the primary trigger mechanism. |
+| **Agent loop replacing cron** | OpenClaw's agentic loop (intake -> context assembly -> model inference -> tool execution -> persistence) replaces the node-cron 5-min heartbeat | Medium | Replaces `scan-loop.js` orchestration; preserves all function calls inside skills | OpenClaw Gateway supports native cron scheduling -- jobs persist under `~/.openclaw/cron/` and survive restarts. Three patterns: one-shot, interval-based, cron expressions. |
+| **Session persistence across runs** | Agent must remember what it has already scanned/classified across restarts -- currently lost when process dies (in-memory `seen` Set) | Low | Replaces the ephemeral `seen` Set with JSONL transcript persistence | Sessions stored as append-only JSONL at `~/.openclaw/agents/<agentId>/sessions/<SessionId>.jsonl`. Context compaction summarizes older conversation. Eliminates "restart = re-scan everything." |
+| **MCP tool integration** | OpenClaw has native MCP server support -- custom tools defined in TypeScript callable from agent loop | Low | WDK wallet ops and Claude API classification become MCP tools | Configure MCP servers in `openclaw.json`. Custom servers can be written in TypeScript using official MCP SDKs. |
+| **Hooks for audit and control** | PreToolUse and PostToolUse hooks intercept every skill invocation for logging, validation, security | Low | Replaces `console.log` audit trail with structured hook-based logging | PreToolUse fires BEFORE tool execution (can block). PostToolUse fires AFTER (audit logging). Also: `before_model_resolve`, `before_prompt_build`, `session_start/end`. |
 
-### Anti-Features (Deliberately Not Building)
+### How Skills Look in Code
 
-| Feature | Why Requested | Why Problematic | Alternative |
-|---------|---------------|-----------------|-------------|
-| Real user accounts / auth | "Real P2P needs real users" | Adds auth complexity blocking demo in under 5 min; judges don't create accounts in a video demo | Hardcode two mock personas — "Seller: Alice", "Buyer: Bob". Tells the story without any login friction. |
-| Real USDT on mainnet | "More impressive with real money" | Hackathon rules require testnet; mainnet introduces irreversible financial risk and legal exposure | Sepolia testnet USDT with explicit "TESTNET" label. Judges in Web3 hackathons understand this convention. |
-| WebSocket real-time updates | "Listings should update live" | Socket infrastructure adds setup complexity; 30s polling is visually indistinguishable in a 5-min demo | Keep existing polling. Add "Last updated: X seconds ago" timestamp to signal freshness. |
-| Barcode invalidation (SecureSwap pattern) | "TicketSwap invalidates original barcodes — we should too" | Requires integration with ticketing providers' APIs (not available); weeks of partnership negotiation | Frame AI verification as the replacement: "We verify legitimacy before funds release, eliminating the need to invalidate barcodes after entry." |
-| Multi-step dispute resolution | "What if buyer and seller disagree?" | Dispute resolution is a full product in itself — arbitration, multi-sig, timers, appeals | State in README: "v1.0 auto-resolves via AI verdict. Human dispute resolution is on the roadmap." |
-| Mobile-responsive UI | "Users are on mobile" | Extra CSS work consuming time from core agent story; adds risk of breaking desktop layout | Widescreen dashboard is appropriate framing for an "AI command center". Judges watch a demo, not try the app on their phone. |
-| Historical analytics / charts | "Show trends over time" | Polish (#6) not autonomy (#1); Chart.js time-series takes a day to implement correctly | Case files already capture timestamped evidence. Link to them as the audit trail — structured JSON is sufficient. |
-| Polygon NFT ticket contract integration | "Full Ducket stack" | Different chain from WDK escrow; cross-chain complexity with zero judging benefit; extreme scope risk | Reference Ducket's existing Polygon contracts in README as context for the broader product vision. |
+An OpenClaw skill is a directory containing a `SKILL.md` file:
+
+```
+agent/skills/
+  scan-platforms/
+    SKILL.md
+  classify-listing/
+    SKILL.md
+  enforce-escrow/
+    SKILL.md
+  write-evidence/
+    SKILL.md
+```
+
+Each `SKILL.md` has YAML frontmatter + natural language instructions:
+
+```yaml
+---
+name: scan-platforms
+description: "Scan StubHub, Viagogo, and Facebook Marketplace for ticket listings matching a given event. Use when the agent needs to discover new listings for fraud analysis. Triggers on scheduled scan cycles or when a new event is registered."
+version: 1.0.0
+---
+
+# Scan Platforms Skill
+
+Scrape all three ticket resale platforms for the target event.
+Use Promise.allSettled so one blocked platform does not kill the others.
+Deduplicate results by URL hash against previously seen listings.
+Return only net-new listings for classification.
+
+## Steps
+1. Call scrapeStubHub, scrapeViagogo, scrapeFacebook with the event name
+2. Merge results, filter duplicates against session memory
+3. Return the fresh listing array for downstream classification
+```
+
+**CRITICAL YAML pitfall:** Values containing `: ` (colon + space) in the description field are interpreted as nested YAML mappings unless quoted. Skills with YAML parse errors are silently dropped with no user feedback (confirmed: openclaw/openclaw#22134). Always quote description values.
+
+### How the Agent Decides When to Invoke Skills
+
+OpenClaw injects a compact XML list of eligible skills into the system prompt (base overhead: ~195 characters + ~97 characters per skill plus description length). The LLM decides which skills to invoke based on conversation context and skill descriptions. This is fundamentally different from cron -- the agent reasons about WHAT to do, not just executes a hardcoded sequence.
+
+For Ducket: the cron trigger sends a message to the agent session ("Time for your scheduled scan"). The LLM matches this to the `scan-platforms` skill via description matching, then chains: scan -> classify each listing -> enforce escrow for flagged ones -> write evidence. The LLM orchestrates this chain based on skill descriptions, not hardcoded `runScanCycle()` function calls.
+
+Skill loading precedence: `<workspace>/skills` (highest) -> `~/.openclaw/skills` -> bundled skills (lowest). Extra dirs configurable via `skills.load.extraDirs` in `openclaw.json`. Skills snapshot on session start and reuse that list for subsequent turns.
+
+### Agent Loop Lifecycle vs Cron
+
+The existing `scan-loop.js` lifecycle:
+```
+node-cron timer fires -> runScanCycle() -> scrape -> classify -> enforce -> log -> wait 5 min
+```
+
+The OpenClaw agent loop lifecycle:
+```
+1. INTAKE:      Cron trigger sends message to agent session
+2. CONTEXT:     Gateway loads session JSONL, compacts if needed, assembles system prompt + skill list
+3. INFERENCE:   LLM reasons about what to do (which skills, in what order, with what parameters)
+4. EXECUTION:   Agent invokes skills via tool calls, each skill runs the wrapped function
+5. STREAMING:   Results stream back, agent reasons about outcomes (retry? escalate? continue?)
+6. PERSISTENCE: Session state saved to JSONL, cron job marked complete
+```
+
+**Key differences:**
+- Steps 2-3 are entirely new: the agent REASONS about what to do, not just executes a hardcoded sequence
+- Step 5 allows adaptive behavior: the agent can change its plan mid-execution based on results
+- Step 6 gives durable state: no more losing progress on restart
+- This directly serves hackathon judging criteria #1 (Agent Intelligence/autonomy)
+
+---
+
+## Differentiators
+
+Features OpenClaw enables which the existing cron pipeline cannot do. These make the integration worth the effort for hackathon judges.
+
+| Feature | Value Proposition | Complexity | Dependency on Existing | Notes |
+|---------|-------------------|------------|----------------------|-------|
+| **Explainable agent decision chain** | Full session transcript showing WHY the agent chose to scan, classify, and enforce -- not just WHAT it did | Low | Replaces `console.log` breadcrumbs with structured JSONL session transcript | JSONL transcripts capture every model inference, tool call, and result. Judges can inspect the full reasoning chain. Directly serves criterion #1. |
+| **Adaptive scan reasoning** | Agent decides scan behavior based on context -- e.g., increase frequency closer to event date, skip platforms known to be blocked | Medium | Enhances fixed 5-min cron with LLM-driven decisions | Currently scan runs every 5 min regardless. With OpenClaw, the agent can reason: "StubHub blocked last 3 cycles, skip and focus on Viagogo." |
+| **Multi-step tool chaining with error recovery** | Agent loop handles tool failures gracefully -- retries, falls back, or escalates based on LLM reasoning | Low | Improves on current `try/catch` fallback in `classify.js` and `Promise.allSettled` in `scan-loop.js` | Agent can reason: "Viagogo scraper failed, I'll rely on StubHub and Facebook results and note reduced confidence." |
+| **Context compaction and memory flush** | Before context window fills, agent writes important state to persistent memory files | Low | Replaces ephemeral `seen` Set + `LISTINGS.md` append pattern | Memory flush writes state to `memory/YYYY-MM-DD.md`. Classification history persists properly across sessions. |
+| **Gateway-managed process lifecycle** | OpenClaw Gateway owns the process -- handles restarts, crash recovery, session resumption | Medium | Replaces manual `SIGINT`/`SIGTERM` handlers in `scan-loop.js` | Gateway persists cron jobs across restarts. No more "restart process = lose all seen listings." |
+| **Webhook delivery for scan results** | Cron job results POSTed to HTTP endpoint -- feeds dashboard without polling | Medium | Could replace Express polling with webhook push | `delivery.mode = "webhook"` + `delivery.to = "<url>"` on cron jobs. Nice-to-have, not essential. |
+
+---
+
+## Anti-Features
+
+Features to explicitly NOT build during this integration.
+
+| Anti-Feature | Why Avoid | What to Do Instead |
+|--------------|-----------|-------------------|
+| **Full multi-agent architecture** | Inter-session communication (`sessions_send`) and supervisor agents are over-scoped for hackathon deadline. Complexity explosion for marginal judge impact. | Single agent with multiple skills. One session, one loop. Skills provide separation of concerns. |
+| **Chat-based interaction with the agent** | OpenClaw is designed for conversational agents on WhatsApp/Telegram/etc. Ducket's agent is autonomous -- no human in the loop. Building a chat UI contradicts the "no human triggers" design principle. | Use OpenClaw's cron trigger to start scans. Agent talks to itself through skills. Dashboard remains read-only. |
+| **ClawHub community skill installation** | 13,729 community skills exist but none solve ticket fraud detection. Installing random skills adds attack surface and judge confusion. | Write 4-5 custom skills specific to Ducket's pipeline. Keep the skill set minimal and auditable. |
+| **Browser automation via OpenClaw** | OpenClaw has built-in browser tools (headless Chromium). But Ducket already uses Patchright for scraping with XHR interception -- a superior pattern for anti-bot evasion on StubHub/Viagogo. Switching would regress scraping quality. | Keep Patchright scrapers as-is. Wrap them in OpenClaw skills that call existing scraper functions. |
+| **Memory/knowledge base/RAG features** | OpenClaw supports vector search and knowledge bases. Over-engineered for ~100 listings per scan at hackathon scale. | Use existing `LISTINGS.md` + case files + session persistence. |
+| **Plugin system (Gateway extensions)** | OpenClaw plugins are TypeScript/JS extensions compiled into the Gateway. Harder for judges to follow than skills. | Skills (SKILL.md) are the right abstraction -- natural language, easy to read, no compilation step. |
+| **Webhook delivery to dashboard** | Pushing results via webhook sounds better than polling, but the dashboard already works with Express endpoints + 30s polling. Changing the data flow risks breaking the demo. | Keep Express API serving dashboard data. Agent writes results to files that Express reads. |
 
 ---
 
 ## Feature Dependencies
 
 ```
-[Seller Listing Form]
-    └──triggers──> [Hybrid Classifier] (v1.0)
-                       └──populates──> [Classification.reasoning]
-                                           └──renders in──> [Agent Decision Panel]
-                                           └──drives──> [Escrow Settlement Outcome]
-
-[Buyer USDT Lock Step]
-    └──calls──> [Escrow Deposit via WDK] (v1.0)
-                    └──unlocks──> [Escrow Settlement Outcome]
-                                      ├──LEGITIMATE──> [Release to seller]
-                                      ├──SCAM/COUNTERFEIT──> [Refund to buyer]
-                                      └──SCALPING──> [Slash legitimacy bond]
-
-[Seed Data with Pre-classified Listings]
-    └──powers──> [Full demo without live scrapers]
-                     └──uses──> [Mock fallback] (v1.0)
-
-[Ducket Brand Styling]
-    └──wraps──> [All UI components]
-                    └──replaces──> [Plain Tailwind scaffold] (v1.0)
-
-[Demo Narrative Framing]
-    └──contextualizes──> [All UI features]
-    └──updates──> [README + demo script]
+Gateway setup -> Cron job configuration -> Agent session creation
+                                                    |
+                                                    v
+Skills definition (4x SKILL.md files) -----> Agent loop activation
+    |             |            |              |
+    v             v            v              v
+scan-platforms   classify     enforce-escrow  write-evidence
+(wraps           (wraps       (wraps          (wraps
+ scrape-*.js)     classify.js) escrow.js)      evidence.js)
+    |
+    v
+Session persistence (JSONL) replaces in-memory `seen` Set
+    |
+    v
+Hooks (PreToolUse/PostToolUse) for structured audit logging
 ```
 
-### Dependency Notes
+**Critical path:** Gateway setup -> Skills -> Cron trigger -> Agent loop. Everything else layers on top.
 
-- **Seller listing form requires classifier:** The form submission must trigger or simulate a classification call so the AI reasoning panel has data to display. Without this the "AI verifies" step is empty.
-- **Buyer USDT lock requires escrow deposit:** WDK wallet must execute the deposit. This is already built — the UI is a thin wrapper calling existing API endpoints.
-- **Escrow settlement requires classification result:** The release vs refund vs slash decision is driven by the `category` field on the `Classification` object. This wiring is the only new backend logic in v2.0.
-- **Agent Decision Panel enhances both listing form and buyer lock step:** Showing reasoning at each stage of the flow makes the AI feel active throughout the transaction, not just as a post-hoc badge.
-- **Ducket brand styling does NOT block logic features:** Apply after the buyer/seller flow is wired. Never let styling work gate the escrow demo path.
-- **Seed data does NOT block any feature:** Prepare it in parallel. It is a fixture file, not a dependency.
+**Dependency on existing code:** All four skills wrap existing functions. No existing code needs rewriting -- only wrapping. The `scan-loop.js` orchestration logic moves into the agent loop, but the actual scraping/classification/escrow/evidence functions stay identical.
 
 ---
 
-## MVP Definition
+## Session Persistence Model
 
-### Launch With (v2.0 — Hackathon Deadline March 22, 2026)
-
-The minimum set needed to tell the P2P resale story credibly to judges in under 5 minutes.
-
-- [ ] **Seller listing form** — Submit ticket details, trigger AI classification, show reasoning immediately
-- [ ] **Agent Decision Panel** — Full `Classification.reasoning` text visible per listing in a prominent, styled component
-- [ ] **Buyer USDT lock step** — UI button calling escrow deposit, shows WDK wallet address and Etherscan link
-- [ ] **Escrow settlement outcome** — UI shows release/refund/slash result with on-chain tx link, driven by classification
-- [ ] **Ducket brand styling** — Purple/yellow theme, Outfit headings, shadcn components applied to existing dashboard
-- [ ] **Seed data with pre-classified FIFA listings** — 4 listings covering all classification types, each with rich reasoning text
-- [ ] **Demo narrative reframe** — README intro and demo script updated to P2P resale framing with buyer/seller personas
-
-### Add After Validation (v2.x — Post-hackathon)
-
-- [ ] **Real seller/buyer accounts** — Add when auth is needed for real users (post-hackathon product decision)
-- [ ] **Barcode invalidation** — Add when a ticketing provider API partnership is in place
-- [ ] **Dispute resolution flow** — Add when user research surfaces it as a trust blocker
-
-### Future Consideration (v3+)
-
-- [ ] **Mobile UI** — Defer until product-market fit is established
-- [ ] **Historical analytics** — Defer until time-series data pipeline is in place
-- [ ] **Multi-chain escrow** — Defer until WDK supports additional chains beyond Sepolia
+| Aspect | Current (scan-loop.js) | With OpenClaw |
+|--------|----------------------|---------------|
+| Dedup state | In-memory `seen` Set -- lost on restart | JSONL transcript -- persists across restarts |
+| Scan history | LISTINGS.md append log -- reset on restart (`flag: 'w'`) | Session transcript + memory flush to persistent files |
+| Classification results | Case files in `agent/cases/` (durable) | Same case files + session transcript showing reasoning chain |
+| Escrow state | In-memory `bondDeposited`/`bondSlashed` flags -- lost on restart | Session state in JSONL -- recoverable, queryable |
+| Error context | `console.error` to stdout -- lost | Structured in session transcript with tool call/result pairing |
 
 ---
 
-## Feature Prioritization Matrix
+## Mapping to Existing Pipeline
 
-| Feature | Judge Value | Implementation Cost | Priority |
-|---------|-------------|---------------------|----------|
-| Agent Decision Panel (surface existing reasoning) | HIGH — Criterion #1 Agent Intelligence | LOW — render `Classification.reasoning` string | P1 |
-| Buyer USDT lock step | HIGH — Criterion #2 WDK Integration | LOW — call existing deposit API | P1 |
-| Escrow settlement outcome | HIGH — Criterion #4 Agentic Payment Design | LOW — call existing release/refund/slash | P1 |
-| Seller listing form | HIGH — makes P2P pivot credible to judges | LOW — form component + classify trigger | P1 |
-| Seed data (pre-classified FIFA listings) | HIGH — demo resilience, no blank state | LOW — JSON fixture file | P1 |
-| Ducket brand styling | MEDIUM — Criterion #6 Polish | MEDIUM — rebrand existing components with shadcn | P2 |
-| Demo narrative reframe (README, script) | MEDIUM — Criterion #7 Presentation | LOW — writing, not code | P2 |
-
-**Priority key:**
-- P1: Must have — without this the demo fails or the P2P pivot is not believable
-- P2: Should have — measurably improves score, completable within deadline
-- P3: Nice to have — post-hackathon
+| Existing Component | OpenClaw Equivalent | Migration Effort |
+|-------------------|---------------------|-----------------|
+| `scan-loop.js` (orchestration) | Agent loop + cron trigger | Medium -- rewrite orchestration, keep functions |
+| `scan-loop.js` (cron scheduling) | OpenClaw Gateway cron | Low -- configure in `openclaw.json` |
+| `scrape-*.js` (3 scrapers) | `scan-platforms` skill calling existing functions | Low -- wrap, don't rewrite |
+| `classify.js` (hybrid rules+Claude) | `classify-listing` skill calling `classifyListing()` | Low -- wrap, don't rewrite |
+| `escrow.js` (WDK + ethers) | `enforce-escrow` skill calling existing functions | Low -- wrap, don't rewrite |
+| `evidence.js` (case file writer) | `write-evidence` skill calling `writeCaseFile()` | Low -- wrap, don't rewrite |
+| `index.ts` (wallet init) | Agent startup hook or `session_start` lifecycle event | Low -- move to hook |
+| In-memory `seen` Set | Session JSONL persistence (automatic) | Zero -- OpenClaw handles this |
+| `LISTINGS.md` append log | Session transcript + optional file write | Low |
+| `console.log` audit trail | Session JSONL + PostToolUse hooks | Low -- structured by default |
 
 ---
 
-## Competitor Feature Analysis
+## MVP Recommendation
 
-| Feature | TicketSwap | StubHub | Ducket v2.0 |
-|---------|------------|---------|-------------|
-| Fraud prevention | SecureSwap barcode invalidation (partner events only); manual review otherwise | Seller guarantee + refund policy | AI classification with full visible reasoning + on-chain evidence hash |
-| Payment security | Platform holds funds in bank for up to 5 business days | Fiat payout 5-10 days after event | WDK non-custodial USDT — funds on-chain, auto-release by AI verdict |
-| Price cap enforcement | 20% above face value (soft; no financial penalty) | No cap | Scalping classification triggers refund/slash — economically enforceable |
-| Transparency | Seller name/photo/sales history visible | Limited | Full AI reasoning log + Etherscan tx link per classification |
-| Decentralization | None — centralized platform custody | None | Self-custodial WDK wallet; no platform holds funds |
-| Settlement speed | Up to 5 business days | 5-10 business days | Near-instant on Sepolia testnet |
-| Cross-platform enforcement | No | No | Agent scans 3 platforms simultaneously; same ticket flagged across venues |
+Prioritize (in order):
 
-**Key insight from research:** TicketSwap's SecureSwap is the closest competitor feature — but it only works for partnered events, applies only to barcodes (not AI reasoning), and gives buyers no visibility into why a ticket was accepted or rejected. Ducket's differentiator is not just safety — it is *explainable, enforceable* safety backed by on-chain funds that don't depend on platform goodwill or partnership agreements.
+1. **Skill-based pipeline decomposition** -- Table stakes. Define 4 skills wrapping existing functions. This is the minimum viable OpenClaw integration and the most visible to judges.
+
+2. **Agent loop replacing cron** -- Table stakes. Configure OpenClaw Gateway cron to trigger scan cycles. Without this, there is no reason to have OpenClaw.
+
+3. **Session persistence** -- Table stakes. Let OpenClaw's JSONL handle dedup state. Eliminates the "restart loses state" weakness. Zero implementation effort -- comes free with the framework.
+
+4. **Explainable decision chain** -- Differentiator. The JSONL session transcript showing the agent's reasoning chain is the strongest hackathon demo feature. Judges see WHY the agent acted, not just WHAT it did.
+
+5. **PostToolUse audit hooks** -- Differentiator. Replace `console.log` with structured event logging per skill invocation. Low effort, high judge impression.
+
+**Defer:**
+- **Adaptive scan reasoning**: Impressive but risky -- LLM might make bad scheduling decisions during a 5-minute demo. Keep fixed cron intervals for reliability.
+- **Inter-session communication**: Over-scoped for deadline. Single session is sufficient.
+- **Webhook delivery**: Dashboard already works with polling. Don't break it.
+- **Context compaction**: Only matters for long-running agents. Hackathon demo is 5 minutes.
 
 ---
 
-## What Makes AI Verification Compelling for Judges
+## Complexity Budget
 
-Based on winning agentic payment hackathon patterns (Arc/USDC, AgentVerse, x402 Berlin ideathon) and the Tether Hackathon's explicit judging criteria:
-
-**1. Visible reasoning, not just a verdict.**
-"This ticket is suspicious" scores low. "Price is 340% above face value. Seller account created 2 days ago. Listing pattern matches FIFA scalping campaigns detected across StubHub and Viagogo simultaneously. Confidence: 94%." scores high. The `Classification.reasoning` string from the Claude API already contains this — it just needs to be front and center in the UI.
-
-**2. Money movement that is conditional on AI output.**
-The agent deciding whether USDT releases or gets slashed makes the AI consequential — not decorative. Criterion #4 (Agentic Payment Design) is directly satisfied by this conditional escrow pattern. Judges from the agentic payments space understand "AI-gated funds release" as a novel primitive.
-
-**3. Autonomous pipeline, not a button that calls an API.**
-The scan → classify → escrow action loop running without a human trigger is the core story. The UI is evidence the agent already acted. Judges evaluating Criterion #1 (Agent Intelligence) distinguish between "agent that waits for prompts" and "agent that monitors and acts on its own schedule."
-
-**4. Escrow as trust infrastructure, not just payment.**
-The framing "buyer's USDT is held until the AI certifies the ticket is legitimate" positions escrow as a trust primitive that replaces platform reputation. This is the novel payment design angle. Competitors (TicketSwap, StubHub) use escrow as a payment delay — Ducket uses it as a conditional trust mechanism.
-
-**5. Economic consequence for fraud.**
-The slash action (confirmed fraud → legitimacy bond burned) is what separates detection from enforcement. Hackathon judges in the agentic finance space consistently reward designs where the agent's decisions have real (testnet) economic consequences.
+| Feature | Estimated Effort | Risk | Priority |
+|---------|-----------------|------|----------|
+| Write 4 SKILL.md files | 1-2 hours | LOW -- just markdown with YAML | Must-have |
+| Configure Gateway + cron | 1-2 hours | MEDIUM -- first-time setup, env config | Must-have |
+| Wire skills to existing functions (MCP tools) | 2-3 hours | MEDIUM -- MCP tool wrapping, import paths | Must-have |
+| Session persistence (automatic) | 0 hours | LOW -- OpenClaw provides by default | Free |
+| PostToolUse audit hooks | 1 hour | LOW -- straightforward hook registration | Should-have |
+| Verify demo flow works end-to-end | 1-2 hours | HIGH -- integration bugs, timing issues | Must-have |
+| **Total** | **5-10 hours** | | |
 
 ---
 
 ## Sources
 
-- [TicketSwap: How it works](https://www.ticketswap.com/how-does-it-work) — Buyer/seller flow reference, SecureSwap verification pattern
-- [TicketSwap SecureSwap feature](https://help.ticketswap.com/en/articles/5123901-what-is-secureswap) — Competitor verification mechanism details
-- [P2PTIX platform](https://p2ptix.com/) — P2P escrow-hold flow pattern (payment held until receipt confirmed)
-- [Smart Escrow for Marketplaces 2026](https://rebelfi.io/blog/how-smart-escrow-unlocks-new-business-models-for-marketplaces-and-b2b) — Smart escrow market context and conditional release patterns
-- [x402 Ideathon Berlin: agentic commerce patterns](https://algorand.co/blog/x402-ideathon-berlin-recap-web3-builders-exploring-agentic-commerce) — Winning hackathon agentic payment patterns
-- [Agentic Payments Hackathon (YC HQ)](https://events.ycombinator.com/agenticpaymentshackathon) — Judging criteria context for agentic payment design
-- [NFT Ticketing 2026 market context](https://www.ticketfairy.com/blog/mastering-nft-ticketing-for-event-marketing-in-2026-blockchain-boosts-security-fan-engagement) — Blockchain ticket verification market and demand
-- [Smart Contract Escrow Development 2026](https://ericaai.tech.blog/2026/03/13/smart-contract-escrow-development/) — Technical escrow flow patterns
-- Ducket v1.0 codebase — `dashboard/src/types.ts`, `dashboard/src/components/` — confirmed built capabilities
+- [OpenClaw Skills Documentation](https://docs.openclaw.ai/tools/skills) -- MEDIUM confidence (search summaries)
+- [OpenClaw Agent Loop](https://docs.openclaw.ai/concepts/agent-loop) -- MEDIUM confidence (search summaries)
+- [OpenClaw Session Management (DeepWiki)](https://deepwiki.com/openclaw/openclaw/2.4-session-management) -- MEDIUM confidence
+- [OpenClaw Cron Jobs](https://docs.openclaw.ai/automation/cron-jobs) -- MEDIUM confidence (search summaries)
+- [OpenClaw Skill Format Spec](https://github.com/openclaw/clawhub/blob/main/docs/skill-format.md) -- HIGH confidence (official repo)
+- [OpenClaw npm package](https://www.npmjs.com/package/openclaw) -- HIGH confidence (npm registry)
+- [OpenClaw GitHub AGENTS.md](https://github.com/openclaw/openclaw/blob/main/AGENTS.md) -- HIGH confidence (official repo)
+- [YAML parse error silent drop issue #22134](https://github.com/openclaw/openclaw/issues/22134) -- HIGH confidence (official issue tracker)
+- [Claude Agent SDK TypeScript](https://github.com/anthropics/claude-agent-sdk-typescript) -- HIGH confidence (official Anthropic repo)
+- [OpenClaw Architecture Overview (Substack)](https://ppaolo.substack.com/p/openclaw-system-architecture-overview) -- LOW confidence (third-party analysis)
+
+**Confidence note:** WebFetch was denied during research, so official docs were not directly read. All OpenClaw-specific claims are MEDIUM confidence based on web search summaries and should be validated against actual documentation during implementation.
 
 ---
-*Feature research for: P2P ticket resale with AI fraud verification + USDT escrow (Ducket AI Galactica v2.0)*
-*Researched: 2026-03-20*
+*Feature research for: OpenClaw integration into Ducket AI Galactica v2.1*
+*Researched: 2026-03-22*
