@@ -57,7 +57,7 @@ Requirements for OpenClaw integration. Satisfies hackathon track "Must Have" for
 - [x] **CLAW-03**: CLI wrapper scripts (cli-scan.js, cli-classify.js, cli-escrow.js) bridge OpenClaw exec tool to existing agent modules
 - [ ] **CLAW-04**: OpenClaw agent loop can trigger the full scan→classify→enforce pipeline end-to-end
 - [ ] **CLAW-05**: Demo startup script (`npm run demo`) includes OpenClaw daemon alongside dashboard
-- [ ] **CLAW-06**: Existing classification quality preserved — all agent tests still pass after integration
+- [x] **CLAW-06**: Existing classification quality preserved — all agent tests still pass after integration
 
 ## v1.0 Requirements (Validated)
 
@@ -113,7 +113,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLAW-03 | Phase 15 | Complete |
 | CLAW-04 | Phase 16 | Pending |
 | CLAW-05 | Phase 16 | Pending |
-| CLAW-06 | Phase 16 | Pending |
+| CLAW-06 | Phase 16 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 24 total (22 complete, 2 pending)
