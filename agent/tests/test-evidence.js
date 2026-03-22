@@ -124,10 +124,14 @@ async function runTests() {
     // Threshold: 92% >= 85% → YES
     assert(content.includes('Threshold Met'), 'Content includes Threshold Met row');
     assert(content.includes('YES'), 'Threshold Met = YES for 92% confidence');
-    // Screenshot placeholder
+    // Structured seller/listing fields (replaced screenshot placeholder in Phase 5)
     assert(
-      content.includes('not captured — scrapers collect structured data only'),
-      'Content includes screenshot placeholder'
+      content.includes('Seller Age'),
+      'Content includes Seller Age field (replaced screenshot placeholder)'
+    );
+    assert(
+      content.includes('Transfer Method'),
+      'Content includes Transfer Method field'
     );
   } else {
     assert(false, 'Case file content (skipped — no filepath returned)');
