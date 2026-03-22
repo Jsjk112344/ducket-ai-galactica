@@ -4,7 +4,7 @@ milestone: v2.1
 milestone_name: OpenClaw Integration
 status: planning
 stopped_at: Completed 16-02-PLAN.md — OpenClaw pipeline wiring + demo startup + regression verification
-last_updated: "2026-03-22T00:21:36.752Z"
+last_updated: "2026-03-22T00:35:25.697Z"
 last_activity: 2026-03-22 — Roadmap created for v2.1 OpenClaw Integration
 progress:
   total_phases: 2

@@ -4,15 +4,16 @@
 
 An autonomous agent that scans secondary ticketing marketplaces (StubHub, Viagogo, Facebook Marketplace) for fraudulent or overpriced ticket listings, classifies each listing using a hybrid rules + Claude AI engine, and enforces outcomes on-chain via USDT escrow on Sepolia — all without human intervention. Built for the Tether Hackathon Galáctica: WDK Edition 1 (deadline: March 22, 2026) as an extension of Ducket's existing anti-fraud ticketing platform.
 
-## Current Milestone: v2.1 OpenClaw Integration
+## Current State
 
-**Goal:** Integrate OpenClaw as the agent reasoning/orchestration framework behind the classification pipeline — matching what SUBMISSION.md claims and satisfying the track's "Must Have" requirement for an agent framework.
+**Shipped v2.1 OpenClaw Integration** on 2026-03-22. OpenClaw is now the agent reasoning/orchestration framework behind the classification pipeline — matching SUBMISSION.md claims and satisfying the track's "Must Have" requirement for an agent framework.
 
-**Target features:**
-- OpenClaw agent loop replacing node-cron scan cycle
-- OpenClaw skills wrapping existing scraping, classification, and escrow logic
-- Clear separation: OpenClaw (orchestration) → Claude AI (reasoning) → WDK (wallet execution)
-- Backend-only changes — no UI, slides, or workflow modifications
+**Delivered:**
+- OpenClaw workspace with SOUL.md identity + 3 SKILL.md skill definitions
+- CLI wrappers bridging OpenClaw exec to existing scan/classify/escrow modules
+- OpenClaw pipeline orchestrator (`openclaw-loop.js`) — end-to-end autonomous pipeline
+- 3-process demo startup (OpenClaw gateway + agent + dashboard)
+- All 107 agent tests passing with no regressions
 
 ## Core Value
 
@@ -33,12 +34,14 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 - ✓ All wallet operations are self-custodial via WDK (no centralized custody) — v1.0
 - ✓ All settlement in USDT/Tether tokens on testnet (Sepolia) — v1.0
 
+- ✓ OpenClaw agent loop orchestrating scan→classify→enforce pipeline — v2.1
+- ✓ OpenClaw skills for scraping, classification, and escrow (SKILL.md + CLI wrappers) — v2.1
+- ✓ Clear agent logic (OpenClaw) / wallet execution (WDK) separation — v2.1
+- ✓ Existing classification quality preserved (107/107 tests green) — v2.1
+
 ### Active
 
-- [ ] OpenClaw agent loop orchestrating scan cycle
-- [ ] OpenClaw skills for scraping, classification, and escrow
-- [ ] Clear agent logic (OpenClaw) / wallet execution (WDK) separation
-- [ ] Existing classification quality preserved or improved
+(No active requirements — hackathon submission ready)
 
 ### Out of Scope
 
@@ -53,6 +56,7 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 
 ## Context
 
+**Shipped v2.1 OpenClaw Integration** on 2026-03-22 — 2 phases, 3 plans, 10 commits.
 **Shipped v1.0 MVP** on 2026-03-19 with 6,057 LOC across JS/TS/TSX/Sol/CSS.
 **Tech stack:** Node.js (ESM), WDK (@tetherto/wdk-wallet-evm), Hardhat 3, Patchright, @anthropic-ai/sdk (Claude), React 19, Vite 8, Tailwind v4, Express, ethers.js.
 **Demo event:** FIFA World Cup 2026 — universally recognized, massive secondary market.
@@ -85,6 +89,9 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 | 3 platforms (StubHub, Viagogo, Facebook Marketplace) | Global platforms, broad reach, resonates with any judge | ✓ Good — mock fallback handles anti-bot |
 | FIFA World Cup 2026 as demo event | Universally recognized, massive scalping problem | ✓ Good — compelling demo narrative |
 | Agent autonomy prioritized over UI polish | Judging criteria #1 is agent intelligence, #6 is polish | ✓ Good — full autonomous pipeline shipped |
+| OpenClaw as agent framework | Track "Must Have" requires agent reasoning framework | ✓ Good — SOUL.md + 3 skills + pipeline orchestrator |
+| Direct ESM import over child_process | openclaw-loop.js imports modules directly for speed and simplicity | ✓ Good — avoids scan-loop.js top-level await side effect |
+| demo:fallback script for node-cron revert | One-line script change to revert to pre-OpenClaw demo | ✓ Good — demo reliability preserved |
 | npm workspaces over Turbo | No build pipeline needed yet, zero-setup npm install for judges | ✓ Good — judges clone and npm install |
 | Hardhat 3 with mocha-ethers toolbox | hardhat-toolbox@7 exits with code 1 on Hardhat 3 | ✓ Good — 9 passing unit tests |
 | Patchright for scraping | DataDome-class bot protection on targets | ✓ Good — XHR interception pattern works |
@@ -93,4 +100,4 @@ Safe P2P ticket resale — buyer locks USDT in escrow, AI agent verifies ticket 
 | Mock fallback for all scrapers | Anti-bot detection on non-residential IPs | ✓ Good — demo resilience, labeled as mock |
 
 ---
-*Last updated: 2026-03-22 after v2.1 OpenClaw Integration milestone start*
+*Last updated: 2026-03-22 after v2.1 OpenClaw Integration milestone complete*

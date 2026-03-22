@@ -1,5 +1,14 @@
 # Milestones
 
+## v2.1 OpenClaw Integration (Shipped: 2026-03-22)
+
+**Phases completed:** 2 phases, 3 plans, 2 tasks
+
+**Key accomplishments:**
+- (none recorded)
+
+---
+
 ## v1.0 MVP (Shipped: 2026-03-19)
 
 **Phases completed:** 8 phases, 15/16 plans executed
