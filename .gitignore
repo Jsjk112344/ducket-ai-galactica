@@ -39,6 +39,10 @@ npm-debug.log*
 coverage/
 .nyc_output/
 
+# Agent runtime output — generated case files from pipeline runs
+agent/cases/
+agent/memory/LISTINGS.md
+
 # Build artifacts
 *.js.map
 
