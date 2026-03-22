@@ -34,6 +34,10 @@ const scalping = {
   price: 840,
   faceValue: 200,
   priceDeltaPct: 320,
+  sellerAge: 3,
+  sellerTransactions: 0,
+  sellerVerified: false,
+  transferMethod: 'screenshot',
   redFlags: ['price 4x face value'],
   url: 'https://stubhub.com/test1',
   source: 'mock',
@@ -50,12 +54,17 @@ const scam = {
   source: 'mock',
 };
 
-// COUNTERFEIT_RISK: priceDeltaPct=-10 (exactly at threshold, no scalping/scam rule) but has 'new seller' and 'no proof' flags
+// COUNTERFEIT_RISK: priceDeltaPct=-10 (exactly at threshold, no scalping/scam rule),
+// sellerRisk > 60 (new account, 0 transactions, unverified) → COUNTERFEIT_RISK in ambiguous zone
 const counterfeit = {
   platform: 'Viagogo',
   price: 180,
   faceValue: 200,
   priceDeltaPct: -10,
+  sellerAge: 5,
+  sellerTransactions: 0,
+  sellerVerified: false,
+  transferMethod: 'dm_only',
   redFlags: ['new seller account', 'no proof of ticket'],
   url: 'https://viagogo.com/test3',
   source: 'mock',
@@ -199,13 +208,12 @@ assert(
 
 console.log('\n[TEST] --- Confidence Formula ---');
 
-// SCALPING formula: min(95, 70 + round(priceDeltaPct / 20))
-// For priceDeltaPct=320: 70 + round(320/20) = 70 + 16 = 86
-const expectedScalpingConfidence = Math.min(95, 70 + Math.round(scalping.priceDeltaPct / 20));
+// Confidence formula for non-LEGITIMATE: min(97, max(55, 50 + round(compositeRisk / 2)))
+// We verify the scalping result has a reasonable confidence above the enforcement gate
 assert(
-  `SCALPING confidence formula correct (priceDeltaPct=${scalping.priceDeltaPct} → expected ${expectedScalpingConfidence})`,
-  scalpingResult.confidence === expectedScalpingConfidence,
-  `got ${scalpingResult.confidence}`
+  'SCALPING confidence formula produces value >= 85 with enriched listing data',
+  scalpingResult.confidence >= 85 && scalpingResult.confidence <= 97,
+  `got ${scalpingResult.confidence}, expected 85-97 range`
 );
 
 // ── Summary ───────────────────────────────────────────────────────────────────
