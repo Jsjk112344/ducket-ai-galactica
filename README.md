@@ -2,17 +2,23 @@
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](./LICENSE)
 
-Safe P2P ticket resale powered by an autonomous AI agent and USDT escrow. Seller lists a ticket, buyer locks USDT, an OpenClaw-orchestrated agent verifies legitimacy, and a smart contract releases or refunds — no human in the loop.
+Trustless Event Ticket Reselling — List tickets, buy with confidence. An OpenClaw agent scrapes live marketplaces via real Chrome, verifies every listing across five fraud signals, and enforces verdicts through USDT escrow.
 
-## How It Works
+## The Problem
 
-1. **Seller Lists Ticket** — Seller posts event details (event name, section, quantity, price, face value) to the platform. The listing enters a "Pending Verification" state.
+Ticket resale is broken. StubHub charges 25% fees. Facebook Marketplace is rife with scams. Buyers have no way to verify a listing is legitimate before paying, and sellers have no way to prove they're trustworthy.
 
-2. **Buyer Locks USDT** — Buyer selects a listing and deposits USDT into escrow via WDK non-custodial wallet on Sepolia. Funds are held by the smart contract — not by the seller or the platform.
+## How Ducket Fixes It
 
-3. **AI Agent Verifies** — An OpenClaw-orchestrated agent dispatches three skills autonomously: scrape market data, classify the listing (5-signal risk scoring + Claude AI for ambiguous cases), and route the verdict to escrow. The agent produces a confidence score and detailed reasoning — no human trigger required.
+Ducket replaces trust with an autonomous AI agent. No middleman, no fees, no scams.
 
-4. **Escrow Settles** — The smart contract releases USDT to the seller (legitimate listing) or refunds the buyer (failed verification) based entirely on the agent's verdict.
+1. **Seller Lists Ticket** — Seller posts event details (event, section, quantity, price). The listing enters "Pending Verification."
+
+2. **Agent Scrapes & Verifies** — The OpenClaw agent uses real Chrome (via CDP browser control) to browse StubHub, Viagogo, and Facebook Marketplace — bypassing anti-bot tools that block headless scrapers. It then classifies the listing across 5 weighted risk signals and produces an explainable verdict.
+
+3. **Buyer Locks USDT** — Buyer selects a verified listing and deposits USDT into escrow via WDK non-custodial wallet on Sepolia. Funds are held by the smart contract — not by the seller or the platform.
+
+4. **Escrow Settles** — The smart contract releases USDT to the seller (legitimate) or refunds the buyer (fraud) based entirely on the agent's verdict.
 
 ## Architecture
 
@@ -32,18 +38,17 @@ Safe P2P ticket resale powered by an autonomous AI agent and USDT escrow. Seller
 │                                                ▼                        │
 │  ┌──────────────────────────────────────────────────────────────────┐   │
 │  │                    OpenClaw Agent Gateway                         │   │
-│  │          Orchestration · Skill Dispatch · Session State           │   │
+│  │      Orchestration · Browser Control · Skill Dispatch             │   │
 │  │                                                                   │   │
 │  │  ┌─────────────┐   ┌──────────────────┐   ┌─────────────────┐   │   │
 │  │  │ Scan Skill   │   │ Classify Skill    │   │ Escrow Skill    │   │   │
-│  │  │ (SKILL.md)   │   │ (SKILL.md)        │   │ (SKILL.md)      │   │   │
 │  │  │              │   │                   │   │                 │   │   │
-│  │  │ StubHub      │   │ Tier 1: Rules     │   │ deposit (WDK)   │   │   │
-│  │  │ Viagogo      │   │  85%+ → instant   │   │ release         │   │   │
-│  │  │ Facebook     │   │ Tier 2: Claude AI │   │ refund          │   │   │
-│  │  │ (Patchright) │   │  <85% → reasoning │   │ slash           │   │   │
+│  │  │ Real Chrome  │   │ Tier 1: Rules     │   │ deposit (WDK)   │   │   │
+│  │  │ via CDP →    │   │  85%+ → instant   │   │ release         │   │   │
+│  │  │ StubHub      │   │ Tier 2: Claude AI │   │ refund          │   │   │
+│  │  │ Viagogo      │   │  <85% → reasoning │   │ slash           │   │   │
+│  │  │ Facebook     │   │                   │   │                 │   │   │
 │  │  └──────┬───────┘   └────────┬──────────┘   └────────┬────────┘   │   │
-│  │         │                    │                        │            │   │
 │  │         └────────────────────┼────────────────────────┘            │   │
 │  │                              │                                     │   │
 │  │         Agent decides autonomously: scan → classify → enforce      │   │
@@ -52,9 +57,9 @@ Safe P2P ticket resale powered by an autonomous AI agent and USDT escrow. Seller
 │                    ┌────────────┴────────────┐                           │
 │                    ▼                         ▼                           │
 │         ┌──────────────────┐     ┌──────────────────┐                   │
-│         │  ✅ LEGITIMATE    │     │  ❌ VIOLATION     │                   │
-│         │  Release USDT    │     │  Slash/Refund    │                   │
-│         │  to seller       │     │  to buyer/pool   │                   │
+│         │  LEGITIMATE       │     │  VIOLATION        │                   │
+│         │  Release USDT    │     │  Slash/Refund     │                   │
+│         │  to seller       │     │  to buyer/pool    │                   │
 │         └────────┬─────────┘     └────────┬─────────┘                   │
 │                  └──────────┬─────────────┘                             │
 │                             ▼                                           │
@@ -68,28 +73,39 @@ Safe P2P ticket resale powered by an autonomous AI agent and USDT escrow. Seller
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-## How the AI Agent Decides
+## How the AI Agent Works
 
-The agent separates **orchestration** (OpenClaw), **reasoning** (Claude AI), and **execution** (WDK):
+The agent separates **orchestration** (OpenClaw), **scraping** (OpenClaw Browser), **reasoning** (Claude AI), and **execution** (WDK):
 
-**OpenClaw** manages the autonomous agent loop — it decides *when* to act, dispatches skills, and maintains session state across scan cycles. Three skills are registered:
+### OpenClaw Browser Scraping
 
-| Skill | Purpose | Invokes |
-|-------|---------|---------|
-| **ducket-scan** | Scrape listings from 3 platforms | Patchright scrapers (StubHub, Viagogo, Facebook) |
+Traditional headless scrapers (Playwright, Puppeteer) get blocked by anti-bot tools — Cloudflare Enterprise, Akamai Bot Manager, DataDome. Our agent uses **OpenClaw's browser control** to navigate through real Chrome via CDP:
+
+- No automation flags, real browser fingerprint, real cookies
+- Anti-bot tools see a normal Chrome session, not a headless bot
+- Two-step scraping: search page → find event URLs → navigate into events → extract ticket data
+- Graceful fallback: OpenClaw browser → Patchright stealth scraper → labeled mock data
+
+### OpenClaw Skill Dispatch
+
+Three skills are registered with the OpenClaw agent:
+
+| Skill | Purpose | Method |
+|-------|---------|--------|
+| **ducket-scan** | Scrape live listings from 3 marketplaces | OpenClaw browser (real Chrome via CDP) |
 | **ducket-classify** | Score and classify each listing | 5-signal risk engine + Claude AI escalation |
 | **ducket-escrow** | Execute on-chain settlement | WDK wallet operations on FraudEscrow.sol |
 
-**Classification** uses a two-tier engine — deterministic rules first, Claude AI for ambiguous cases:
+### Two-Tier Classification
 
 | Tier | When | Speed | Cost |
 |------|------|-------|------|
 | **Rules** | Confidence ≥ 85% (obvious scalping, scam bait) | Instant | Free |
 | **Claude** | Confidence < 85% (borderline pricing, mixed signals) | ~2s | API call |
 
-The classification skill scores **5 weighted risk signals**: pricing risk (30%), seller trust (25%), listing quality (20%), temporal patterns (15%), and platform trust (10%). High-confidence zones are decided instantly by rules. Ambiguous cases (composite risk 25-70) are escalated to Claude AI with the full signal breakdown for nuanced reasoning.
+**5 weighted risk signals**: pricing risk (30%), seller trust (25%), listing quality (20%), temporal patterns (15%), platform trust (10%).
 
-**Classification categories and escrow outcomes:**
+### Classification → Escrow Outcomes
 
 | Category | Trigger | Escrow Action |
 |----------|---------|---------------|
@@ -100,20 +116,14 @@ The classification skill scores **5 weighted risk signals**: pricing risk (30%),
 
 Face values are **agent-sourced** from an independent FIFA 2026 database — the seller never sets their own baseline.
 
-## What the Demo Shows
-
-`npm run demo` runs both cycles automatically:
-
-**Cycle 1 — Legitimate listing:** Seller lists FIFA World Cup tickets at a fair price → buyer locks USDT → agent approves (rules: 25% markup, within bounds) → escrow released to seller.
-
-**Cycle 2 — Scalper caught:** Same event, 608% markup → buyer locks USDT → agent rejects (rules: SCALPING_VIOLATION, 95% confidence) → escrow slashed. Same pipeline, opposite outcome — the agent decided, the contract enforced.
-
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js >= 22.16.0
-- npm >= 9.0.0
+- **Node.js** >= 22.0.0
+- **npm** >= 9.0.0
+- **OpenClaw** CLI installed (`npm i -g openclaw` or `npx openclaw`)
+- **Google Chrome** installed (for OpenClaw browser control)
 
 ### Setup
 
@@ -121,63 +131,109 @@ Face values are **agent-sourced** from an independent FIFA 2026 database — the
 git clone https://github.com/niccoloducket/ducket-ai-galactica.git
 cd ducket-ai-galactica
 npm install
-cp .env.example .env
-# Fill in your API keys (see .env.example for details)
 ```
 
-### Run
+Copy the example environment file and fill in your API keys:
+
+```bash
+cp .env.example .env
+```
+
+Required environment variables (see `.env.example` for all options):
+
+| Variable | Description |
+|----------|-------------|
+| `CLAUDE_API_KEY` | Anthropic API key for AI classification |
+| `ESCROW_WALLET_SEED` | BIP-39 seed phrase for WDK wallet (testnet only) |
+| `WDK_API_KEY` | Tether WDK API key |
+| `SEPOLIA_RPC_URL` | Sepolia RPC endpoint (e.g. Infura or Alchemy) |
+| `SEPOLIA_DEPLOYER_PRIVATE_KEY` | Deployer key for escrow contract |
+
+### Run the Demo
+
+**Full demo** (OpenClaw browser scraping + AI classification + escrow + dashboard):
+
+```bash
+npm run demo:openclaw
+```
+
+This starts 4 processes concurrently:
+1. **OpenClaw Gateway** — agent orchestration on `ws://127.0.0.1:18789`
+2. **OpenClaw Browser** — real Chrome instance for anti-bot scraping
+3. **Pipeline** — one-shot scan → classify → escrow cycle via OpenClaw browser
+4. **Dashboard** — React UI at `http://localhost:5173`
+
+**Standard demo** (Patchright headless scraping + cron loop):
 
 ```bash
 npm run demo
-# Starts AI verification agent + React dashboard simultaneously
-# Agent verifies ticket listings against market data
-# Dashboard: http://localhost:5173
 ```
+
+**Fallback** (no OpenClaw, Patchright only):
+
+```bash
+npm run demo:fallback
+```
+
+### What You'll See
+
+- **Terminal**: The agent browses StubHub, Viagogo, and Facebook Marketplace in real Chrome, extracts live ticket listings, classifies each one, and logs verdicts with confidence scores and reasoning
+- **Dashboard** (`http://localhost:5173`): Resale flow UI showing listings, agent verdicts, signal breakdowns, and escrow status
 
 ## Project Structure
 
 ```
 ducket-ai-galactica/
-  agent/             AI verification agent
-    src/             Core pipeline (verification loop, AI analysis, escrow settlement)
-    tools/           Market data sources (Patchright scrapers)
-    skills/          OpenClaw skill definitions (SKILL.md files)
-    cli/             CLI wrapper scripts bridging OpenClaw to agent modules
-    memory/          Listing records
-    cases/           Verification evidence per listing
-    SOUL.md          OpenClaw agent identity and mission
-  dashboard/         React dashboard (Vite + Tailwind v4)
-    src/             Resale flow UI components
-    server/          Express API serving listing and escrow data
-  contracts/         FraudEscrow.sol (Hardhat 3)
+  agent/                  AI verification agent
+    src/                  Core pipeline (scan loop, classifier, escrow, evidence)
+      openclaw-loop.js    OpenClaw browser pipeline (scan → classify → escrow)
+      scan-loop.js        Cron-based pipeline (fallback, Patchright scrapers)
+      classify.js         Two-tier classification engine (rules + Claude AI)
+      escrow.js           On-chain escrow lifecycle (deposit/release/refund/slash)
+      evidence.js         Case file writer (one markdown file per listing verdict)
+      wallet/             WDK wallet singleton (non-custodial, BIP-44)
+    tools/                Market data scrapers
+      browse.js           OpenClaw browser scraper (real Chrome via CDP)
+      scrape-stubhub.js   Patchright StubHub scraper (XHR interception)
+      scrape-viagogo.js   Patchright Viagogo scraper (XHR interception)
+      scrape-facebook.js  Patchright Facebook scraper (DOM extraction)
+      mock-data.js        Dynamic mock generator with realistic fraud patterns
+    openclaw/             OpenClaw workspace
+      SOUL.md             Agent identity and mission
+      skills/             Skill definitions (scan, classify, escrow)
+    data/                 Seed listing data (real prices captured from live sites)
+    cases/                Generated verdict case files (gitignored)
+    memory/               Listing records (gitignored)
+  dashboard/              React dashboard (Vite + Tailwind v4)
+    src/                  UI components (resale flow, agent panel, escrow status)
+    server/               Express API serving listing and escrow data
+  contracts/              FraudEscrow.sol (Hardhat 3, Sepolia testnet)
 ```
-
-## Demo Video
-
-[VIDEO LINK — to be added before submission]
 
 ## Tech Stack
 
 | Technology | Usage |
 |-----------|-------|
-| OpenClaw | Agent orchestration — skill dispatch, session management, autonomous loop |
-| @anthropic-ai/sdk (Claude) | Classification reasoning — structured verdicts with 5-signal analysis |
-| @tetherto/wdk + wdk-wallet-evm | Non-custodial USDT wallet — escrow deposits, approvals, settlements |
-| ethers v6 | ABI encoding, contract reads, Sepolia provider |
-| Patchright | Anti-bot scraping (StubHub, Viagogo, Facebook Marketplace) |
-| React 19 + Vite 8 | Dashboard UI with resale flow wizard |
-| Tailwind CSS v4 | Dashboard styling (M3 dark theme) |
-| Hardhat 3 | FraudEscrow.sol compilation and testing |
-| Ethereum Sepolia | Testnet — all transactions are real on-chain |
+| **OpenClaw** | Agent orchestration — gateway, browser control (CDP), skill dispatch |
+| **@anthropic-ai/sdk** (Claude) | Classification reasoning — structured verdicts with 5-signal analysis |
+| **@tetherto/wdk + wdk-wallet-evm** | Non-custodial USDT wallet — escrow deposits, approvals, settlements |
+| **ethers v6** | ABI encoding, contract reads, Sepolia provider |
+| **Patchright** | Fallback anti-bot scraping (StubHub, Viagogo, Facebook Marketplace) |
+| **React 19 + Vite 8** | Dashboard UI with resale flow wizard |
+| **Tailwind CSS v4** | Dashboard styling (dark theme) |
+| **Hardhat 3** | FraudEscrow.sol compilation and testing |
+| **Ethereum Sepolia** | Testnet — all transactions are real on-chain |
 
 ## Third-Party Disclosures
 
-All third-party services are used in accordance with their respective terms of service.
-No mainnet funds are used — Sepolia testnet only. See tech stack above for full list.
+All third-party services used in accordance with their respective terms of service:
+- **Anthropic Claude API** — AI classification reasoning
+- **OpenClaw** — Agent orchestration and browser control
+- **Tether WDK** — Non-custodial wallet operations
+- **Infura/Alchemy** — Sepolia RPC provider
+- **StubHub, Viagogo, Facebook Marketplace** — Public listing data scraped for fraud detection
 
-## Environment Variables
-
-See `.env.example` for all required variables with explaining comments.
+No mainnet funds are used — Sepolia testnet only.
 
 ## License
 

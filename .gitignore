@@ -23,9 +23,16 @@ keystore/
 # Submission answers (not for public repo)
 docs/SUBMISSION.md
 
+# Planning artifacts (internal dev process)
+.planning/
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude Code (development tooling, not part of the project)
+.claude/
+CLAUDE.md
 
 # IDE
 .vscode/settings.json
