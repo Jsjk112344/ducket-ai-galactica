@@ -5,7 +5,8 @@
   "description": "Autonomous fraud detection agent with USDT escrow enforcement",
   "workspaces": ["agent", "dashboard", "contracts"],
   "scripts": {
-    "demo": "concurrently --names agent,dashboard --prefix-colors blue,green \"npx tsx agent/src/scan-loop.js\" \"npm run dev --workspace=dashboard\"",
+    "demo": "concurrently --names openclaw,agent,dashboard --prefix-colors cyan,blue,green \"npx openclaw gateway run --dev --allow-unconfigured\" \"npx tsx agent/src/scan-loop.js\" \"npm run dev --workspace=dashboard\"",
+    "demo:fallback": "concurrently --names agent,dashboard --prefix-colors blue,green \"npx tsx agent/src/scan-loop.js\" \"npm run dev --workspace=dashboard\"",
     "dev:agent": "npm run dev --workspace=agent",
     "dev:dashboard": "npm run dev --workspace=dashboard",
     "build": "npm run build --workspaces --if-present"
