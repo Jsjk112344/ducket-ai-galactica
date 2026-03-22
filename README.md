@@ -139,15 +139,21 @@ Copy the example environment file and fill in your API keys:
 cp .env.example .env
 ```
 
-Required environment variables (see `.env.example` for all options):
+**Required** environment variables:
 
 | Variable | Description |
 |----------|-------------|
 | `CLAUDE_API_KEY` | Anthropic API key for AI classification |
+
+**Optional** (needed for on-chain escrow — demo works without these, classification still runs):
+
+| Variable | Description |
+|----------|-------------|
 | `ESCROW_WALLET_SEED` | BIP-39 seed phrase for WDK wallet (testnet only) |
 | `WDK_API_KEY` | Tether WDK API key |
 | `SEPOLIA_RPC_URL` | Sepolia RPC endpoint (e.g. Infura or Alchemy) |
-| `SEPOLIA_DEPLOYER_PRIVATE_KEY` | Deployer key for escrow contract |
+
+See `.env.example` for the full list with descriptions.
 
 ### Run the Demo
 
