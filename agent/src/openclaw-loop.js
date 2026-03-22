@@ -2,15 +2,16 @@
 // Apache 2.0 License
 //
 // One-shot pipeline: scan all platforms, classify each listing, enforce escrow.
-// No cron scheduling — designed to be triggered by the OpenClaw agent loop.
-// Mirrors scan-loop.js logic but imports modules directly (no cron side effects).
+// Uses OpenClaw's browser control (real Chrome via CDP) for scraping —
+// bypasses anti-bot tools (Cloudflare, Akamai, DataDome) that block headless browsers.
+// Falls back to Patchright scrapers if OpenClaw browser is not available.
 //
 // Run with: node agent/src/openclaw-loop.js
 // Or triggered by OpenClaw gateway agent turn.
 
-import { scrapeStubHub } from '../tools/scrape-stubhub.js';
-import { scrapeViagogo } from '../tools/scrape-viagogo.js';
-import { scrapeFacebook } from '../tools/scrape-facebook.js';
+import { browseStubHubWithFallback } from '../tools/browse.js';
+import { browseViagogoWithFallback } from '../tools/browse.js';
+import { browseFacebookWithFallback } from '../tools/browse.js';
 import { classifyListing } from './classify.js';
 import { writeCaseFile, isCaseFileExists } from './evidence.js';
 import { dispatchEscrowAction } from './escrow.js';
@@ -28,30 +29,37 @@ const FRAUD_CONFIDENCE_THRESHOLD = parseInt(process.env.FRAUD_CONFIDENCE_THRESHO
 
 /**
  * Run one full pipeline cycle: scan → classify → enforce.
+ * Uses OpenClaw browser (real Chrome) for scraping — falls back to Patchright.
  * Returns summary object for logging/testing.
  * No cron, no top-level await on import-sensitive code — safe to require from tests.
  */
 async function runPipeline() {
   console.log(`[OpenClawLoop] Pipeline start: ${new Date().toISOString()} — event: ${EVENT_NAME}`);
+  console.log(`[OpenClawLoop] Scraping via OpenClaw browser (real Chrome) — anti-bot bypass enabled`);
 
-  // ── Scan ──────────────────────────────────────────────────────────────────
-  // Promise.allSettled: one blocked platform does NOT kill the others.
-  const results = await Promise.allSettled([
-    scrapeStubHub(EVENT_NAME),
-    scrapeViagogo(EVENT_NAME),
-    scrapeFacebook(EVENT_NAME),
-  ]);
-
+  // ── Scan via OpenClaw Browser ─────────────────────────────────────────────
+  // Uses real Chrome via CDP — no automation flags, real fingerprint.
+  // SEQUENTIAL: OpenClaw browser has one active tab — parallel navigates would stomp each other.
+  // Each scraper gets exclusive browser access, then hands off to the next.
   const names = ['StubHub', 'Viagogo', 'Facebook'];
-  results.forEach((r, i) => {
-    if (r.status === 'rejected') {
-      // Unexpected — scrapers are designed to catch internally and return mock, not throw.
-      // Logged here as a safety net in case a scraper's outer catch somehow fails.
-      console.error(`[OpenClawLoop] ${names[i]} scraper rejected: ${r.reason}`);
-    } else {
-      console.log(`[OpenClawLoop] ${names[i]}: ${r.value.length} listings`);
+  const scrapers = [
+    browseStubHubWithFallback,
+    browseViagogoWithFallback,
+    browseFacebookWithFallback,
+  ];
+
+  const results = [];
+  for (let i = 0; i < scrapers.length; i++) {
+    try {
+      const data = await scrapers[i](EVENT_NAME);
+      const liveCount = data.filter(l => l.source === 'live-browse').length;
+      console.log(`[OpenClawLoop] ${names[i]}: ${data.length} listings (${liveCount} live, ${data.length - liveCount} mock/seed)`);
+      results.push({ status: 'fulfilled', value: data });
+    } catch (err) {
+      console.error(`[OpenClawLoop] ${names[i]} browse rejected: ${err.message}`);
+      results.push({ status: 'rejected', reason: err });
     }
-  });
+  }
 
   // Merge fulfilled results — rejected scrapers contribute zero listings
   const listings = results.flatMap(r => r.status === 'fulfilled' ? r.value : []);
